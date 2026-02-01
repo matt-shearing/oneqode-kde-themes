@@ -1,0 +1,10 @@
+{
+    "id": "org.oneqode.lightglass",
+    "name": "OneQode Light Glass",
+    "type": "Plasma/LookAndFeel",
+    "version": "1.0.0",
+    "api-version": "6.0",
+    "license": "MIT",
+    "author": "OneQode",
+    "description": "A light, glass-inspired theme with ice cyan accents for comfortable daytime work"
+}

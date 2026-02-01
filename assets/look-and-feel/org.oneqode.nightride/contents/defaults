@@ -1,0 +1,20 @@
+[kdeglobals][KDE]
+widgetStyle=klassy
+
+[kdeglobals][General]
+ColorScheme=OneQodeNightRide
+font=Inter,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+fixed=JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+
+[kdeglobals][Icons]
+Theme=Papirus-Dark
+
+[plasmarc][Theme]
+name=breeze-dark
+
+[kwinrc][org.kde.kdecoration2]
+library=org.kde.klassy
+theme=Klassy
+
+[Wallpaper]
+Image=OneQode-Night-Ride

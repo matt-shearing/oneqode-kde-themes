@@ -1,0 +1,12 @@
+[Unit]
+Description=OneQode Theme Switcher
+Documentation=https://github.com/oneqode/oneqode-kde-themes
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/oneqode-theme-switch
+Environment=DISPLAY=:0
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%U/bus
+
+[Install]
+WantedBy=default.target

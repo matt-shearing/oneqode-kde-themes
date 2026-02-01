@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# OneQode Theme Watcher
+# Monitors for theme changes via KDE GUI and ensures Klassy is applied
+#
+# This runs as a background service and watches ~/.config/kdeglobals
+# When it detects a OneQode theme was selected, it applies Klassy decoration
+
+set -euo pipefail
+
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/kdeglobals"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/oneqode"
+LOG_FILE="$STATE_DIR/theme-watcher.log"
+KWINRC="${XDG_CONFIG_HOME:-$HOME/.config}/kwinrc"
+
+mkdir -p "$STATE_DIR"
+
+log() {
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] $*" >> "$LOG_FILE"
+}
+
+ensure_klassy() {
+    # Check if Klassy is installed
+    if [[ ! -f /usr/lib/qt6/plugins/org.kde.kdecoration3/org.kde.klassy.so ]]; then
+        log "Klassy not installed, skipping"
+        return 0
+    fi
+
+    # Check if decoration section exists and has Klassy
+    if grep -q '\[org.kde.kdecoration2\]' "$KWINRC" 2>/dev/null; then
+        if grep -A2 '\[org.kde.kdecoration2\]' "$KWINRC" | grep -q 'library=org.kde.klassy'; then
+            log "Klassy already set"
+            return 0
+        fi
+        # Update existing section
+        log "Updating decoration to Klassy"
+        sed -i '/\[org.kde.kdecoration2\]/,/^\[/ s/^library=.*/library=org.kde.klassy/' "$KWINRC"
+        sed -i '/\[org.kde.kdecoration2\]/,/^\[/ s/^theme=.*/theme=Klassy/' "$KWINRC"
+    else
+        # Add new section
+        log "Adding Klassy decoration section"
+        echo -e "\n[org.kde.kdecoration2]\nlibrary=org.kde.klassy\ntheme=Klassy" >> "$KWINRC"
+    fi
+
+    # Reload KWin
+    dbus-send --type=signal --dest=org.kde.KWin /KWin org.kde.KWin.reloadConfig 2>/dev/null || true
+    log "KWin notified"
+}
+
+check_and_apply() {
+    local current_theme
+    current_theme=$(grep "LookAndFeelPackage=" "$CONFIG_FILE" 2>/dev/null | cut -d= -f2 || echo "")
+
+    if [[ "$current_theme" == "org.oneqode.lightglass" ]] || [[ "$current_theme" == "org.oneqode.nightride" ]]; then
+        log "OneQode theme detected: $current_theme"
+        ensure_klassy
+    fi
+}
+
+# Main loop - watch for changes to kdeglobals
+log "Theme watcher started"
+
+# Initial check
+check_and_apply
+
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+# Watch the config directory for changes to kdeglobals
+# KDE uses atomic writes (temp file + rename), so we watch the directory
+while true; do
+    # Wait for any file change in config dir
+    EVENT=$(inotifywait -q -e moved_to,create,modify --format '%f' "$CONFIG_DIR" 2>/dev/null) || {
+        log "inotifywait error, sleeping 10s"
+        sleep 10
+        check_and_apply
+        continue
+    }
+
+    # Only react to kdeglobals changes
+    if [[ "$EVENT" == "kdeglobals" ]] || [[ "$EVENT" == *"kdeglobals"* ]]; then
+        log "Detected kdeglobals change"
+        sleep 0.5
+        check_and_apply
+    fi
+done

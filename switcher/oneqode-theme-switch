@@ -1,0 +1,339 @@
+#!/usr/bin/env bash
+# OneQode Theme Switcher
+# Automatically switches between Light Glass and Night Ride themes
+# based on solar time or fixed schedule.
+
+set -euo pipefail
+
+# Paths
+CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/oneqode/oneqode-theme-switcher.conf"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/oneqode"
+STATE_FILE="$STATE_DIR/theme-state"
+LOG_FILE="$STATE_DIR/theme-switch.log"
+
+# Defaults (overridden by config)
+MODE="solar"
+LATITUDE="-33.8688"
+LONGITUDE="151.2093"
+TIMEZONE="Australia/Sydney"
+DAY_START="07:30"
+NIGHT_START="18:30"
+SUNRISE_OFFSET=0
+SUNSET_OFFSET=0
+LIGHT_THEME="org.oneqode.lightglass"
+DARK_THEME="org.oneqode.nightride"
+DEBUG="false"
+
+# Ensure state directory exists (called early)
+mkdir -p "$STATE_DIR"
+
+# Logging
+log() {
+    local level="$1"
+    shift
+    local msg="$*"
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "[$timestamp] [$level] $msg" >> "$LOG_FILE"
+    if [[ "$DEBUG" == "true" ]] || [[ "$level" == "ERROR" ]]; then
+        echo "[$level] $msg" >&2
+    fi
+}
+
+debug() {
+    if [[ "$DEBUG" == "true" ]]; then
+        log "DEBUG" "$@"
+    fi
+}
+
+info() {
+    log "INFO" "$@"
+}
+
+error() {
+    log "ERROR" "$@"
+}
+
+# Load configuration
+load_config() {
+    if [[ -f "$CONFIG_FILE" ]]; then
+        # shellcheck source=/dev/null
+        source "$CONFIG_FILE"
+        debug "Loaded config from $CONFIG_FILE"
+    else
+        info "No config file found at $CONFIG_FILE, using defaults"
+    fi
+}
+
+# Ensure state directory exists
+ensure_state_dir() {
+    mkdir -p "$STATE_DIR"
+}
+
+# Get current theme state
+get_current_state() {
+    if [[ -f "$STATE_FILE" ]]; then
+        cat "$STATE_FILE"
+    else
+        echo ""
+    fi
+}
+
+# Save theme state
+save_state() {
+    local theme="$1"
+    echo "$theme" > "$STATE_FILE"
+    debug "Saved state: $theme"
+}
+
+# Detect theme apply tool
+detect_apply_tool() {
+    if command -v plasma-apply-lookandfeel &>/dev/null; then
+        echo "plasma-apply-lookandfeel"
+    elif command -v lookandfeeltool &>/dev/null; then
+        echo "lookandfeeltool"
+    else
+        echo ""
+    fi
+}
+
+# Ensure Klassy decoration is set
+ensure_klassy_decoration() {
+    local kwinrc="${XDG_CONFIG_HOME:-$HOME/.config}/kwinrc"
+
+    # Check if Klassy is installed (check for plugin file)
+    if [[ ! -f /usr/lib/qt6/plugins/org.kde.kdecoration3/org.kde.klassy.so ]] && \
+       ! pacman -Qq klassy klassy-bin 2>/dev/null | grep -q klassy; then
+        debug "Klassy not installed, skipping decoration setup"
+        return 0
+    fi
+
+    # Check if decoration section exists
+    if ! grep -q '\[org.kde.kdecoration2\]' "$kwinrc" 2>/dev/null; then
+        debug "Adding Klassy decoration section to kwinrc"
+        echo -e "\n[org.kde.kdecoration2]\nlibrary=org.kde.klassy\ntheme=Klassy" >> "$kwinrc"
+    elif ! grep -A2 '\[org.kde.kdecoration2\]' "$kwinrc" | grep -q 'library=org.kde.klassy'; then
+        debug "Updating decoration to Klassy"
+        # Update existing section - use sed to replace library line
+        sed -i '/\[org.kde.kdecoration2\]/,/^\[/ s/^library=.*/library=org.kde.klassy/' "$kwinrc"
+        # Ensure theme line exists
+        if ! grep -A2 '\[org.kde.kdecoration2\]' "$kwinrc" | grep -q '^theme='; then
+            sed -i '/\[org.kde.kdecoration2\]/a theme=Klassy' "$kwinrc"
+        fi
+    fi
+
+    # Reload KWin config
+    dbus-send --type=signal --dest=org.kde.KWin /KWin org.kde.KWin.reloadConfig 2>/dev/null || true
+}
+
+# Apply theme
+apply_theme() {
+    local theme="$1"
+    local tool
+    tool=$(detect_apply_tool)
+
+    if [[ -z "$tool" ]]; then
+        error "No theme apply tool found (plasma-apply-lookandfeel or lookandfeeltool)"
+        return 1
+    fi
+
+    info "Applying theme: $theme using $tool"
+
+    if [[ "$tool" == "plasma-apply-lookandfeel" ]]; then
+        "$tool" -a "$theme" 2>&1 || {
+            error "Failed to apply theme with plasma-apply-lookandfeel"
+            return 1
+        }
+    else
+        "$tool" -a "$theme" 2>&1 || {
+            error "Failed to apply theme with lookandfeeltool"
+            return 1
+        }
+    fi
+
+    # Ensure Klassy decoration is properly set (plasma-apply-lookandfeel often misses this)
+    ensure_klassy_decoration
+
+    info "Successfully applied theme: $theme"
+    return 0
+}
+
+# Calculate solar times using Python/astral
+get_solar_period() {
+    local python_script
+    python_script=$(cat <<'PYTHON'
+import sys
+from datetime import datetime, timedelta
+try:
+    from astral import LocationInfo
+    from astral.sun import sun
+except ImportError:
+    print("ERROR:astral_not_installed")
+    sys.exit(1)
+
+lat = float(sys.argv[1])
+lon = float(sys.argv[2])
+tz = sys.argv[3]
+sunrise_offset = int(sys.argv[4])
+sunset_offset = int(sys.argv[5])
+
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from backports.zoneinfo import ZoneInfo
+
+try:
+    tzinfo = ZoneInfo(tz)
+except Exception as e:
+    print(f"ERROR:invalid_timezone:{e}")
+    sys.exit(1)
+
+location = LocationInfo(latitude=lat, longitude=lon, timezone=tz)
+now = datetime.now(tzinfo)
+
+try:
+    s = sun(location.observer, date=now.date(), tzinfo=tzinfo)
+except Exception as e:
+    print(f"ERROR:sun_calculation:{e}")
+    sys.exit(1)
+
+sunrise = s['sunrise'] + timedelta(minutes=sunrise_offset)
+sunset = s['sunset'] + timedelta(minutes=sunset_offset)
+
+if sunrise <= now < sunset:
+    print("day")
+else:
+    print("night")
+PYTHON
+)
+
+    local result
+    result=$(python3 -c "$python_script" "$LATITUDE" "$LONGITUDE" "$TIMEZONE" "$SUNRISE_OFFSET" "$SUNSET_OFFSET" 2>&1)
+
+    if [[ "$result" == ERROR:* ]]; then
+        error "Solar calculation failed: $result"
+        echo "error"
+    else
+        echo "$result"
+    fi
+}
+
+# Calculate fixed-time period
+get_fixed_period() {
+    local current_time
+    current_time=$(date '+%H:%M')
+
+    # Convert times to minutes for comparison
+    local current_mins day_mins night_mins
+    current_mins=$((10#${current_time%%:*} * 60 + 10#${current_time##*:}))
+    day_mins=$((10#${DAY_START%%:*} * 60 + 10#${DAY_START##*:}))
+    night_mins=$((10#${NIGHT_START%%:*} * 60 + 10#${NIGHT_START##*:}))
+
+    if [[ $current_mins -ge $day_mins ]] && [[ $current_mins -lt $night_mins ]]; then
+        echo "day"
+    else
+        echo "night"
+    fi
+}
+
+# Get current period (day/night)
+get_period() {
+    local period
+
+    if [[ "$MODE" == "solar" ]]; then
+        period=$(get_solar_period)
+        if [[ "$period" == "error" ]]; then
+            info "Solar mode failed, falling back to fixed time"
+            period=$(get_fixed_period)
+        fi
+    else
+        period=$(get_fixed_period)
+    fi
+
+    echo "$period"
+}
+
+# Main
+main() {
+    ensure_state_dir
+    load_config
+
+    debug "Mode: $MODE"
+    debug "Location: $LATITUDE, $LONGITUDE ($TIMEZONE)"
+
+    local period theme
+    period=$(get_period)
+    debug "Current period: $period"
+
+    if [[ "$period" == "day" ]]; then
+        theme="$LIGHT_THEME"
+    else
+        theme="$DARK_THEME"
+    fi
+
+    local current_state
+    current_state=$(get_current_state)
+    debug "Current state: $current_state"
+    debug "Target theme: $theme"
+
+    if [[ "$current_state" == "$theme" ]]; then
+        debug "Theme already applied, skipping"
+        exit 0
+    fi
+
+    local tool
+    tool=$(detect_apply_tool)
+    if [[ -z "$tool" ]]; then
+        error "No theme apply tool available"
+        exit 1
+    fi
+
+    if apply_theme "$theme"; then
+        save_state "$theme"
+        info "Theme switched to: $theme (period: $period)"
+    else
+        error "Failed to switch theme"
+        exit 1
+    fi
+}
+
+# Handle arguments
+case "${1:-}" in
+    --force-day)
+        ensure_state_dir
+        load_config
+        apply_theme "$LIGHT_THEME" && save_state "$LIGHT_THEME"
+        ;;
+    --force-night)
+        ensure_state_dir
+        load_config
+        apply_theme "$DARK_THEME" && save_state "$DARK_THEME"
+        ;;
+    --status)
+        load_config
+        period=$(get_period)
+        current=$(get_current_state)
+        echo "Mode: $MODE"
+        echo "Current period: $period"
+        echo "Applied theme: ${current:-none}"
+        ;;
+    --help|-h)
+        echo "Usage: oneqode-theme-switch [OPTION]"
+        echo ""
+        echo "Options:"
+        echo "  --force-day    Force light theme"
+        echo "  --force-night  Force dark theme"
+        echo "  --status       Show current status"
+        echo "  --help         Show this help"
+        echo ""
+        echo "Without options, auto-switches based on configuration."
+        ;;
+    "")
+        main
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        echo "Use --help for usage information" >&2
+        exit 1
+        ;;
+esac

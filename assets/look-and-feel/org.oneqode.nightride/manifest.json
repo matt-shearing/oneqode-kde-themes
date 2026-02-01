@@ -1,0 +1,10 @@
+{
+    "id": "org.oneqode.nightride",
+    "name": "OneQode Night Ride",
+    "type": "Plasma/LookAndFeel",
+    "version": "1.0.0",
+    "api-version": "6.0",
+    "license": "MIT",
+    "author": "OneQode",
+    "description": "A dark, synthwave-inspired theme with neon accents for nighttime coding"
+}

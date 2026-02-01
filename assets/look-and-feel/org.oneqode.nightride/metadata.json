@@ -1,0 +1,20 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "contact@oneqode.com",
+                "Name": "OneQode"
+            }
+        ],
+        "Category": "Plasma Look And Feel",
+        "Description": "A dark, synthwave-inspired theme with neon accents for nighttime coding",
+        "Icon": "preferences-desktop-theme",
+        "Id": "org.oneqode.nightride",
+        "License": "MIT",
+        "Name": "OneQode Night Ride",
+        "Version": "1.0.0",
+        "Website": "https://github.com/oneqode/oneqode-kde-themes"
+    },
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

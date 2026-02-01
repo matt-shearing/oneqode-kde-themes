@@ -1,0 +1,11 @@
+[Unit]
+Description=OneQode Theme Switcher Timer
+Documentation=https://github.com/oneqode/oneqode-kde-themes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

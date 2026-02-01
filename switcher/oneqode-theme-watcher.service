@@ -1,0 +1,13 @@
+[Unit]
+Description=OneQode Theme Watcher - ensures Klassy decoration on theme change
+Documentation=https://github.com/oneqode/oneqode-kde-themes
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/oneqode-theme-watcher
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
