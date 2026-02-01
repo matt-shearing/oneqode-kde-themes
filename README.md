@@ -39,11 +39,11 @@ Each theme sets:
 | Plasma style | Yes | Breeze / Breeze Dark |
 | Icons | Yes | Papirus / Papirus-Dark |
 | Fonts | Yes | Inter + JetBrains Mono Nerd |
-| Cursors | No | Uses your existing cursor theme |
-| Splash screen | No | Uses your existing splash |
-| Login screen (SDDM) | No | Uses your existing SDDM theme |
+| Cursors | Yes | Bibata Modern Ice |
+| Splash screen | Yes | Minimal branded KSplash |
+| Login screen (SDDM) | Yes | Breeze + OneQode background |
 
-The themes focus on color consistency and blur effects rather than replacing every system component.
+The themes provide a cohesive experience from login to desktop.
 
 ## Verification
 

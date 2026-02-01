@@ -18,3 +18,9 @@ theme=Klassy
 
 [Wallpaper]
 Image=OneQode-Light-Glass
+
+[KSplash]
+Theme=org.oneqode.lightglass
+
+[kcminputrc][Mouse]
+cursorTheme=Bibata-Modern-Ice

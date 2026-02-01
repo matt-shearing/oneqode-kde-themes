@@ -75,6 +75,7 @@ install_pacman_deps() {
         git
         rsync
         jq
+        curl
         plasma-workspace
         python
         python-astral
@@ -153,6 +154,78 @@ install_klassy() {
     warn "Manual installation: yay -S klassy-bin OR yay -S klassy"
 }
 
+# Install Bibata cursor theme
+install_cursors() {
+    info "Installing Bibata cursor theme..."
+
+    local cursor_dir="$LOCAL_SHARE/icons"
+    local cursor_name="Bibata-Modern-Ice"
+    local cursor_url="https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.6/Bibata-Modern-Ice.tar.xz"
+
+    # Check if already installed
+    if [[ -d "$cursor_dir/$cursor_name" ]]; then
+        success "Bibata cursor already installed"
+        return 0
+    fi
+
+    mkdir -p "$cursor_dir"
+
+    # Download and extract
+    local tmp_file
+    tmp_file=$(mktemp)
+
+    if curl -fsSL "$cursor_url" -o "$tmp_file"; then
+        tar -xf "$tmp_file" -C "$cursor_dir"
+        rm -f "$tmp_file"
+        success "Bibata cursor installed"
+    else
+        rm -f "$tmp_file"
+        warn "Could not download Bibata cursor"
+        warn "Manual install: download from https://github.com/ful1e5/Bibata_Cursor/releases"
+        return 1
+    fi
+}
+
+# Configure SDDM (requires root)
+configure_sddm() {
+    info "Configuring SDDM login screen..."
+
+    local sddm_conf_dir="/etc/sddm.conf.d"
+    local sddm_theme_dir="/usr/share/sddm/themes/breeze"
+    local wallpaper_dir="/usr/share/wallpapers/OneQode"
+
+    # Check if we can write to system directories
+    if [[ ! -w "/etc" ]]; then
+        warn "SDDM configuration requires root privileges"
+        warn "Run the following commands manually to enable SDDM theming:"
+        echo ""
+        echo "  sudo mkdir -p $wallpaper_dir"
+        echo "  sudo cp $ASSETS_DIR/wallpapers/*.jpg $wallpaper_dir/"
+        echo "  sudo mkdir -p $sddm_conf_dir"
+        echo "  sudo cp $SCRIPT_DIR/sddm/10-oneqode.conf $sddm_conf_dir/"
+        echo "  sudo cp $SCRIPT_DIR/sddm/theme.conf.user.light $sddm_theme_dir/theme.conf.user"
+        echo ""
+        return 0
+    fi
+
+    # Install wallpapers to system location (for SDDM access)
+    mkdir -p "$wallpaper_dir"
+    cp "$ASSETS_DIR/wallpapers/"*.jpg "$wallpaper_dir/"
+
+    # Install SDDM config
+    mkdir -p "$sddm_conf_dir"
+    cp "$SCRIPT_DIR/sddm/10-oneqode.conf" "$sddm_conf_dir/"
+
+    # Set initial theme background (Light Glass for day)
+    if [[ -d "$sddm_theme_dir" ]]; then
+        cp "$SCRIPT_DIR/sddm/theme.conf.user.light" "$sddm_theme_dir/theme.conf.user"
+        success "SDDM configured with OneQode background"
+    else
+        warn "Breeze SDDM theme not found at $sddm_theme_dir"
+        warn "SDDM background not configured"
+    fi
+}
+
 # Create required directories
 create_directories() {
     info "Creating directories..."
@@ -160,6 +233,7 @@ create_directories() {
     mkdir -p "$LOCAL_SHARE/color-schemes"
     mkdir -p "$LOCAL_SHARE/plasma/look-and-feel"
     mkdir -p "$LOCAL_SHARE/wallpapers/OneQode"
+    mkdir -p "$LOCAL_SHARE/icons"
     mkdir -p "$LOCAL_BIN"
     mkdir -p "$LOCAL_STATE/oneqode"
     mkdir -p "$CONFIG_DIR/oneqode"
@@ -311,9 +385,13 @@ print_summary() {
     echo "Installed components:"
     echo "  - Color schemes: OneQodeLightGlass, OneQodeNightRide"
     echo "  - Look-and-feel: org.oneqode.lightglass, org.oneqode.nightride"
+    echo "  - Splash screens: Minimal branded KSplash for each theme"
+    echo "  - Cursor theme: Bibata-Modern-Ice"
     echo "  - Wallpapers: ~/.local/share/wallpapers/OneQode/"
     echo "  - Theme switcher: ~/.local/bin/oneqode-theme-switch"
+    echo "  - Theme watcher: ~/.local/bin/oneqode-theme-watcher"
     echo "  - Systemd timer: oneqode-theme-switcher.timer (every 5 min)"
+    echo "  - SDDM login: Breeze theme with OneQode background"
     echo ""
     echo "Configuration:"
     echo "  - Edit ~/.config/oneqode/oneqode-theme-switcher.conf"
@@ -341,6 +419,7 @@ main() {
 
     install_pacman_deps
     install_klassy
+    install_cursors
 
     create_directories
     install_color_schemes
@@ -350,6 +429,7 @@ main() {
 
     enable_timer
     configure_kwin
+    configure_sddm
     apply_initial_theme
 
     print_summary

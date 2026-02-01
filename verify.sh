@@ -126,6 +126,13 @@ verify_repo_structure() {
     check_file "$SCRIPT_DIR/assets/wallpapers/OneQode-Light-Glass.jpg" "Light Glass wallpaper"
     check_file "$SCRIPT_DIR/assets/wallpapers/OneQode-Night-Ride.jpg" "Night Ride wallpaper"
 
+    check_file "$SCRIPT_DIR/assets/look-and-feel/org.oneqode.lightglass/contents/splash/Splash.qml" "Light Glass splash"
+    check_file "$SCRIPT_DIR/assets/look-and-feel/org.oneqode.nightride/contents/splash/Splash.qml" "Night Ride splash"
+
+    check_file "$SCRIPT_DIR/sddm/10-oneqode.conf" "SDDM config"
+    check_file "$SCRIPT_DIR/sddm/theme.conf.user.light" "SDDM light background"
+    check_file "$SCRIPT_DIR/sddm/theme.conf.user.dark" "SDDM dark background"
+
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-switch" "Switcher script"
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-watcher" "Watcher script"
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-switcher.service" "Systemd service"

@@ -18,3 +18,9 @@ theme=Klassy
 
 [Wallpaper]
 Image=OneQode-Night-Ride
+
+[KSplash]
+Theme=org.oneqode.nightride
+
+[kcminputrc][Mouse]
+cursorTheme=Bibata-Modern-Ice

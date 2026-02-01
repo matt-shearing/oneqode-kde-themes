@@ -154,8 +154,41 @@ apply_theme() {
     # Ensure Klassy decoration is properly set (plasma-apply-lookandfeel often misses this)
     ensure_klassy_decoration
 
+    # Update SDDM background (if we have permission)
+    update_sddm_background "$theme"
+
     info "Successfully applied theme: $theme"
     return 0
+}
+
+# Update SDDM background for next login
+update_sddm_background() {
+    local theme="$1"
+    local sddm_theme_dir="/usr/share/sddm/themes/breeze"
+    local theme_conf="$sddm_theme_dir/theme.conf.user"
+
+    # Skip if we can't write to SDDM theme dir
+    if [[ ! -w "$sddm_theme_dir" ]]; then
+        debug "No write access to SDDM theme dir, skipping"
+        return 0
+    fi
+
+    local background
+    if [[ "$theme" == *"lightglass"* ]]; then
+        background="/usr/share/wallpapers/OneQode/OneQode-Light-Glass.jpg"
+    else
+        background="/usr/share/wallpapers/OneQode/OneQode-Night-Ride.jpg"
+    fi
+
+    # Only update if background exists
+    if [[ -f "$background" ]]; then
+        cat > "$theme_conf" <<EOF
+[General]
+background=$background
+type=image
+EOF
+        debug "SDDM background updated to: $background"
+    fi
 }
 
 # Calculate solar times using Python/astral
