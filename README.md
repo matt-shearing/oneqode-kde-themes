@@ -9,7 +9,7 @@ A polished KDE Plasma 6 theme suite for EndeavourOS/Arch Linux on Wayland, featu
 ## Quick Install
 
 ```bash
-git clone https://github.com/oneqode/oneqode-kde-themes.git
+git clone https://github.com/matt-shearing/oneqode-kde-themes.git
 cd oneqode-kde-themes
 chmod +x install.sh
 ./install.sh
@@ -296,7 +296,7 @@ The installer is idempotent and preserves your configuration.
    git add .
    git commit -m "Initial release: OneQode KDE Theme Suite v1.0.0"
    git branch -M main
-   git remote add origin git@github.com:yourusername/oneqode-kde-themes.git
+   git remote add origin git@github.com:matt-shearing/oneqode-kde-themes.git
    git push -u origin main
    ```
 

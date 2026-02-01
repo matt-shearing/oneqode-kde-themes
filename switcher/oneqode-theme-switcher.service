@@ -1,6 +1,6 @@
 [Unit]
 Description=OneQode Theme Switcher
-Documentation=https://github.com/oneqode/oneqode-kde-themes
+Documentation=https://github.com/matt-shearing/oneqode-kde-themes
 
 [Service]
 Type=oneshot

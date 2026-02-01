@@ -1,6 +1,6 @@
 [Unit]
 Description=OneQode Theme Watcher - ensures Klassy decoration on theme change
-Documentation=https://github.com/oneqode/oneqode-kde-themes
+Documentation=https://github.com/matt-shearing/oneqode-kde-themes
 After=graphical-session.target
 
 [Service]

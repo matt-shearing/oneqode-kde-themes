@@ -1,6 +1,6 @@
 [Unit]
 Description=OneQode Theme Switcher Timer
-Documentation=https://github.com/oneqode/oneqode-kde-themes
+Documentation=https://github.com/matt-shearing/oneqode-kde-themes
 
 [Timer]
 OnBootSec=1min
