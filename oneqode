@@ -86,11 +86,7 @@ menu_multiselect() {
     local options=("$@")
 
     if $USE_GUM; then
-        # gum choose returns selected items one per line
-        # Use process substitution to avoid subshell issues
-        local result
-        result=$(gum choose --no-limit --header "$prompt" "${options[@]}" 2>/dev/null) || true
-        echo "$result"
+        gum choose --no-limit --header "$prompt" "${options[@]}"
     else
         echo ""
         echo -e "${CYAN}$prompt${NC}"
