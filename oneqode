@@ -86,7 +86,11 @@ menu_multiselect() {
     local options=("$@")
 
     if $USE_GUM; then
-        gum choose --no-limit --header "$prompt" "${options[@]}"
+        # gum choose returns selected items one per line
+        # Use process substitution to avoid subshell issues
+        local result
+        result=$(gum choose --no-limit --header "$prompt" "${options[@]}" 2>/dev/null) || true
+        echo "$result"
     else
         echo ""
         echo -e "${CYAN}$prompt${NC}"
@@ -187,6 +191,11 @@ do_install_selective() {
     show_header
     echo ""
 
+    if $USE_GUM; then
+        info "Use Space to select, Enter to confirm"
+        echo ""
+    fi
+
     local components
     components=$(menu_multiselect "Select components to install:" \
         "Color Schemes" \
@@ -198,8 +207,11 @@ do_install_selective() {
         "Theme Switcher" \
         "SDDM Login Screen")
 
+    # Trim whitespace
+    components=$(echo "$components" | sed '/^$/d')
+
     if [[ -z "$components" ]]; then
-        warn "No components selected"
+        warn "No components selected (use Space to select, Enter to confirm)"
         pause
         return
     fi
@@ -213,6 +225,7 @@ do_install_selective() {
     install_deps
 
     while IFS= read -r component; do
+        [[ -z "$component" ]] && continue
         case "$component" in
             "Color Schemes")
                 source "$SCRIPT_DIR/lib/install-colors.sh"
