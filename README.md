@@ -11,20 +11,31 @@ A polished KDE Plasma 6 theme suite for EndeavourOS/Arch Linux on Wayland, featu
 ```bash
 git clone https://github.com/matt-shearing/oneqode-kde-themes.git
 cd oneqode-kde-themes
-chmod +x install.sh
-./install.sh
+./oneqode
 ```
 
-The installer will:
-1. Install required packages via pacman (fonts, python-astral, inotify-tools, etc.)
-2. Install Klassy window decoration via yay (with Breeze fallback)
-3. Install color schemes and look-and-feel packages to `~/.local/share/`
-4. Enable KWin blur/translucency/contrast effects
-5. Install and enable the automatic theme switcher (runs every 5 minutes)
-6. Install and enable the theme watcher (ensures Klassy works with GUI theme selection)
-7. Apply the Light Glass theme immediately
+This launches an interactive TUI where you can:
+- Install all components or select specific ones
+- Switch themes manually
+- Configure settings
+- View installation status
+
+### Alternative: Command-line install
+
+```bash
+./oneqode install    # Install everything
+./install.sh         # Same as above (legacy)
+```
 
 **Important:** Log out and back in after installation for all changes to take effect.
+
+### Optional: Install `gum` for a prettier TUI
+
+```bash
+yay -S gum
+```
+
+Without gum, the TUI falls back to basic bash menus.
 
 ## What's Included
 
@@ -99,13 +110,18 @@ Find your coordinates:
 ### Manual Theme Switching
 
 ```bash
-# Force light theme
+# Via TUI
+./oneqode
+
+# Via CLI
+./oneqode switch day      # Light Glass
+./oneqode switch night    # Night Ride
+./oneqode switch          # Auto (solar-based)
+./oneqode status          # Check status
+
+# Or directly via the switcher script
 oneqode-theme-switch --force-day
-
-# Force dark theme
 oneqode-theme-switch --force-night
-
-# Check current status
 oneqode-theme-switch --status
 ```
 
@@ -274,18 +290,45 @@ The installer is idempotent and preserves your configuration.
 
 ## File Locations
 
+**Installed files:**
+
 | Component | Location |
 |-----------|----------|
 | Color schemes | `~/.local/share/color-schemes/` |
 | Look-and-feel | `~/.local/share/plasma/look-and-feel/` |
 | Wallpapers | `~/.local/share/wallpapers/OneQode/` |
+| Konsole themes | `~/.local/share/konsole/` |
+| Ghostty themes | `~/.config/ghostty/themes/` |
+| Cursors | `~/.local/share/icons/Bibata-Modern-Ice/` |
 | Switcher script | `~/.local/bin/oneqode-theme-switch` |
 | Watcher script | `~/.local/bin/oneqode-theme-watcher` |
 | Configuration | `~/.config/oneqode/oneqode-theme-switcher.conf` |
 | State file | `~/.local/state/oneqode/theme-state` |
-| Switcher logs | `~/.local/state/oneqode/theme-switch.log` |
-| Watcher logs | `~/.local/state/oneqode/theme-watcher.log` |
 | Systemd units | `~/.config/systemd/user/` |
+
+**Repository structure:**
+
+```
+oneqode-kde-themes/
+├── oneqode              # Main TUI entry point
+├── install.sh           # Legacy installer (calls oneqode)
+├── uninstall.sh         # Legacy uninstaller (calls oneqode)
+├── verify.sh            # Verification script
+├── lib/                 # Modular install scripts
+│   ├── common.sh
+│   ├── install-colors.sh
+│   ├── install-lookandfeel.sh
+│   ├── install-wallpapers.sh
+│   ├── install-cursors.sh
+│   ├── install-konsole.sh
+│   ├── install-ghostty.sh
+│   ├── install-switcher.sh
+│   ├── install-sddm.sh
+│   └── install-deps.sh
+├── assets/              # Theme assets
+├── switcher/            # Theme switcher scripts
+└── sddm/                # SDDM configuration
+```
 
 ## Publishing to GitHub
 

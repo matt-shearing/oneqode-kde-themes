@@ -1,0 +1,495 @@
+#!/usr/bin/env bash
+#
+# OneQode KDE Theme Suite - TUI Manager
+#
+# A cohesive day/night theme experience for KDE Plasma 6
+#
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export ONEQODE_DIR="$SCRIPT_DIR"
+
+# Source common functions
+source "$SCRIPT_DIR/lib/common.sh"
+
+# Check for gum (pretty TUI)
+USE_GUM=false
+if has_cmd gum; then
+    USE_GUM=true
+fi
+
+#
+# Menu helpers
+#
+
+# Show a styled header
+show_header() {
+    clear
+    if $USE_GUM; then
+        gum style \
+            --foreground 212 --border-foreground 212 --border double \
+            --align center --width 50 --margin "1 2" --padding "1 2" \
+            "OneQode KDE Theme Suite" "Day/Night Theming for Plasma 6"
+    else
+        echo ""
+        echo -e "${MAGENTA}╔══════════════════════════════════════════════════╗${NC}"
+        echo -e "${MAGENTA}║${NC}        ${CYAN}OneQode KDE Theme Suite${NC}               ${MAGENTA}║${NC}"
+        echo -e "${MAGENTA}║${NC}        Day/Night Theming for Plasma 6        ${MAGENTA}║${NC}"
+        echo -e "${MAGENTA}╚══════════════════════════════════════════════════╝${NC}"
+        echo ""
+    fi
+}
+
+# Show installation status
+show_status() {
+    echo ""
+    echo -e "${CYAN}Installation Status:${NC}"
+    echo ""
+    echo -e "  $(status_icon colors) Color Schemes"
+    echo -e "  $(status_icon lookandfeel) Look-and-Feel"
+    echo -e "  $(status_icon wallpapers) Wallpapers"
+    echo -e "  $(status_icon cursors) Cursors (Bibata)"
+    echo -e "  $(status_icon konsole) Konsole Themes"
+    echo -e "  $(status_icon ghostty) Ghostty Themes"
+    echo -e "  $(status_icon switcher) Theme Switcher"
+    echo -e "  $(status_icon sddm) SDDM Login Screen"
+    echo ""
+}
+
+# Select from menu using gum or bash select
+menu_select() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+
+    if $USE_GUM; then
+        gum choose --header "$prompt" "${options[@]}"
+    else
+        echo ""
+        echo -e "${CYAN}$prompt${NC}"
+        echo ""
+        PS3="Enter choice: "
+        select opt in "${options[@]}"; do
+            if [[ -n "$opt" ]]; then
+                echo "$opt"
+                break
+            fi
+        done
+    fi
+}
+
+# Multi-select using gum or bash
+menu_multiselect() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+
+    if $USE_GUM; then
+        gum choose --no-limit --header "$prompt" "${options[@]}"
+    else
+        echo ""
+        echo -e "${CYAN}$prompt${NC}"
+        echo -e "${YELLOW}(Enter numbers separated by spaces, then press Enter)${NC}"
+        echo ""
+
+        local i=1
+        for opt in "${options[@]}"; do
+            echo "  $i) $opt"
+            ((i++))
+        done
+        echo ""
+
+        read -rp "Selection: " selections
+        for sel in $selections; do
+            if [[ "$sel" =~ ^[0-9]+$ ]] && (( sel >= 1 && sel <= ${#options[@]} )); then
+                echo "${options[$((sel-1))]}"
+            fi
+        done
+    fi
+}
+
+# Confirm action
+confirm() {
+    local prompt="$1"
+
+    if $USE_GUM; then
+        gum confirm "$prompt"
+    else
+        read -rp "$prompt [y/N] " response
+        [[ "$response" =~ ^[Yy]$ ]]
+    fi
+}
+
+# Pause for user
+pause() {
+    if $USE_GUM; then
+        gum input --placeholder "Press Enter to continue..."
+    else
+        read -rp "Press Enter to continue..."
+    fi
+}
+
+#
+# Actions
+#
+
+do_install_all() {
+    show_header
+    info "Installing all components..."
+    echo ""
+
+    source "$SCRIPT_DIR/lib/install-deps.sh"
+    install_deps
+    install_klassy
+
+    source "$SCRIPT_DIR/lib/install-colors.sh"
+    install_colors
+
+    source "$SCRIPT_DIR/lib/install-lookandfeel.sh"
+    install_lookandfeel
+
+    source "$SCRIPT_DIR/lib/install-wallpapers.sh"
+    install_wallpapers
+
+    source "$SCRIPT_DIR/lib/install-cursors.sh"
+    install_cursors
+
+    source "$SCRIPT_DIR/lib/install-konsole.sh"
+    install_konsole
+
+    source "$SCRIPT_DIR/lib/install-ghostty.sh"
+    install_ghostty
+
+    source "$SCRIPT_DIR/lib/install-switcher.sh"
+    install_switcher
+    enable_switcher
+
+    echo ""
+    success "All components installed!"
+    echo ""
+    info "Configure: ~/.config/oneqode/oneqode-theme-switcher.conf"
+    info "Set your location for solar-based switching"
+    echo ""
+
+    if confirm "Configure SDDM login screen? (requires sudo)"; then
+        source "$SCRIPT_DIR/lib/install-sddm.sh"
+        install_sddm
+    fi
+
+    echo ""
+    success "Installation complete!"
+    warn "Log out and back in for best results"
+    pause
+}
+
+do_install_selective() {
+    show_header
+    echo ""
+
+    local components
+    components=$(menu_multiselect "Select components to install:" \
+        "Color Schemes" \
+        "Look-and-Feel" \
+        "Wallpapers" \
+        "Cursors (Bibata)" \
+        "Konsole Themes" \
+        "Ghostty Themes" \
+        "Theme Switcher" \
+        "SDDM Login Screen")
+
+    if [[ -z "$components" ]]; then
+        warn "No components selected"
+        pause
+        return
+    fi
+
+    echo ""
+    info "Installing selected components..."
+    echo ""
+
+    # Install dependencies first
+    source "$SCRIPT_DIR/lib/install-deps.sh"
+    install_deps
+
+    while IFS= read -r component; do
+        case "$component" in
+            "Color Schemes")
+                source "$SCRIPT_DIR/lib/install-colors.sh"
+                install_colors
+                ;;
+            "Look-and-Feel")
+                source "$SCRIPT_DIR/lib/install-lookandfeel.sh"
+                install_lookandfeel
+                ;;
+            "Wallpapers")
+                source "$SCRIPT_DIR/lib/install-wallpapers.sh"
+                install_wallpapers
+                ;;
+            "Cursors (Bibata)")
+                source "$SCRIPT_DIR/lib/install-cursors.sh"
+                install_cursors
+                ;;
+            "Konsole Themes")
+                source "$SCRIPT_DIR/lib/install-konsole.sh"
+                install_konsole
+                ;;
+            "Ghostty Themes")
+                source "$SCRIPT_DIR/lib/install-ghostty.sh"
+                install_ghostty
+                ;;
+            "Theme Switcher")
+                source "$SCRIPT_DIR/lib/install-switcher.sh"
+                install_switcher
+                enable_switcher
+                ;;
+            "SDDM Login Screen")
+                source "$SCRIPT_DIR/lib/install-sddm.sh"
+                install_sddm
+                ;;
+        esac
+    done <<< "$components"
+
+    echo ""
+    success "Selected components installed!"
+    pause
+}
+
+do_uninstall() {
+    show_header
+    echo ""
+
+    if ! confirm "Uninstall OneQode theme suite?"; then
+        return
+    fi
+
+    echo ""
+    info "Uninstalling..."
+    echo ""
+
+    source "$SCRIPT_DIR/lib/install-switcher.sh"
+    uninstall_switcher
+
+    source "$SCRIPT_DIR/lib/install-ghostty.sh"
+    uninstall_ghostty
+
+    source "$SCRIPT_DIR/lib/install-konsole.sh"
+    uninstall_konsole
+
+    source "$SCRIPT_DIR/lib/install-cursors.sh"
+    uninstall_cursors
+
+    source "$SCRIPT_DIR/lib/install-wallpapers.sh"
+    uninstall_wallpapers
+
+    source "$SCRIPT_DIR/lib/install-lookandfeel.sh"
+    uninstall_lookandfeel
+
+    source "$SCRIPT_DIR/lib/install-colors.sh"
+    uninstall_colors
+
+    if confirm "Remove SDDM configuration? (requires sudo)"; then
+        source "$SCRIPT_DIR/lib/install-sddm.sh"
+        uninstall_sddm
+    fi
+
+    echo ""
+    success "OneQode theme suite uninstalled"
+    pause
+}
+
+do_switch_theme() {
+    show_header
+    echo ""
+
+    if ! is_installed switcher; then
+        warn "Theme switcher not installed"
+        pause
+        return
+    fi
+
+    local choice
+    choice=$(menu_select "Switch theme to:" \
+        "Light Glass (Day)" \
+        "Night Ride (Dark)" \
+        "Auto (Solar-based)" \
+        "Back")
+
+    case "$choice" in
+        "Light Glass (Day)")
+            "$LOCAL_BIN/oneqode-theme-switch" --force-day
+            success "Switched to Light Glass"
+            ;;
+        "Night Ride (Dark)")
+            "$LOCAL_BIN/oneqode-theme-switch" --force-night
+            success "Switched to Night Ride"
+            ;;
+        "Auto (Solar-based)")
+            "$LOCAL_BIN/oneqode-theme-switch"
+            success "Auto mode - theme based on sun position"
+            ;;
+        "Back")
+            return
+            ;;
+    esac
+    pause
+}
+
+do_configure() {
+    show_header
+    echo ""
+
+    local config_file="$CONFIG_DIR/oneqode/oneqode-theme-switcher.conf"
+
+    if [[ ! -f "$config_file" ]]; then
+        warn "Config file not found. Install the theme switcher first."
+        pause
+        return
+    fi
+
+    info "Configuration file: $config_file"
+    echo ""
+    echo "Current settings:"
+    echo ""
+    grep -v "^#" "$config_file" | grep -v "^$" | sed 's/^/  /'
+    echo ""
+
+    if confirm "Edit configuration?"; then
+        ${EDITOR:-nano} "$config_file"
+    fi
+}
+
+do_status() {
+    show_header
+    show_status
+
+    if is_installed switcher; then
+        echo -e "${CYAN}Switcher Status:${NC}"
+        "$LOCAL_BIN/oneqode-theme-switch" --status 2>/dev/null || true
+        echo ""
+
+        echo -e "${CYAN}Timer Status:${NC}"
+        systemctl --user status oneqode-theme-switcher.timer --no-pager 2>/dev/null | head -5 || true
+        echo ""
+    fi
+
+    pause
+}
+
+#
+# Main menu
+#
+
+main_menu() {
+    while true; do
+        show_header
+        show_status
+
+        local choice
+        choice=$(menu_select "What would you like to do?" \
+            "Install All" \
+            "Install Selected Components" \
+            "Switch Theme" \
+            "Configure" \
+            "Status" \
+            "Uninstall" \
+            "Exit")
+
+        case "$choice" in
+            "Install All")
+                do_install_all
+                ;;
+            "Install Selected Components")
+                do_install_selective
+                ;;
+            "Switch Theme")
+                do_switch_theme
+                ;;
+            "Configure")
+                do_configure
+                ;;
+            "Status")
+                do_status
+                ;;
+            "Uninstall")
+                do_uninstall
+                ;;
+            "Exit")
+                echo ""
+                info "Goodbye!"
+                exit 0
+                ;;
+        esac
+    done
+}
+
+#
+# CLI handling
+#
+
+show_help() {
+    cat << EOF
+OneQode KDE Theme Suite
+
+Usage: oneqode [command]
+
+Commands:
+    (no command)    Launch interactive TUI
+    install         Install all components
+    uninstall       Uninstall all components
+    switch          Switch theme (day/night/auto)
+    status          Show installation status
+    help            Show this help
+
+Examples:
+    oneqode                  # Launch TUI
+    oneqode install          # Install everything
+    oneqode switch day       # Switch to Light Glass
+    oneqode switch night     # Switch to Night Ride
+    oneqode switch           # Auto (solar-based)
+EOF
+}
+
+# Parse CLI args
+case "${1:-}" in
+    "")
+        check_not_root
+        main_menu
+        ;;
+    install)
+        check_not_root
+        do_install_all
+        ;;
+    uninstall)
+        check_not_root
+        do_uninstall
+        ;;
+    switch)
+        check_not_root
+        case "${2:-}" in
+            day|light)
+                "$LOCAL_BIN/oneqode-theme-switch" --force-day
+                ;;
+            night|dark)
+                "$LOCAL_BIN/oneqode-theme-switch" --force-night
+                ;;
+            *)
+                "$LOCAL_BIN/oneqode-theme-switch"
+                ;;
+        esac
+        ;;
+    status)
+        show_status
+        if is_installed switcher; then
+            "$LOCAL_BIN/oneqode-theme-switch" --status
+        fi
+        ;;
+    help|--help|-h)
+        show_help
+        ;;
+    *)
+        error "Unknown command: $1"
+        show_help
+        exit 1
+        ;;
+esac
