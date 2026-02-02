@@ -1,0 +1,13 @@
+# Local files
+TODO.local
+*.local
+
+# Editor
+*.swp
+*~
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
