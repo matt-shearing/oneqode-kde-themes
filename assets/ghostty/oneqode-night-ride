@@ -1,0 +1,31 @@
+# OneQode Night Ride - Ghostty Theme
+# A dark synthwave theme with magenta and cyan neon accents
+
+background = #191c2a
+foreground = #e6ebf5
+
+cursor-color = #ff0080
+cursor-text = #191c2a
+
+selection-background = #ff0080
+selection-foreground = #ffffff
+
+# Normal colors
+palette = 0=#282d3c
+palette = 1=#ff5555
+palette = 2=#50ffb4
+palette = 3=#ffbe50
+palette = 4=#00c8ff
+palette = 5=#ff0080
+palette = 6=#00d4ff
+palette = 7=#e6ebf5
+
+# Bright colors
+palette = 8=#505564
+palette = 9=#ff7878
+palette = 10=#78ffc8
+palette = 11=#ffdc78
+palette = 12=#50dcff
+palette = 13=#ff50b4
+palette = 14=#50e6ff
+palette = 15=#ffffff

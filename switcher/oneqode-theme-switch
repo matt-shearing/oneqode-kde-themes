@@ -157,6 +157,9 @@ apply_theme() {
     # Update SDDM background (if we have permission)
     update_sddm_background "$theme"
 
+    # Update terminal themes
+    update_terminal_themes "$theme"
+
     info "Successfully applied theme: $theme"
     return 0
 }
@@ -189,6 +192,94 @@ type=image
 EOF
         debug "SDDM background updated to: $background"
     fi
+}
+
+# Update terminal themes (Konsole and Ghostty)
+update_terminal_themes() {
+    local theme="$1"
+    local is_light=false
+
+    if [[ "$theme" == *"lightglass"* ]]; then
+        is_light=true
+    fi
+
+    # Update Konsole
+    update_konsole_theme "$is_light"
+
+    # Update Ghostty
+    update_ghostty_theme "$is_light"
+}
+
+# Update Konsole color scheme for default profile
+update_konsole_theme() {
+    local is_light="$1"
+    local konsole_dir="$HOME/.local/share/konsole"
+    local config_dir="$HOME/.config"
+
+    local scheme_name
+    if [[ "$is_light" == "true" ]]; then
+        scheme_name="OneQodeLightGlass"
+    else
+        scheme_name="OneQodeNightRide"
+    fi
+
+    # Check if our color schemes are installed
+    if [[ ! -f "$konsole_dir/${scheme_name}.colorscheme" ]]; then
+        debug "Konsole color scheme not found: $scheme_name"
+        return 0
+    fi
+
+    # Update default profile if it exists
+    local default_profile
+    default_profile=$(kreadconfig6 --file konsolerc --group "Desktop Entry" --key "DefaultProfile" 2>/dev/null || echo "")
+
+    if [[ -n "$default_profile" && -f "$konsole_dir/$default_profile" ]]; then
+        # Update the profile's color scheme
+        kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Appearance" --key "ColorScheme" "$scheme_name"
+        debug "Updated Konsole profile $default_profile to use $scheme_name"
+    fi
+
+    # Also update konsolerc for new windows
+    kwriteconfig6 --file konsolerc --group "UiSettings" --key "ColorScheme" "$scheme_name" 2>/dev/null || true
+
+    # Signal running Konsole instances to reload (via DBus)
+    if command -v qdbus6 &>/dev/null; then
+        for session in $(qdbus6 org.kde.konsole-* 2>/dev/null | grep -v "^$"); do
+            qdbus6 "$session" /Sessions/1 org.kde.konsole.Session.setProfile "$default_profile" 2>/dev/null || true
+        done
+    fi
+
+    debug "Konsole theme updated to: $scheme_name"
+}
+
+# Update Ghostty theme
+update_ghostty_theme() {
+    local is_light="$1"
+    local ghostty_themes="$HOME/.config/ghostty/themes"
+
+    local theme_name
+    if [[ "$is_light" == "true" ]]; then
+        theme_name="oneqode-light-glass"
+    else
+        theme_name="oneqode-night-ride"
+    fi
+
+    # Check if our themes are installed
+    if [[ ! -f "$ghostty_themes/$theme_name" ]]; then
+        debug "Ghostty theme not found: $theme_name"
+        return 0
+    fi
+
+    # Update the symlink
+    ln -sf "$theme_name" "$ghostty_themes/oneqode-current"
+
+    # Signal Ghostty to reload config
+    if pgrep -x ghostty &>/dev/null; then
+        pkill -USR1 ghostty 2>/dev/null || true
+        debug "Sent reload signal to Ghostty"
+    fi
+
+    debug "Ghostty theme updated to: $theme_name"
 }
 
 # Calculate solar times using Python/astral

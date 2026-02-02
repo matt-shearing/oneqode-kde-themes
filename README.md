@@ -42,8 +42,10 @@ Each theme sets:
 | Cursors | Yes | Bibata Modern Ice |
 | Splash screen | Yes | Minimal branded KSplash |
 | Login screen (SDDM) | Yes | Breeze + OneQode background |
+| Konsole | Yes | Matching terminal colors |
+| Ghostty | Yes | Matching terminal colors |
 
-The themes provide a cohesive experience from login to desktop.
+The themes provide a cohesive experience from login to desktop, including terminal emulators.
 
 ## Verification
 

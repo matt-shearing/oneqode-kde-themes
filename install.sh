@@ -234,6 +234,8 @@ create_directories() {
     mkdir -p "$LOCAL_SHARE/plasma/look-and-feel"
     mkdir -p "$LOCAL_SHARE/wallpapers/OneQode"
     mkdir -p "$LOCAL_SHARE/icons"
+    mkdir -p "$LOCAL_SHARE/konsole"
+    mkdir -p "$CONFIG_DIR/ghostty/themes"
     mkdir -p "$LOCAL_BIN"
     mkdir -p "$LOCAL_STATE/oneqode"
     mkdir -p "$CONFIG_DIR/oneqode"
@@ -267,6 +269,43 @@ install_wallpapers() {
     rsync -a "$ASSETS_DIR/wallpapers/" "$LOCAL_SHARE/wallpapers/OneQode/"
 
     success "Wallpapers installed"
+}
+
+# Install terminal themes (Konsole and Ghostty)
+install_terminal_themes() {
+    info "Installing terminal themes..."
+
+    # Install Konsole color schemes
+    if [[ -d "$ASSETS_DIR/konsole" ]]; then
+        cp "$ASSETS_DIR/konsole/"*.colorscheme "$LOCAL_SHARE/konsole/"
+        success "Konsole color schemes installed"
+    fi
+
+    # Install Ghostty themes
+    if [[ -d "$ASSETS_DIR/ghostty" ]]; then
+        cp "$ASSETS_DIR/ghostty/"* "$CONFIG_DIR/ghostty/themes/"
+        success "Ghostty themes installed"
+
+        # Create Ghostty config include for theme switching
+        local ghostty_config="$CONFIG_DIR/ghostty/config"
+        local theme_include="config-file = themes/oneqode-current"
+
+        # Create initial current theme symlink
+        ln -sf "oneqode-night-ride" "$CONFIG_DIR/ghostty/themes/oneqode-current"
+
+        # Add include to ghostty config if not present
+        if [[ -f "$ghostty_config" ]]; then
+            if ! grep -q "oneqode-current" "$ghostty_config"; then
+                echo "" >> "$ghostty_config"
+                echo "# OneQode theme (switched automatically)" >> "$ghostty_config"
+                echo "$theme_include" >> "$ghostty_config"
+                info "Added OneQode theme include to Ghostty config"
+            fi
+        else
+            echo "# Ghostty config" > "$ghostty_config"
+            echo "$theme_include" >> "$ghostty_config"
+        fi
+    fi
 }
 
 # Install switcher script
@@ -392,6 +431,8 @@ print_summary() {
     echo "  - Theme watcher: ~/.local/bin/oneqode-theme-watcher"
     echo "  - Systemd timer: oneqode-theme-switcher.timer (every 5 min)"
     echo "  - SDDM login: Breeze theme with OneQode background"
+    echo "  - Konsole: OneQodeLightGlass, OneQodeNightRide color schemes"
+    echo "  - Ghostty: Matching terminal themes (auto-switching)"
     echo ""
     echo "Configuration:"
     echo "  - Edit ~/.config/oneqode/oneqode-theme-switcher.conf"
@@ -425,6 +466,7 @@ main() {
     install_color_schemes
     install_look_and_feel
     install_wallpapers
+    install_terminal_themes
     install_switcher
 
     enable_timer

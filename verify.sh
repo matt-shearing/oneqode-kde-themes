@@ -133,6 +133,11 @@ verify_repo_structure() {
     check_file "$SCRIPT_DIR/sddm/theme.conf.user.light" "SDDM light background"
     check_file "$SCRIPT_DIR/sddm/theme.conf.user.dark" "SDDM dark background"
 
+    check_file "$SCRIPT_DIR/assets/konsole/OneQodeLightGlass.colorscheme" "Konsole Light Glass"
+    check_file "$SCRIPT_DIR/assets/konsole/OneQodeNightRide.colorscheme" "Konsole Night Ride"
+    check_file "$SCRIPT_DIR/assets/ghostty/oneqode-light-glass" "Ghostty Light Glass"
+    check_file "$SCRIPT_DIR/assets/ghostty/oneqode-night-ride" "Ghostty Night Ride"
+
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-switch" "Switcher script"
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-watcher" "Watcher script"
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-switcher.service" "Systemd service"

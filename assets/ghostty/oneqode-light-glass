@@ -1,0 +1,31 @@
+# OneQode Light Glass - Ghostty Theme
+# A light, glass-inspired theme with ice cyan accents
+
+background = #fafcff
+foreground = #232d37
+
+cursor-color = #00b4c8
+cursor-text = #fafcff
+
+selection-background = #00b4c8
+selection-foreground = #ffffff
+
+# Normal colors
+palette = 0=#232d37
+palette = 1=#dc322f
+palette = 2=#2aa198
+palette = 3=#b58900
+palette = 4=#268bd2
+palette = 5=#d33682
+palette = 6=#00b4c8
+palette = 7=#eee8d5
+
+# Bright colors
+palette = 8=#3c464f
+palette = 9=#ff5555
+palette = 10=#50c8b4
+palette = 11=#dcb43c
+palette = 12=#50aaff
+palette = 13=#ff64b4
+palette = 14=#3cd2e6
+palette = 15=#ffffff
