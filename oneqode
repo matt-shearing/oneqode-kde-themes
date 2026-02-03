@@ -7,7 +7,14 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve symlinks to find the real script location
+SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$SOURCE" ]]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 export ONEQODE_DIR="$SCRIPT_DIR"
 
 # Source common functions
@@ -391,16 +398,204 @@ do_configure_switcher() {
         return
     fi
 
-    info "Configuration file: $config_file"
+    # Show current settings
+    local current_mode current_lat current_lon current_tz current_day current_night
+    current_mode=$(grep "^MODE=" "$config_file" | cut -d= -f2)
+    current_lat=$(grep "^LATITUDE=" "$config_file" | cut -d= -f2)
+    current_lon=$(grep "^LONGITUDE=" "$config_file" | cut -d= -f2)
+    current_tz=$(grep "^TIMEZONE=" "$config_file" | cut -d= -f2)
+    current_day=$(grep "^DAY_START=" "$config_file" | cut -d= -f2)
+    current_night=$(grep "^NIGHT_START=" "$config_file" | cut -d= -f2)
+
+    info "Current configuration:"
     echo ""
-    echo "Current settings:"
-    echo ""
-    grep -v "^#" "$config_file" | grep -v "^$" | sed 's/^/  /'
+    echo "  Mode: $current_mode"
+    if [[ "$current_mode" == "solar" ]]; then
+        echo "  Location: $current_lat, $current_lon"
+        echo "  Timezone: $current_tz"
+    else
+        echo "  Day starts: $current_day"
+        echo "  Night starts: $current_night"
+    fi
     echo ""
 
-    if confirm "Edit configuration?"; then
-        ${EDITOR:-nano} "$config_file"
+    local choice
+    choice=$(menu_select "Configure:" \
+        "Set Location (city presets)" \
+        "Set Location (custom coordinates)" \
+        "Use Fixed Times Only" \
+        "Edit Config File Manually" \
+        "Back")
+
+    case "$choice" in
+        "Set Location (city presets)")
+            do_set_location_preset "$config_file"
+            ;;
+        "Set Location (custom coordinates)")
+            do_set_location_custom "$config_file"
+            ;;
+        "Use Fixed Times Only")
+            do_set_fixed_times "$config_file"
+            ;;
+        "Edit Config File Manually")
+            ${EDITOR:-nano} "$config_file"
+            ;;
+        "Back")
+            return
+            ;;
+    esac
+}
+
+# City presets: "City Name|latitude|longitude|timezone"
+CITY_PRESETS=(
+    "Sydney, Australia|-33.8688|151.2093|Australia/Sydney"
+    "Melbourne, Australia|-37.8136|144.9631|Australia/Melbourne"
+    "Bangkok, Thailand|13.7563|100.5018|Asia/Bangkok"
+    "Singapore|1.3521|103.8198|Asia/Singapore"
+    "Tokyo, Japan|35.6762|139.6503|Asia/Tokyo"
+    "Hong Kong|22.3193|114.1694|Asia/Hong_Kong"
+    "London, UK|51.5074|-0.1278|Europe/London"
+    "Berlin, Germany|52.5200|13.4050|Europe/Berlin"
+    "Paris, France|48.8566|2.3522|Europe/Paris"
+    "Amsterdam, Netherlands|52.3676|4.9041|Europe/Amsterdam"
+    "New York, USA|40.7128|-74.0060|America/New_York"
+    "San Francisco, USA|37.7749|-122.4194|America/Los_Angeles"
+    "Los Angeles, USA|34.0522|-118.2437|America/Los_Angeles"
+    "Dubai, UAE|25.2048|55.2708|Asia/Dubai"
+    "Mumbai, India|19.0760|72.8777|Asia/Kolkata"
+)
+
+do_set_location_preset() {
+    local config_file="$1"
+    show_header
+    echo ""
+
+    # Build city name list
+    local city_names=()
+    for preset in "${CITY_PRESETS[@]}"; do
+        city_names+=("$(echo "$preset" | cut -d'|' -f1)")
+    done
+    city_names+=("Back")
+
+    local choice
+    choice=$(menu_select "Select your location:" "${city_names[@]}")
+
+    [[ "$choice" == "Back" ]] && return
+
+    # Find matching preset
+    for preset in "${CITY_PRESETS[@]}"; do
+        local name lat lon tz
+        name=$(echo "$preset" | cut -d'|' -f1)
+        if [[ "$name" == "$choice" ]]; then
+            lat=$(echo "$preset" | cut -d'|' -f2)
+            lon=$(echo "$preset" | cut -d'|' -f3)
+            tz=$(echo "$preset" | cut -d'|' -f4)
+
+            # Update config file (use | delimiter to avoid issues with / in timezone)
+            sed -i "s|^MODE=.*|MODE=solar|" "$config_file"
+            sed -i "s|^LATITUDE=.*|LATITUDE=$lat|" "$config_file"
+            sed -i "s|^LONGITUDE=.*|LONGITUDE=$lon|" "$config_file"
+            sed -i "s|^TIMEZONE=.*|TIMEZONE=$tz|" "$config_file"
+
+            echo ""
+            success "Location set to: $name"
+            echo ""
+            echo "  Latitude:  $lat"
+            echo "  Longitude: $lon"
+            echo "  Timezone:  $tz"
+            echo ""
+            pause
+            return
+        fi
+    done
+}
+
+do_set_location_custom() {
+    local config_file="$1"
+    show_header
+    echo ""
+
+    info "Enter custom coordinates"
+    echo ""
+    echo "Tip: Use Google Maps to find coordinates"
+    echo "     (right-click on map → copy coordinates)"
+    echo ""
+
+    local lat lon tz
+
+    if $USE_GUM; then
+        lat=$(gum input --header "Latitude (e.g., 13.7563 for Bangkok):" --placeholder "latitude")
+        lon=$(gum input --header "Longitude (e.g., 100.5018 for Bangkok):" --placeholder "longitude")
+        tz=$(gum input --header "Timezone (e.g., Asia/Bangkok):" --placeholder "timezone")
+    else
+        read -rp "Latitude: " lat
+        read -rp "Longitude: " lon
+        read -rp "Timezone (e.g., Asia/Bangkok): " tz
     fi
+
+    # Basic validation
+    if [[ -z "$lat" || -z "$lon" || -z "$tz" ]]; then
+        warn "All fields are required"
+        pause
+        return
+    fi
+
+    # Update config file (use | delimiter to avoid issues with / in timezone)
+    sed -i "s|^MODE=.*|MODE=solar|" "$config_file"
+    sed -i "s|^LATITUDE=.*|LATITUDE=$lat|" "$config_file"
+    sed -i "s|^LONGITUDE=.*|LONGITUDE=$lon|" "$config_file"
+    sed -i "s|^TIMEZONE=.*|TIMEZONE=$tz|" "$config_file"
+
+    echo ""
+    success "Location updated!"
+    echo ""
+    echo "  Latitude:  $lat"
+    echo "  Longitude: $lon"
+    echo "  Timezone:  $tz"
+    echo ""
+    pause
+}
+
+do_set_fixed_times() {
+    local config_file="$1"
+    show_header
+    echo ""
+
+    local current_day current_night
+    current_day=$(grep "^DAY_START=" "$config_file" | cut -d= -f2)
+    current_night=$(grep "^NIGHT_START=" "$config_file" | cut -d= -f2)
+
+    info "Fixed time mode (ignores location/sunrise/sunset)"
+    echo ""
+    echo "Current times:"
+    echo "  Day starts:   $current_day"
+    echo "  Night starts: $current_night"
+    echo ""
+
+    local day_start night_start
+
+    if $USE_GUM; then
+        day_start=$(gum input --header "Day starts at (HH:MM, 24h):" --value "$current_day")
+        night_start=$(gum input --header "Night starts at (HH:MM, 24h):" --value "$current_night")
+    else
+        read -rp "Day starts at [$current_day]: " day_start
+        read -rp "Night starts at [$current_night]: " night_start
+        [[ -z "$day_start" ]] && day_start="$current_day"
+        [[ -z "$night_start" ]] && night_start="$current_night"
+    fi
+
+    # Update config file
+    sed -i "s/^MODE=.*/MODE=fixed/" "$config_file"
+    sed -i "s/^DAY_START=.*/DAY_START=$day_start/" "$config_file"
+    sed -i "s/^NIGHT_START=.*/NIGHT_START=$night_start/" "$config_file"
+
+    echo ""
+    success "Fixed time mode enabled!"
+    echo ""
+    echo "  Day starts:   $day_start"
+    echo "  Night starts: $night_start"
+    echo ""
+    pause
 }
 
 do_configure_transparency() {
@@ -554,6 +749,7 @@ Commands:
     install         Install all components
     uninstall       Uninstall all components
     switch          Switch theme (day/night/auto)
+    location        Set location for solar switching
     status          Show installation status
     help            Show this help
 
@@ -563,7 +759,71 @@ Examples:
     oneqode switch day       # Switch to Light Glass
     oneqode switch night     # Switch to Night Ride
     oneqode switch           # Auto (solar-based)
+    oneqode location         # List available cities
+    oneqode location bangkok # Set location to Bangkok
 EOF
+}
+
+# CLI location command
+do_location_cli() {
+    local config_file="$CONFIG_DIR/oneqode/oneqode-theme-switcher.conf"
+
+    if [[ ! -f "$config_file" ]]; then
+        error "Config file not found. Install the theme switcher first."
+        exit 1
+    fi
+
+    local search="${1:-}"
+
+    if [[ -z "$search" ]]; then
+        # List all cities
+        echo "Available locations:"
+        echo ""
+        for preset in "${CITY_PRESETS[@]}"; do
+            local name tz
+            name=$(echo "$preset" | cut -d'|' -f1)
+            tz=$(echo "$preset" | cut -d'|' -f4)
+            printf "  %-25s %s\n" "$name" "$tz"
+        done
+        echo ""
+        echo "Usage: oneqode location <city>"
+        echo "Example: oneqode location bangkok"
+        return
+    fi
+
+    # Search for matching city (case insensitive)
+    local search_lower
+    search_lower=$(echo "$search" | tr '[:upper:]' '[:lower:]')
+
+    for preset in "${CITY_PRESETS[@]}"; do
+        local name name_lower lat lon tz
+        name=$(echo "$preset" | cut -d'|' -f1)
+        name_lower=$(echo "$name" | tr '[:upper:]' '[:lower:]')
+
+        if [[ "$name_lower" == *"$search_lower"* ]]; then
+            lat=$(echo "$preset" | cut -d'|' -f2)
+            lon=$(echo "$preset" | cut -d'|' -f3)
+            tz=$(echo "$preset" | cut -d'|' -f4)
+
+            # Update config file (use | delimiter to avoid issues with / in timezone)
+            sed -i "s|^MODE=.*|MODE=solar|" "$config_file"
+            sed -i "s|^LATITUDE=.*|LATITUDE=$lat|" "$config_file"
+            sed -i "s|^LONGITUDE=.*|LONGITUDE=$lon|" "$config_file"
+            sed -i "s|^TIMEZONE=.*|TIMEZONE=$tz|" "$config_file"
+
+            success "Location set to: $name"
+            echo "  Latitude:  $lat"
+            echo "  Longitude: $lon"
+            echo "  Timezone:  $tz"
+            echo ""
+            info "Run 'oneqode switch' to apply theme for new location"
+            return
+        fi
+    done
+
+    error "No city matching '$search' found"
+    echo "Run 'oneqode location' to see available cities"
+    exit 1
 }
 
 # Parse CLI args
@@ -599,6 +859,10 @@ case "${1:-}" in
         if is_installed switcher; then
             "$LOCAL_BIN/oneqode-theme-switch" --status
         fi
+        ;;
+    location|loc)
+        check_not_root
+        do_location_cli "${2:-}"
         ;;
     help|--help|-h)
         show_help

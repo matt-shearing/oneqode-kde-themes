@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=OneQode Theme Switcher
+Comment=System tray for quick theme switching
+Exec=python3 ~/.local/share/oneqode/oneqode-tray.py
+Icon=oneqode
+Terminal=false
+Categories=Utility;
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel

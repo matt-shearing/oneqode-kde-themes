@@ -5,13 +5,17 @@ install_switcher() {
     info "Installing theme switcher..."
 
     local switcher_dir="$ONEQODE_DIR/switcher"
+    local icons_dir="$ONEQODE_DIR/assets/icons"
 
     mkdir -p "$LOCAL_BIN"
     mkdir -p "$LOCAL_STATE/oneqode"
     mkdir -p "$CONFIG_DIR/oneqode"
     mkdir -p "$SYSTEMD_USER"
+    mkdir -p "$LOCAL_SHARE/oneqode/icons"
+    mkdir -p "$CONFIG_DIR/autostart"
 
-    # Install scripts
+    # Install scripts (symlink oneqode so it can find its lib folder)
+    ln -sf "$ONEQODE_DIR/oneqode" "$LOCAL_BIN/oneqode"
     install -m 755 "$switcher_dir/oneqode-theme-switch" "$LOCAL_BIN/"
     install -m 755 "$switcher_dir/oneqode-theme-watcher" "$LOCAL_BIN/"
 
@@ -24,6 +28,12 @@ install_switcher() {
     cp "$switcher_dir/oneqode-theme-switcher.service" "$SYSTEMD_USER/"
     cp "$switcher_dir/oneqode-theme-switcher.timer" "$SYSTEMD_USER/"
     cp "$switcher_dir/oneqode-theme-watcher.service" "$SYSTEMD_USER/"
+
+    # Install tray applet
+    install -m 755 "$switcher_dir/oneqode-tray.py" "$LOCAL_SHARE/oneqode/"
+    cp "$icons_dir/oneqode-light.svg" "$LOCAL_SHARE/oneqode/icons/"
+    cp "$icons_dir/oneqode-dark.svg" "$LOCAL_SHARE/oneqode/icons/"
+    cp "$switcher_dir/oneqode-tray.desktop" "$CONFIG_DIR/autostart/"
 
     success "Theme switcher installed"
 }
@@ -52,12 +62,18 @@ uninstall_switcher() {
 
     disable_switcher
 
+    # Kill tray applet if running
+    pkill -f "oneqode-tray.py" 2>/dev/null || true
+
+    rm -f "$LOCAL_BIN/oneqode"
     rm -f "$LOCAL_BIN/oneqode-theme-switch"
     rm -f "$LOCAL_BIN/oneqode-theme-watcher"
     rm -f "$SYSTEMD_USER/oneqode-theme-switcher.service"
     rm -f "$SYSTEMD_USER/oneqode-theme-switcher.timer"
     rm -f "$SYSTEMD_USER/oneqode-theme-watcher.service"
     rm -rf "$LOCAL_STATE/oneqode"
+    rm -rf "$LOCAL_SHARE/oneqode"
+    rm -f "$CONFIG_DIR/autostart/oneqode-tray.desktop"
 
     systemctl --user daemon-reload
 

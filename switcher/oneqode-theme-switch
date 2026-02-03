@@ -9,6 +9,7 @@ set -euo pipefail
 CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/oneqode/oneqode-theme-switcher.conf"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/oneqode"
 STATE_FILE="$STATE_DIR/theme-state"
+FORCE_FILE="$STATE_DIR/force-period"
 LOG_FILE="$STATE_DIR/theme-switch.log"
 
 # Defaults (overridden by config)
@@ -84,6 +85,28 @@ save_state() {
     local theme="$1"
     echo "$theme" > "$STATE_FILE"
     debug "Saved state: $theme"
+}
+
+# Get forced period (if any)
+get_forced_period() {
+    if [[ -f "$FORCE_FILE" ]]; then
+        cat "$FORCE_FILE"
+    else
+        echo ""
+    fi
+}
+
+# Save forced period (for sticky manual switches)
+save_forced_period() {
+    local period="$1"
+    echo "$period" > "$FORCE_FILE"
+    debug "Saved forced period: $period"
+}
+
+# Clear forced period (when solar catches up)
+clear_forced_period() {
+    rm -f "$FORCE_FILE"
+    debug "Cleared forced period"
 }
 
 # Detect theme apply tool
@@ -273,15 +296,9 @@ update_ghostty_theme() {
     # Update the symlink
     ln -sf "$theme_name" "$ghostty_themes/oneqode-current"
 
-    # Signal Ghostty to reload config (with small delay to let symlink settle)
-    if pgrep -x ghostty &>/dev/null; then
-        sleep 0.1
-        # Use killall for cleaner signal delivery
-        killall -USR1 ghostty 2>/dev/null || true
-        debug "Sent reload signal to Ghostty"
-    fi
-
-    debug "Ghostty theme updated to: $theme_name"
+    # Note: Ghostty USR1 reload signal causes crashes on some systems.
+    # New Ghostty windows will pick up the theme automatically.
+    debug "Ghostty theme symlink updated to: $theme_name"
 }
 
 # Calculate solar times using Python/astral
@@ -391,6 +408,22 @@ main() {
     period=$(get_period)
     debug "Current period: $period"
 
+    # Check for forced period (sticky manual override)
+    local forced_period
+    forced_period=$(get_forced_period)
+    if [[ -n "$forced_period" ]]; then
+        debug "Forced period active: $forced_period"
+        if [[ "$forced_period" == "$period" ]]; then
+            # Solar has caught up with the forced period, clear the override
+            info "Solar period now matches forced period ($period), clearing override"
+            clear_forced_period
+        else
+            # Still in override mode, don't switch
+            debug "Override active: staying on $forced_period until solar catches up"
+            exit 0
+        fi
+    fi
+
     if [[ "$period" == "day" ]]; then
         theme="$LIGHT_THEME"
     else
@@ -428,20 +461,33 @@ case "${1:-}" in
     --force-day)
         ensure_state_dir
         load_config
-        apply_theme "$LIGHT_THEME" && save_state "$LIGHT_THEME"
+        if apply_theme "$LIGHT_THEME"; then
+            save_state "$LIGHT_THEME"
+            save_forced_period "day"
+            info "Forced to day theme (will persist until solar period becomes day)"
+        fi
         ;;
     --force-night)
         ensure_state_dir
         load_config
-        apply_theme "$DARK_THEME" && save_state "$DARK_THEME"
+        if apply_theme "$DARK_THEME"; then
+            save_state "$DARK_THEME"
+            save_forced_period "night"
+            info "Forced to night theme (will persist until solar period becomes night)"
+        fi
         ;;
     --status)
+        ensure_state_dir
         load_config
         period=$(get_period)
         current=$(get_current_state)
+        forced=$(get_forced_period)
         echo "Mode: $MODE"
         echo "Current period: $period"
         echo "Applied theme: ${current:-none}"
+        if [[ -n "$forced" ]]; then
+            echo "Manual override: $forced (until solar catches up)"
+        fi
         ;;
     --help|-h)
         echo "Usage: oneqode-theme-switch [OPTION]"
