@@ -60,6 +60,7 @@ show_status() {
     echo -e "  $(status_icon konsole) Konsole Themes"
     echo -e "  $(status_icon ghostty) Ghostty Themes"
     echo -e "  $(status_icon zed) Zed Themes"
+    echo -e "  $(status_icon typora) Typora Themes"
     echo -e "  $(status_icon switcher) Theme Switcher"
     echo -e "  $(status_icon sddm) SDDM Login Screen"
     echo ""
@@ -172,6 +173,9 @@ do_install_all() {
     source "$SCRIPT_DIR/lib/install-zed.sh"
     install_zed
 
+    source "$SCRIPT_DIR/lib/install-typora.sh"
+    install_typora
+
     source "$SCRIPT_DIR/lib/install-switcher.sh"
     install_switcher
     enable_switcher
@@ -212,6 +216,7 @@ do_install_selective() {
         "Konsole Themes" \
         "Ghostty Themes" \
         "Zed Themes" \
+        "Typora Themes" \
         "Theme Switcher" \
         "SDDM Login Screen")
 
@@ -263,6 +268,10 @@ do_install_selective() {
                 source "$SCRIPT_DIR/lib/install-zed.sh"
                 install_zed
                 ;;
+            "Typora Themes")
+                source "$SCRIPT_DIR/lib/install-typora.sh"
+                install_typora
+                ;;
             "Theme Switcher")
                 source "$SCRIPT_DIR/lib/install-switcher.sh"
                 install_switcher
@@ -300,6 +309,9 @@ do_uninstall() {
 
     source "$SCRIPT_DIR/lib/install-zed.sh"
     uninstall_zed
+
+    source "$SCRIPT_DIR/lib/install-typora.sh"
+    uninstall_typora
 
     source "$SCRIPT_DIR/lib/install-konsole.sh"
     uninstall_konsole

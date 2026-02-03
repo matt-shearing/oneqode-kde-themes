@@ -76,6 +76,9 @@ is_installed() {
         zed)
             [[ -f "$CONFIG_DIR/zed/themes/oneqode.json" ]]
             ;;
+        typora)
+            [[ -f "$CONFIG_DIR/Typora/themes/oneqode-night-ride.css" ]]
+            ;;
         switcher)
             [[ -x "$LOCAL_BIN/oneqode-theme-switch" ]]
             ;;

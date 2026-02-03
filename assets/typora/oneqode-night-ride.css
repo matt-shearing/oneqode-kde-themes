@@ -1,0 +1,394 @@
+/* OneQode Night Ride - Typora Theme
+ * A dark synthwave theme with magenta and cyan neon accents
+ */
+
+:root {
+    --bg-color: #191c2a;
+    --side-bar-bg-color: #12141f;
+    --text-color: #e6ebf5;
+    --heading-color: #ffffff;
+
+    --select-text-bg-color: #ff0080;
+    --select-text-font-color: #ffffff;
+
+    --control-text-color: #a0a8b8;
+    --control-text-hover-color: #e6ebf5;
+
+    --item-hover-bg-color: #282d3c;
+    --item-hover-text-color: #ffffff;
+    --active-file-bg-color: #282d3c;
+    --active-file-border-color: #ff0080;
+    --active-file-text-color: #ffffff;
+
+    --primary-color: #00c8ff;
+    --accent-color: #ff0080;
+
+    --window-border: 1px solid #282d3c;
+    --rawblock-edit-panel-bd: #12141f;
+    --search-select-bg-color: #ff0080;
+
+    --code-bg-color: #12141f;
+    --code-border-color: #282d3c;
+
+    --blockquote-border-color: #ff0080;
+    --blockquote-bg-color: #1e2233;
+
+    --table-border-color: #282d3c;
+    --table-header-bg-color: #1e2233;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    background: var(--bg-color);
+    fill: currentColor;
+    line-height: 1.7;
+}
+
+body {
+    font-family: "Inter", "SF Pro Text", "Segoe UI", "Helvetica Neue", sans-serif;
+    color: var(--text-color);
+}
+
+#write {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 30px 60px;
+    padding-bottom: 100px;
+}
+
+@media only screen and (min-width: 1400px) {
+    #write {
+        max-width: 1024px;
+    }
+}
+
+@media only screen and (min-width: 1800px) {
+    #write {
+        max-width: 1200px;
+    }
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: #50dcff;
+    text-decoration: underline;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Inter", "SF Pro Display", "Segoe UI", sans-serif;
+    font-weight: 600;
+    color: var(--heading-color);
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.35;
+}
+
+h1 {
+    font-size: 2.2em;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 0.3em;
+}
+
+h2 {
+    font-size: 1.7em;
+    border-bottom: 1px solid #282d3c;
+    padding-bottom: 0.25em;
+}
+
+h3 {
+    font-size: 1.4em;
+    color: var(--primary-color);
+}
+
+h4 {
+    font-size: 1.2em;
+}
+
+h5 {
+    font-size: 1.1em;
+}
+
+h6 {
+    font-size: 1em;
+    color: var(--control-text-color);
+}
+
+/* Horizontal rule */
+hr {
+    height: 2px;
+    border: none;
+    background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+    margin: 2em 0;
+}
+
+/* Paragraphs */
+p {
+    margin: 0.8em 0;
+}
+
+/* Strong and emphasis */
+strong {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+em {
+    color: var(--primary-color);
+}
+
+/* Code */
+code {
+    font-family: "JetBrains Mono", "Fira Code", "SF Mono", Consolas, monospace;
+    font-size: 0.9em;
+    background: var(--code-bg-color);
+    border: 1px solid var(--code-border-color);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: #50ffb4;
+}
+
+/* Code blocks */
+pre {
+    background: var(--code-bg-color);
+    border: 1px solid var(--code-border-color);
+    border-radius: 6px;
+    padding: 1em;
+    overflow-x: auto;
+}
+
+pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--text-color);
+}
+
+.md-fences {
+    background: var(--code-bg-color);
+    border: 1px solid var(--code-border-color);
+    border-radius: 6px;
+    padding: 0.8em 1em;
+    font-size: 0.9em;
+}
+
+/* Blockquotes */
+blockquote {
+    border-left: 4px solid var(--blockquote-border-color);
+    background: var(--blockquote-bg-color);
+    padding: 0.8em 1.2em;
+    margin: 1em 0;
+    border-radius: 0 6px 6px 0;
+    color: #c0c8d8;
+}
+
+blockquote p {
+    margin: 0.4em 0;
+}
+
+/* Lists */
+ul, ol {
+    padding-left: 1.8em;
+}
+
+li {
+    margin: 0.4em 0;
+}
+
+li::marker {
+    color: var(--accent-color);
+}
+
+/* Task lists */
+.md-task-list-item > input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.1em;
+    height: 1.1em;
+    border: 2px solid var(--primary-color);
+    border-radius: 3px;
+    margin-right: 0.5em;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
+
+.md-task-list-item > input:checked {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.md-task-list-item > input:checked::after {
+    content: "✓";
+    color: white;
+    font-size: 0.8em;
+    position: absolute;
+    top: -2px;
+    left: 2px;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+}
+
+th, td {
+    border: 1px solid var(--table-border-color);
+    padding: 0.6em 1em;
+    text-align: left;
+}
+
+th {
+    background: var(--table-header-bg-color);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background: rgba(40, 45, 60, 0.5);
+}
+
+/* Images */
+img {
+    max-width: 100%;
+    border-radius: 6px;
+}
+
+/* Footnotes */
+.footnotes {
+    font-size: 0.9em;
+    color: var(--control-text-color);
+    border-top: 1px solid var(--table-border-color);
+    margin-top: 2em;
+    padding-top: 1em;
+}
+
+/* Selection */
+::selection {
+    background: var(--select-text-bg-color);
+    color: var(--select-text-font-color);
+}
+
+/* Sidebar */
+#typora-sidebar {
+    background: var(--side-bar-bg-color);
+}
+
+.sidebar-content {
+    background: var(--side-bar-bg-color);
+}
+
+/* Source mode */
+.cm-s-inner {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.cm-s-inner .cm-header {
+    color: var(--primary-color);
+}
+
+.cm-s-inner .cm-link {
+    color: var(--primary-color);
+}
+
+.cm-s-inner .cm-string {
+    color: #50ffb4;
+}
+
+.cm-s-inner .cm-comment {
+    color: #505564;
+}
+
+/* Mermaid diagrams */
+.md-diagram-panel {
+    background: var(--code-bg-color);
+    border-radius: 6px;
+}
+
+/* Math blocks */
+.MathJax {
+    color: var(--primary-color);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #282d3c;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a4050;
+}
+
+/* Focus states */
+#write:focus {
+    outline: none;
+}
+
+input:focus, textarea:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Tooltip */
+.md-hover-tip .md-arrow:after {
+    background: #282d3c;
+}
+
+.code-tooltip {
+    background: #282d3c;
+    border: 1px solid #3a4050;
+}
+
+/* Mark/highlight */
+mark {
+    background: rgba(255, 0, 128, 0.3);
+    color: var(--text-color);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+/* Print styles */
+@media print {
+    html, body {
+        background: white;
+        color: black;
+    }
+
+    h1 {
+        border-bottom-color: #333;
+    }
+
+    a {
+        color: #0066cc;
+    }
+
+    code {
+        background: #f5f5f5;
+        border-color: #ddd;
+        color: #333;
+    }
+}
