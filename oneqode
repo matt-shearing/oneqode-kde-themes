@@ -52,6 +52,7 @@ show_status() {
     echo -e "  $(status_icon cursors) Cursors (Bibata)"
     echo -e "  $(status_icon konsole) Konsole Themes"
     echo -e "  $(status_icon ghostty) Ghostty Themes"
+    echo -e "  $(status_icon zed) Zed Themes"
     echo -e "  $(status_icon switcher) Theme Switcher"
     echo -e "  $(status_icon sddm) SDDM Login Screen"
     echo ""
@@ -161,6 +162,9 @@ do_install_all() {
     source "$SCRIPT_DIR/lib/install-ghostty.sh"
     install_ghostty
 
+    source "$SCRIPT_DIR/lib/install-zed.sh"
+    install_zed
+
     source "$SCRIPT_DIR/lib/install-switcher.sh"
     install_switcher
     enable_switcher
@@ -200,6 +204,7 @@ do_install_selective() {
         "Cursors (Bibata)" \
         "Konsole Themes" \
         "Ghostty Themes" \
+        "Zed Themes" \
         "Theme Switcher" \
         "SDDM Login Screen")
 
@@ -247,6 +252,10 @@ do_install_selective() {
                 source "$SCRIPT_DIR/lib/install-ghostty.sh"
                 install_ghostty
                 ;;
+            "Zed Themes")
+                source "$SCRIPT_DIR/lib/install-zed.sh"
+                install_zed
+                ;;
             "Theme Switcher")
                 source "$SCRIPT_DIR/lib/install-switcher.sh"
                 install_switcher
@@ -281,6 +290,9 @@ do_uninstall() {
 
     source "$SCRIPT_DIR/lib/install-ghostty.sh"
     uninstall_ghostty
+
+    source "$SCRIPT_DIR/lib/install-zed.sh"
+    uninstall_zed
 
     source "$SCRIPT_DIR/lib/install-konsole.sh"
     uninstall_konsole
@@ -348,6 +360,29 @@ do_configure() {
     show_header
     echo ""
 
+    local choice
+    choice=$(menu_select "Configure:" \
+        "Theme Switcher (location/timing)" \
+        "Terminal Transparency" \
+        "Back")
+
+    case "$choice" in
+        "Theme Switcher (location/timing)")
+            do_configure_switcher
+            ;;
+        "Terminal Transparency")
+            do_configure_transparency
+            ;;
+        "Back")
+            return
+            ;;
+    esac
+}
+
+do_configure_switcher() {
+    show_header
+    echo ""
+
     local config_file="$CONFIG_DIR/oneqode/oneqode-theme-switcher.conf"
 
     if [[ ! -f "$config_file" ]]; then
@@ -366,6 +401,78 @@ do_configure() {
     if confirm "Edit configuration?"; then
         ${EDITOR:-nano} "$config_file"
     fi
+}
+
+do_configure_transparency() {
+    show_header
+    echo ""
+
+    local ghostty_light="$CONFIG_DIR/ghostty/themes/oneqode-light-glass"
+    local ghostty_dark="$CONFIG_DIR/ghostty/themes/oneqode-night-ride"
+
+    if [[ ! -f "$ghostty_light" ]]; then
+        warn "Ghostty themes not installed."
+        pause
+        return
+    fi
+
+    # Get current values
+    local current_light current_dark
+    current_light=$(grep "^background-opacity" "$ghostty_light" 2>/dev/null | cut -d= -f2 | tr -d ' ' || echo "0.95")
+    current_dark=$(grep "^background-opacity" "$ghostty_dark" 2>/dev/null | cut -d= -f2 | tr -d ' ' || echo "0.88")
+
+    info "Current transparency settings:"
+    echo ""
+    echo "  Light Glass: $current_light"
+    echo "  Night Ride:  $current_dark"
+    echo ""
+    echo "(Values: 0.0 = fully transparent, 1.0 = opaque)"
+    echo ""
+
+    if $USE_GUM; then
+        local new_light new_dark
+
+        new_light=$(gum input --placeholder "$current_light" --header "Light Glass transparency (0.0-1.0):" --value "$current_light")
+        new_dark=$(gum input --placeholder "$current_dark" --header "Night Ride transparency (0.0-1.0):" --value "$current_dark")
+
+        # Validate and update
+        if [[ "$new_light" =~ ^0?\.[0-9]+$ ]] || [[ "$new_light" == "1" ]] || [[ "$new_light" == "1.0" ]]; then
+            sed -i "s/^background-opacity = .*/background-opacity = $new_light/" "$ghostty_light"
+            success "Light Glass transparency set to $new_light"
+        else
+            warn "Invalid value for Light Glass: $new_light"
+        fi
+
+        if [[ "$new_dark" =~ ^0?\.[0-9]+$ ]] || [[ "$new_dark" == "1" ]] || [[ "$new_dark" == "1.0" ]]; then
+            sed -i "s/^background-opacity = .*/background-opacity = $new_dark/" "$ghostty_dark"
+            success "Night Ride transparency set to $new_dark"
+        else
+            warn "Invalid value for Night Ride: $new_dark"
+        fi
+    else
+        echo "Enter new transparency values (0.0-1.0, or press Enter to keep current):"
+        echo ""
+
+        read -rp "Light Glass [$current_light]: " new_light
+        read -rp "Night Ride [$current_dark]: " new_dark
+
+        [[ -z "$new_light" ]] && new_light="$current_light"
+        [[ -z "$new_dark" ]] && new_dark="$current_dark"
+
+        sed -i "s/^background-opacity = .*/background-opacity = $new_light/" "$ghostty_light"
+        sed -i "s/^background-opacity = .*/background-opacity = $new_dark/" "$ghostty_dark"
+
+        success "Transparency updated"
+    fi
+
+    # Reload Ghostty if running
+    if pgrep -x ghostty &>/dev/null; then
+        sleep 0.1
+        killall -USR1 ghostty 2>/dev/null || true
+        info "Ghostty reloaded with new settings"
+    fi
+
+    pause
 }
 
 do_status() {

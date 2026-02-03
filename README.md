@@ -53,8 +53,9 @@ Each theme sets:
 | Cursors | Yes | Bibata Modern Ice |
 | Splash screen | Yes | Minimal branded KSplash |
 | Login screen (SDDM) | Yes | Breeze + OneQode background |
-| Konsole | Yes | Matching terminal colors |
-| Ghostty | Yes | Matching terminal colors |
+| Konsole | Yes | Matching terminal colors with transparency |
+| Ghostty | Yes | Matching terminal colors with transparency |
+| Zed | Yes | Matching editor theme (follows system) |
 
 The themes provide a cohesive experience from login to desktop, including terminal emulators.
 
@@ -106,6 +107,41 @@ SUNSET_OFFSET=0
 Find your coordinates:
 - [latlong.net](https://www.latlong.net/)
 - [Google Maps](https://maps.google.com) - right-click any location
+
+### Zed Editor
+
+Zed themes are configured to follow the system theme automatically:
+
+```json
+"theme": {
+  "mode": "system",
+  "light": "OneQode Light Glass",
+  "dark": "OneQode Night Ride"
+}
+```
+
+When KDE switches between light/dark modes, Zed will follow automatically. You can also select themes manually via the Zed Command Palette → "theme selector: toggle".
+
+### Terminal Transparency
+
+Configure Ghostty transparency via the TUI:
+
+```bash
+./oneqode
+# Select "Configure" → "Terminal Transparency"
+```
+
+Or edit directly:
+
+```bash
+# Light Glass (default: 0.95)
+nano ~/.config/ghostty/themes/oneqode-light-glass
+
+# Night Ride (default: 0.88)
+nano ~/.config/ghostty/themes/oneqode-night-ride
+```
+
+Values range from 0.0 (fully transparent) to 1.0 (opaque). After editing, reload Ghostty with `killall -USR1 ghostty`.
 
 ### Manual Theme Switching
 
@@ -299,6 +335,7 @@ The installer is idempotent and preserves your configuration.
 | Wallpapers | `~/.local/share/wallpapers/OneQode/` |
 | Konsole themes | `~/.local/share/konsole/` |
 | Ghostty themes | `~/.config/ghostty/themes/` |
+| Zed themes | `~/.config/zed/themes/` |
 | Cursors | `~/.local/share/icons/Bibata-Modern-Ice/` |
 | Switcher script | `~/.local/bin/oneqode-theme-switch` |
 | Watcher script | `~/.local/bin/oneqode-theme-watcher` |
@@ -322,6 +359,7 @@ oneqode-kde-themes/
 │   ├── install-cursors.sh
 │   ├── install-konsole.sh
 │   ├── install-ghostty.sh
+│   ├── install-zed.sh
 │   ├── install-switcher.sh
 │   ├── install-sddm.sh
 │   └── install-deps.sh

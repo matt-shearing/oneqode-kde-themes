@@ -4,6 +4,9 @@
 background = #191c2a
 foreground = #e6ebf5
 
+# Transparency (0.0 = fully transparent, 1.0 = opaque)
+background-opacity = 0.88
+
 cursor-color = #ff0080
 cursor-text = #191c2a
 

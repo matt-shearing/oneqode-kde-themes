@@ -73,6 +73,9 @@ is_installed() {
         ghostty)
             [[ -f "$CONFIG_DIR/ghostty/themes/oneqode-light-glass" ]]
             ;;
+        zed)
+            [[ -f "$CONFIG_DIR/zed/themes/oneqode.json" ]]
+            ;;
         switcher)
             [[ -x "$LOCAL_BIN/oneqode-theme-switch" ]]
             ;;

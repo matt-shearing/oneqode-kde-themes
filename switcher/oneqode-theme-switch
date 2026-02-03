@@ -273,9 +273,11 @@ update_ghostty_theme() {
     # Update the symlink
     ln -sf "$theme_name" "$ghostty_themes/oneqode-current"
 
-    # Signal Ghostty to reload config
+    # Signal Ghostty to reload config (with small delay to let symlink settle)
     if pgrep -x ghostty &>/dev/null; then
-        pkill -USR1 ghostty 2>/dev/null || true
+        sleep 0.1
+        # Use killall for cleaner signal delivery
+        killall -USR1 ghostty 2>/dev/null || true
         debug "Sent reload signal to Ghostty"
     fi
 
