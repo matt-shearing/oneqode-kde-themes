@@ -79,6 +79,14 @@ is_installed() {
         typora)
             [[ -f "$CONFIG_DIR/Typora/themes/oneqode-night-ride.css" ]]
             ;;
+        obsidian)
+            # Check if any vault has the theme
+            find "$HOME" -path "*/.obsidian/themes/OneQode-Night-Ride" -type d 2>/dev/null | grep -q .
+            ;;
+        firefox)
+            # Check if theme files exist in Firefox profile
+            find "$HOME/.mozilla/firefox" -name "userChrome-night-ride.css" 2>/dev/null | grep -q .
+            ;;
         switcher)
             [[ -x "$LOCAL_BIN/oneqode-theme-switch" ]]
             ;;

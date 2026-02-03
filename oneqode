@@ -61,6 +61,8 @@ show_status() {
     echo -e "  $(status_icon ghostty) Ghostty Themes"
     echo -e "  $(status_icon zed) Zed Themes"
     echo -e "  $(status_icon typora) Typora Themes"
+    echo -e "  $(status_icon obsidian) Obsidian Themes"
+    echo -e "  $(status_icon firefox) Firefox Themes"
     echo -e "  $(status_icon switcher) Theme Switcher"
     echo -e "  $(status_icon sddm) SDDM Login Screen"
     echo ""
@@ -176,6 +178,12 @@ do_install_all() {
     source "$SCRIPT_DIR/lib/install-typora.sh"
     install_typora
 
+    source "$SCRIPT_DIR/lib/install-obsidian.sh"
+    install_obsidian
+
+    source "$SCRIPT_DIR/lib/install-firefox.sh"
+    install_firefox
+
     source "$SCRIPT_DIR/lib/install-switcher.sh"
     install_switcher
     enable_switcher
@@ -217,6 +225,8 @@ do_install_selective() {
         "Ghostty Themes" \
         "Zed Themes" \
         "Typora Themes" \
+        "Obsidian Themes" \
+        "Firefox Themes" \
         "Theme Switcher" \
         "SDDM Login Screen")
 
@@ -272,6 +282,14 @@ do_install_selective() {
                 source "$SCRIPT_DIR/lib/install-typora.sh"
                 install_typora
                 ;;
+            "Obsidian Themes")
+                source "$SCRIPT_DIR/lib/install-obsidian.sh"
+                install_obsidian
+                ;;
+            "Firefox Themes")
+                source "$SCRIPT_DIR/lib/install-firefox.sh"
+                install_firefox
+                ;;
             "Theme Switcher")
                 source "$SCRIPT_DIR/lib/install-switcher.sh"
                 install_switcher
@@ -312,6 +330,12 @@ do_uninstall() {
 
     source "$SCRIPT_DIR/lib/install-typora.sh"
     uninstall_typora
+
+    source "$SCRIPT_DIR/lib/install-obsidian.sh"
+    uninstall_obsidian
+
+    source "$SCRIPT_DIR/lib/install-firefox.sh"
+    uninstall_firefox
 
     source "$SCRIPT_DIR/lib/install-konsole.sh"
     uninstall_konsole
