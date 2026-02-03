@@ -13,7 +13,7 @@ cursor-text = #fafcff
 selection-background = #00b4c8
 selection-foreground = #ffffff
 
-# Normal colors (for light theme, "white" colors need to be dark for visibility)
+# Normal colors
 palette = 0=#232d37
 palette = 1=#dc322f
 palette = 2=#2aa198
@@ -21,14 +21,14 @@ palette = 3=#b58900
 palette = 4=#268bd2
 palette = 5=#d33682
 palette = 6=#00b4c8
-palette = 7=#5a6a7a
+palette = 7=#eee8d5
 
 # Bright colors
-palette = 8=#4a5a6a
-palette = 9=#c41a1a
-palette = 10=#1a8a7a
-palette = 11=#9a7000
-palette = 12=#1a6ab0
-palette = 13=#b0286a
-palette = 14=#0090a0
-palette = 15=#3a4a5a
+palette = 8=#3c464f
+palette = 9=#ff5555
+palette = 10=#50c8b4
+palette = 11=#dcb43c
+palette = 12=#50aaff
+palette = 13=#ff64b4
+palette = 14=#3cd2e6
+palette = 15=#ffffff
