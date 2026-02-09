@@ -80,8 +80,10 @@ is_installed() {
             [[ -f "$CONFIG_DIR/Typora/themes/oneqode-night-ride.css" ]]
             ;;
         obsidian)
-            # Check if any vault has the theme
-            find "$HOME" -path "*/.obsidian/themes/OneQode-Night-Ride" -type d 2>/dev/null | grep -q .
+            # Check common vault locations (avoid full $HOME scan)
+            [[ -d "$HOME/Documents/Master Vault/.obsidian/themes/OneQode Night Ride" ]] || \
+            [[ -d "$HOME/Documents/Obsidian/.obsidian/themes/OneQode Night Ride" ]] || \
+            [[ -d "$HOME/Obsidian/.obsidian/themes/OneQode Night Ride" ]]
             ;;
         firefox)
             # Check if theme files exist in Firefox profile
