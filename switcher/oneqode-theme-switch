@@ -149,6 +149,59 @@ ensure_klassy_decoration() {
     dbus-send --type=signal --dest=org.kde.KWin /KWin org.kde.KWin.reloadConfig 2>/dev/null || true
 }
 
+# Apply Klassy decoration config for the current theme variant
+# Klassy requires presets to be imported via klassy-settings, not raw file copy
+apply_klassy_config() {
+    local theme="$1"
+    local repo_dir="$HOME/dev/oneqode-kde-themes/assets/klassy"
+    local installed_dir="/usr/share/oneqode-kde-themes/klassy"
+
+    # Skip if Klassy is not installed
+    if ! command -v klassy-settings &>/dev/null; then
+        debug "klassy-settings not found, skipping config apply"
+        return 0
+    fi
+
+    # Determine which preset to load
+    local preset_name="" preset_file=""
+    if [[ "$theme" == *"lightglass"* ]]; then
+        preset_name="OneQode Light Glass"
+        for dir in "$repo_dir" "$installed_dir"; do
+            if [[ -f "$dir/OneQode_Light_Glass.klpw" ]]; then
+                preset_file="$dir/OneQode_Light_Glass.klpw"
+                break
+            fi
+        done
+    else
+        preset_name="OneQode Night Ride"
+        for dir in "$repo_dir" "$installed_dir"; do
+            if [[ -f "$dir/OneQode_Night_Ride.klpw" ]]; then
+                preset_file="$dir/OneQode_Night_Ride.klpw"
+                break
+            fi
+        done
+    fi
+
+    if [[ -z "$preset_file" ]]; then
+        debug "No Klassy preset found for theme: $theme"
+        return 0
+    fi
+
+    # Import the preset (updates windecopresetsrc)
+    klassy-settings --import-preset "$preset_file" 2>/dev/null || {
+        error "Failed to import Klassy preset: $preset_file"
+        return 0
+    }
+
+    # Load the preset (applies to klassyrc + regenerates icons + signals KWin)
+    klassy-settings --load-windeco-preset "$preset_name" 2>/dev/null || {
+        error "Failed to load Klassy preset: $preset_name"
+        return 0
+    }
+
+    info "Applied Klassy preset: $preset_name"
+}
+
 # Apply theme
 apply_theme() {
     local theme="$1"
@@ -176,6 +229,9 @@ apply_theme() {
 
     # Ensure Klassy decoration is properly set (plasma-apply-lookandfeel often misses this)
     ensure_klassy_decoration
+
+    # Apply the matching Klassy decoration config (light/dark button colors, opacity, etc.)
+    apply_klassy_config "$theme"
 
     # Update SDDM background (if we have permission)
     update_sddm_background "$theme"

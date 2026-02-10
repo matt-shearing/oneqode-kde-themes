@@ -140,6 +140,35 @@ Preference order:
    - warn clearly
    - fall back to Breeze style and document remediation steps
 
+### 4.2.1 Klassy Decoration Configs
+
+When Klassy is installed, the theme switcher copies the appropriate config to
+`~/.config/klassy/klassyrc` on each theme transition.
+
+Source files (raw configs for reference):
+- `assets/klassy/klassyrc-light` — Light Glass decoration settings
+- `assets/klassy/klassyrc-dark` — Night Ride decoration settings
+
+Preset files (used by `klassy-settings` at runtime):
+- `assets/klassy/OneQode_Light_Glass.klpw`
+- `assets/klassy/OneQode_Night_Ride.klpw`
+
+The theme switcher imports and loads presets via `klassy-settings --import-preset`
+and `--load-windeco-preset`. Direct writes to `klassyrc` do NOT trigger Klassy
+to reload — the `klassy-settings` tool is required.
+
+Lookup order: `~/dev/oneqode-kde-themes/assets/klassy/` then
+`/usr/share/oneqode-kde-themes/klassy/`.
+
+Key design differences between variants:
+- **Light Glass**: hover-reveal buttons (hidden normally), AccentNegativeClose
+  colors, coral close / ice-cyan maximize / light-cyan minimize overrides,
+  85% active / 70% inactive title bar opacity, accent color window outline.
+- **Night Ride**: always-visible colored dots on active windows
+  (AccentTrafficLights), neon pink close / neon green maximize / neon cyan
+  minimize hover overrides, 88% active / 65% inactive opacity, custom neon
+  pink window outline.
+
 ### 4.3 Apply theme command detection
 Scripts MUST detect and use:
 

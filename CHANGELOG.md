@@ -24,6 +24,16 @@
 
 ### Added
 
+- **Klassy window decoration presets** (`assets/klassy/`) with per-theme button
+  colors, opacity, and behavior — distributed as `.klpw` preset files:
+  - Light Glass: hover-reveal buttons with coral close, ice-cyan maximize,
+    violet minimize, 85%/70% title bar opacity, window outline colorizes on
+    button hover.
+  - Night Ride: always-visible neon traffic light dots on active windows,
+    neon pink/green/cyan hover overrides, 88%/65% opacity, neon pink window
+    outline, window outline colorizes on button hover.
+- Theme switcher imports and loads Klassy presets via `klassy-settings` on
+  day/night transitions (direct `klassyrc` writes don't trigger Klassy reload).
 - Firefox theme extensions (`.xpi`) and `userChrome-auto.css` for automatic
   Firefox theming.
 - Obsidian install state tracking via `~/.local/state/oneqode/obsidian-installed`
