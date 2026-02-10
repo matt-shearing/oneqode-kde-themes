@@ -31,42 +31,37 @@ install_firefox() {
     local chrome_dir="$profile_dir/chrome"
     mkdir -p "$chrome_dir"
 
-    # Copy both theme files (user chooses which to use)
+    # Copy all theme files
     cp "$assets_dir/userChrome-night-ride.css" "$chrome_dir/"
     cp "$assets_dir/userChrome-light-glass.css" "$chrome_dir/"
+    cp "$assets_dir/userChrome-auto.css" "$chrome_dir/"
+
+    # Install auto-switching CSS as the active theme
+    cp "$assets_dir/userChrome-auto.css" "$chrome_dir/userChrome.css"
 
     # Create README with instructions
     cat > "$chrome_dir/README-OneQode.txt" << 'EOF'
 OneQode Firefox Themes
 ======================
 
-Two themes are available:
-- userChrome-night-ride.css (dark synthwave)
-- userChrome-light-glass.css (light teal)
+The auto-switching theme is installed as userChrome.css by default.
+It follows KDE's light/dark mode via prefers-color-scheme media queries.
 
-To activate a theme:
+Three theme files are available:
+- userChrome-auto.css (auto-switches with system theme - RECOMMENDED)
+- userChrome-night-ride.css (dark synthwave, always)
+- userChrome-light-glass.css (light teal, always)
 
-1. Enable custom stylesheets in Firefox:
-   - Open about:config in Firefox
-   - Search for: toolkit.legacyUserProfileCustomizations.stylesheets
-   - Set it to: true
-
-2. Copy your chosen theme:
-   - Copy userChrome-night-ride.css OR userChrome-light-glass.css
-   - Rename it to: userChrome.css
-
-3. Restart Firefox
-
-To switch themes, replace userChrome.css with the other theme file.
+To use a static theme instead, copy it over userChrome.css and restart Firefox.
 EOF
 
-    success "Firefox themes installed to: $chrome_dir"
+    success "Firefox auto-switching theme installed to: $chrome_dir"
     echo ""
     info "IMPORTANT: You must enable custom stylesheets in Firefox:"
     echo "  1. Open about:config"
     echo "  2. Set toolkit.legacyUserProfileCustomizations.stylesheets to true"
-    echo "  3. Copy one of the theme files to userChrome.css"
-    echo "  4. Restart Firefox"
+    echo "  3. Restart Firefox"
+    echo "  (userChrome.css is already installed with auto light/dark switching)"
 }
 
 uninstall_firefox() {

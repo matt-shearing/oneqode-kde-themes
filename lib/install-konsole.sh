@@ -7,8 +7,22 @@ install_konsole() {
     mkdir -p "$LOCAL_SHARE/konsole"
     cp "$ASSETS_DIR/konsole/"*.colorscheme "$LOCAL_SHARE/konsole/"
 
-    success "Konsole color schemes installed"
-    info "To use: Konsole > Settings > Edit Current Profile > Appearance"
+    # Configure default profile cursor: blinking block, uses colorscheme cursor color
+    local default_profile
+    default_profile=$(kreadconfig6 --file konsolerc --group "Desktop Entry" --key "DefaultProfile" 2>/dev/null || echo "")
+
+    if [[ -n "$default_profile" && -f "$LOCAL_SHARE/konsole/$default_profile" ]]; then
+        kwriteconfig6 --file "$LOCAL_SHARE/konsole/$default_profile" --group "Cursor Options" --key "CursorShape" "0"
+        kwriteconfig6 --file "$LOCAL_SHARE/konsole/$default_profile" --group "Cursor Options" --key "BlinkingCursorEnabled" "true"
+        kwriteconfig6 --file "$LOCAL_SHARE/konsole/$default_profile" --group "Cursor Options" --key "UseCustomCursorColor" "true"
+        kwriteconfig6 --file "$LOCAL_SHARE/konsole/$default_profile" --group "Cursor Options" --key "CustomCursorColor" "255,0,128"
+        kwriteconfig6 --file "$LOCAL_SHARE/konsole/$default_profile" --group "Cursor Options" --key "CustomCursorTextColor" "25,28,42"
+    fi
+
+    # Enable DBus remote operations (needed for live theme switching)
+    kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "AllowRemoteOperations" "true" 2>/dev/null || true
+
+    success "Konsole color schemes installed (with blinking cursor)"
 }
 
 uninstall_konsole() {

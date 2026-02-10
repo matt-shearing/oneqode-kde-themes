@@ -117,6 +117,7 @@ ForegroundPositive=42,161,152
 ForegroundVisited=108,113,196
 
 [General]
+AccentColor=0,180,200
 ColorScheme=OneQodeLightGlass
 Name=OneQode Light Glass
 shadeSortColumn=true

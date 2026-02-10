@@ -88,6 +88,12 @@ Color=160,165,180
 [ForegroundIntense]
 Color=255,255,255
 
+[Cursor]
+Color=255,0,128
+
+[CursorText]
+Color=25,28,42
+
 [General]
 Anchor=0.5,0.5
 Blur=true

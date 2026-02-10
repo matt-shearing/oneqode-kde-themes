@@ -282,11 +282,14 @@ update_terminal_themes() {
         is_light=true
     fi
 
-    # Update Konsole
+    # Update Konsole (also signals Yakuake)
     update_konsole_theme "$is_light"
 
     # Update Ghostty
     update_ghostty_theme "$is_light"
+
+    # Ensure Firefox has auto-switching CSS
+    update_firefox_theme
 }
 
 # Update Konsole color scheme for default profile
@@ -315,17 +318,47 @@ update_konsole_theme() {
     if [[ -n "$default_profile" && -f "$konsole_dir/$default_profile" ]]; then
         # Update the profile's color scheme
         kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Appearance" --key "ColorScheme" "$scheme_name"
+
+        # Set cursor: block shape, blinking, with theme-matched color
+        kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Cursor Options" --key "CursorShape" "0"
+        kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Cursor Options" --key "BlinkingCursorEnabled" "true"
+        kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Cursor Options" --key "UseCustomCursorColor" "true"
+        if [[ "$is_light" == "true" ]]; then
+            kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Cursor Options" --key "CustomCursorColor" "0,180,200"
+            kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Cursor Options" --key "CustomCursorTextColor" "250,252,255"
+        else
+            kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Cursor Options" --key "CustomCursorColor" "255,0,128"
+            kwriteconfig6 --file "$konsole_dir/$default_profile" --group "Cursor Options" --key "CustomCursorTextColor" "25,28,42"
+        fi
+
         debug "Updated Konsole profile $default_profile to use $scheme_name"
     fi
 
     # Also update konsolerc for new windows
     kwriteconfig6 --file konsolerc --group "UiSettings" --key "ColorScheme" "$scheme_name" 2>/dev/null || true
 
-    # Signal running Konsole instances to reload (via DBus)
-    if command -v qdbus6 &>/dev/null; then
-        for session in $(qdbus6 org.kde.konsole-* 2>/dev/null | grep -v "^$"); do
-            qdbus6 "$session" /Sessions/1 org.kde.konsole.Session.setProfile "$default_profile" 2>/dev/null || true
+    # Resolve profile name from the profile file (for DBus calls)
+    local profile_name=""
+    if [[ -n "$default_profile" && -f "$konsole_dir/$default_profile" ]]; then
+        profile_name=$(grep -oP '(?<=^Name=).*' "$konsole_dir/$default_profile" 2>/dev/null || echo "")
+    fi
+
+    # Signal running Konsole/Yakuake instances to reload (via DBus)
+    # Requires AllowRemoteOperations=true in konsolerc [KonsoleWindow]
+    if command -v qdbus6 &>/dev/null && [[ -n "$profile_name" ]]; then
+        for service in $(qdbus6 2>/dev/null | grep 'org\.kde\.konsole-' | tr -d ' '); do
+            for session in $(qdbus6 "$service" 2>/dev/null | grep '/Sessions/'); do
+                qdbus6 "$service" "$session" org.kde.konsole.Session.setProfile "$profile_name" 2>/dev/null || true
+            done
         done
+
+        # Signal Yakuake sessions (Yakuake embeds Konsole's KPart)
+        if qdbus6 org.kde.yakuake /yakuake/sessions 2>/dev/null | grep -q 'activeSessionId'; then
+            for session_path in $(qdbus6 org.kde.yakuake 2>/dev/null | grep '/Sessions/'); do
+                qdbus6 org.kde.yakuake "$session_path" org.kde.konsole.Session.setProfile "$profile_name" 2>/dev/null || true
+            done
+            debug "Signalled Yakuake sessions to reload profile"
+        fi
     fi
 
     debug "Konsole theme updated to: $scheme_name"
@@ -355,6 +388,39 @@ update_ghostty_theme() {
     # Note: Ghostty USR1 reload signal causes crashes on some systems.
     # New Ghostty windows will pick up the theme automatically.
     debug "Ghostty theme symlink updated to: $theme_name"
+}
+
+# Update Firefox userChrome.css to the auto-switching version
+update_firefox_theme() {
+    local firefox_dir="$HOME/.mozilla/firefox"
+    local repo_dir="$HOME/dev/oneqode-kde-themes/assets/firefox"
+    local installed_dir="/usr/share/oneqode-kde-themes/firefox"
+
+    # Find the auto CSS source
+    local auto_css=""
+    for dir in "$repo_dir" "$installed_dir"; do
+        if [[ -f "$dir/userChrome-auto.css" ]]; then
+            auto_css="$dir/userChrome-auto.css"
+            break
+        fi
+    done
+
+    if [[ -z "$auto_css" ]]; then
+        debug "Firefox auto CSS not found, skipping"
+        return 0
+    fi
+
+    # Find Firefox profiles and ensure auto CSS is deployed
+    for profile_dir in "$firefox_dir"/*.default-release "$firefox_dir"/*.default; do
+        if [[ -d "$profile_dir/chrome" ]]; then
+            local target="$profile_dir/chrome/userChrome.css"
+            # Only update if userChrome.css is missing or is one of our static themes
+            if [[ ! -f "$target" ]] || grep -q 'OneQode.*Firefox Theme' "$target" 2>/dev/null; then
+                cp "$auto_css" "$target"
+                debug "Firefox userChrome.css updated to auto-switching version in $profile_dir"
+            fi
+        fi
+    done
 }
 
 # Calculate solar times using Python/astral

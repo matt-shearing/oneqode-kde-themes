@@ -117,6 +117,7 @@ ForegroundPositive=80,255,180
 ForegroundVisited=180,120,255
 
 [General]
+AccentColor=255,0,128
 ColorScheme=OneQodeNightRide
 Name=OneQode Night Ride
 shadeSortColumn=true
