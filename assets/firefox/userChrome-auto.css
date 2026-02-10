@@ -1,0 +1,283 @@
+/* OneQode Auto-Switching Firefox Theme
+ * Automatically switches between Light Glass and Night Ride based on system theme
+ * Uses prefers-color-scheme media query to follow KDE's light/dark mode
+ */
+
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+/* Light mode (Light Glass) */
+@media (prefers-color-scheme: light) {
+  :root {
+    --oneqode-bg-primary: #fafcff;
+    --oneqode-bg-secondary: #f0f4f8;
+    --oneqode-bg-tertiary: #e8f0f5;
+    --oneqode-text-primary: #232d37;
+    --oneqode-text-secondary: #5a6570;
+    --oneqode-text-muted: #8090a0;
+    --oneqode-accent-primary: #00b4c8;
+    --oneqode-accent-secondary: #0095a8;
+    --oneqode-accent-highlight: #d33682;
+    --oneqode-border: #d8e0e8;
+    --oneqode-scrollbar-thumb: #c8d4dc;
+    --oneqode-scrollbar-hover: rgba(0, 180, 200, 0.5);
+    --oneqode-selection: rgba(0, 180, 200, 0.25);
+    --oneqode-shadow: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Dark mode (Night Ride) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --oneqode-bg-primary: #191c2a;
+    --oneqode-bg-secondary: #12141f;
+    --oneqode-bg-tertiary: #282d3c;
+    --oneqode-text-primary: #e6ebf5;
+    --oneqode-text-secondary: #a0a8b8;
+    --oneqode-text-muted: #6a7080;
+    --oneqode-accent-primary: #ff0080;
+    --oneqode-accent-secondary: #00c8ff;
+    --oneqode-accent-highlight: #50ffb4;
+    --oneqode-border: #282d3c;
+    --oneqode-scrollbar-thumb: #282d3c;
+    --oneqode-scrollbar-hover: rgba(255, 0, 128, 0.4);
+    --oneqode-selection: rgba(255, 0, 128, 0.3);
+    --oneqode-shadow: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Firefox color overrides - shared between themes */
+:root {
+  --toolbar-bgcolor: var(--oneqode-bg-secondary) !important;
+  --toolbar-color: var(--oneqode-text-primary) !important;
+  --toolbar-field-background-color: var(--oneqode-bg-primary) !important;
+  --toolbar-field-color: var(--oneqode-text-primary) !important;
+  --toolbar-field-border-color: var(--oneqode-border) !important;
+  --toolbar-field-focus-background-color: var(--oneqode-bg-primary) !important;
+  --toolbar-field-focus-border-color: var(--oneqode-accent-secondary) !important;
+  --urlbar-box-bgcolor: var(--oneqode-bg-tertiary) !important;
+  --urlbar-box-focus-bgcolor: var(--oneqode-bg-tertiary) !important;
+  --urlbar-box-hover-bgcolor: var(--oneqode-bg-tertiary) !important;
+
+  --lwt-text-color: var(--oneqode-text-primary) !important;
+  --lwt-selected-tab-background-color: var(--oneqode-bg-primary) !important;
+
+  --tab-selected-bgcolor: var(--oneqode-bg-primary) !important;
+  --tab-selected-textcolor: var(--oneqode-text-primary) !important;
+
+  --arrowpanel-background: var(--oneqode-bg-secondary) !important;
+  --arrowpanel-color: var(--oneqode-text-primary) !important;
+  --arrowpanel-border-color: var(--oneqode-border) !important;
+
+  --panel-background: var(--oneqode-bg-secondary) !important;
+  --panel-color: var(--oneqode-text-primary) !important;
+  --panel-border-color: var(--oneqode-border) !important;
+
+  --autocomplete-popup-background: var(--oneqode-bg-secondary) !important;
+  --autocomplete-popup-color: var(--oneqode-text-primary) !important;
+  --autocomplete-popup-highlight-background: var(--oneqode-bg-tertiary) !important;
+  --autocomplete-popup-highlight-color: var(--oneqode-text-primary) !important;
+
+  --sidebar-background-color: var(--oneqode-bg-secondary) !important;
+  --sidebar-text-color: var(--oneqode-text-primary) !important;
+  --sidebar-border-color: var(--oneqode-border) !important;
+
+  --in-content-page-background: var(--oneqode-bg-primary) !important;
+  --in-content-page-color: var(--oneqode-text-primary) !important;
+}
+
+/* Main window background */
+#main-window,
+#browser,
+#navigator-toolbox {
+  background-color: var(--oneqode-bg-secondary) !important;
+}
+
+/* Tab bar */
+#titlebar,
+#TabsToolbar {
+  background-color: var(--oneqode-bg-secondary) !important;
+}
+
+.tab-background {
+  background-color: transparent !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-background {
+  background-color: var(--oneqode-bg-primary) !important;
+  border-top: 2px solid var(--oneqode-accent-primary) !important;
+}
+
+.tab-text {
+  color: var(--oneqode-text-secondary) !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-text {
+  color: var(--oneqode-text-primary) !important;
+}
+
+.tabbrowser-tab:hover .tab-background:not([selected="true"]) {
+  background-color: var(--oneqode-bg-tertiary) !important;
+}
+
+/* Tab line indicator */
+.tab-line {
+  background-color: var(--oneqode-accent-primary) !important;
+}
+
+/* Navigation toolbar */
+#nav-bar {
+  background-color: var(--oneqode-bg-secondary) !important;
+  border-bottom: 1px solid var(--oneqode-border) !important;
+}
+
+/* URL bar */
+#urlbar-background {
+  background-color: var(--oneqode-bg-primary) !important;
+  border: 1px solid var(--oneqode-border) !important;
+}
+
+#urlbar[focused="true"] #urlbar-background {
+  border-color: var(--oneqode-accent-secondary) !important;
+  box-shadow: 0 0 0 1px var(--oneqode-accent-secondary) !important;
+}
+
+#urlbar-input {
+  color: var(--oneqode-text-primary) !important;
+}
+
+/* Toolbar buttons */
+#back-button,
+#forward-button,
+#reload-button,
+#stop-button,
+#home-button,
+#downloads-button,
+#library-button,
+#sidebar-button,
+#fxa-toolbar-menu-button,
+.toolbarbutton-1 {
+  color: var(--oneqode-text-secondary) !important;
+}
+
+.toolbarbutton-1:hover {
+  background-color: var(--oneqode-bg-tertiary) !important;
+  color: var(--oneqode-text-primary) !important;
+}
+
+/* Bookmarks bar */
+#PersonalToolbar {
+  background-color: var(--oneqode-bg-secondary) !important;
+  border-bottom: 1px solid var(--oneqode-border) !important;
+}
+
+.bookmark-item {
+  color: var(--oneqode-text-secondary) !important;
+}
+
+.bookmark-item:hover {
+  background-color: var(--oneqode-bg-tertiary) !important;
+  color: var(--oneqode-text-primary) !important;
+}
+
+/* Sidebar */
+#sidebar-box {
+  background-color: var(--oneqode-bg-secondary) !important;
+}
+
+#sidebar-header {
+  background-color: var(--oneqode-bg-secondary) !important;
+  border-bottom: 1px solid var(--oneqode-border) !important;
+}
+
+/* Dropdown menus */
+menupopup,
+panel {
+  background-color: var(--oneqode-bg-secondary) !important;
+  color: var(--oneqode-text-primary) !important;
+  border: 1px solid var(--oneqode-border) !important;
+  box-shadow: 0 4px 12px var(--oneqode-shadow) !important;
+}
+
+menuitem,
+menu {
+  color: var(--oneqode-text-primary) !important;
+}
+
+menuitem:hover,
+menu:hover {
+  background-color: var(--oneqode-bg-tertiary) !important;
+}
+
+menuitem[disabled="true"] {
+  color: var(--oneqode-text-muted) !important;
+}
+
+menuseparator {
+  border-color: var(--oneqode-border) !important;
+}
+
+/* Find bar */
+findbar {
+  background-color: var(--oneqode-bg-secondary) !important;
+  border-top: 1px solid var(--oneqode-border) !important;
+}
+
+.findbar-textbox {
+  background-color: var(--oneqode-bg-primary) !important;
+  color: var(--oneqode-text-primary) !important;
+  border: 1px solid var(--oneqode-border) !important;
+}
+
+/* Scrollbar */
+scrollbar {
+  background-color: var(--oneqode-bg-primary) !important;
+}
+
+scrollbar thumb {
+  background-color: var(--oneqode-scrollbar-thumb) !important;
+  border-radius: 4px !important;
+}
+
+scrollbar thumb:hover {
+  background-color: var(--oneqode-scrollbar-hover) !important;
+}
+
+/* Selection highlight */
+::selection {
+  background-color: var(--oneqode-selection) !important;
+  color: var(--oneqode-text-primary) !important;
+}
+
+/* Focus outline */
+:focus-visible {
+  outline: 2px solid var(--oneqode-accent-secondary) !important;
+  outline-offset: 2px !important;
+}
+
+/* New tab button */
+#tabs-newtab-button,
+#new-tab-button {
+  color: var(--oneqode-text-secondary) !important;
+}
+
+#tabs-newtab-button:hover,
+#new-tab-button:hover {
+  background-color: var(--oneqode-bg-tertiary) !important;
+  color: var(--oneqode-accent-secondary) !important;
+}
+
+/* Private browsing indicator */
+#private-browsing-indicator-with-label {
+  background-color: var(--oneqode-accent-primary) !important;
+  color: white !important;
+}
+
+/* Links in UI (light mode only) */
+@media (prefers-color-scheme: light) {
+  a {
+    color: var(--oneqode-accent-secondary) !important;
+  }
+  a:hover {
+    color: var(--oneqode-accent-primary) !important;
+  }
+}

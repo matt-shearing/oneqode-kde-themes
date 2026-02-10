@@ -47,7 +47,7 @@ Each theme sets:
 | Wallpaper | Yes | 4K backgrounds |
 | Window decoration | Yes | Klassy (Breeze fallback) |
 | Application style | Yes | Klassy (Breeze fallback) |
-| Plasma style | Yes | Breeze / Breeze Dark |
+| Plasma style | Yes | Breeze Light / Breeze Dark |
 | Icons | Yes | Papirus / Papirus-Dark |
 | Fonts | Yes | Inter + JetBrains Mono Nerd |
 | Cursors | Yes | Bibata Modern Ice |
@@ -227,6 +227,25 @@ systemctl --user restart oneqode-theme-watcher.service
 3. Reconfigure KWin:
    ```bash
    qdbus6 org.kde.KWin /KWin reconfigure
+   ```
+
+### High CPU usage from plasmashell
+
+If plasmashell is consuming 30%+ CPU after applying the light theme:
+
+1. This was caused by the light theme setting `name=breeze` as the Plasma desktop theme,
+   but Plasma 6 renamed it to `breeze-light`. The missing theme causes an infinite
+   re-render loop in the QML scene graph.
+
+2. Fix: update the theme and restart plasmashell:
+   ```bash
+   kwriteconfig6 --file plasmarc --group Theme --key name breeze-light
+   kquitapp6 plasmashell && kstart plasmashell
+   ```
+
+3. If you installed before this fix, pull the latest version and reinstall:
+   ```bash
+   git pull && ./oneqode install
    ```
 
 ### Klassy not available

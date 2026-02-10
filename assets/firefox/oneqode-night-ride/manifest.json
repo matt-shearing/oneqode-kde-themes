@@ -1,0 +1,50 @@
+{
+  "manifest_version": 2,
+  "name": "OneQode Night Ride",
+  "version": "1.0.0",
+  "description": "A dark synthwave theme with magenta and cyan neon accents for nighttime coding",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "oneqode-night-ride@oneqode.theme",
+      "strict_min_version": "55.0"
+    }
+  },
+  "theme": {
+    "colors": {
+      "frame": "#12141f",
+      "frame_inactive": "#0d0f17",
+      "tab_background_text": "#e6ebf5",
+      "tab_selected": "#191c2a",
+      "tab_text": "#a0a8b8",
+      "tab_line": "#ff0080",
+      "toolbar": "#12141f",
+      "toolbar_text": "#e6ebf5",
+      "toolbar_field": "#191c2a",
+      "toolbar_field_text": "#e6ebf5",
+      "toolbar_field_border": "#282d3c",
+      "toolbar_field_focus": "#191c2a",
+      "toolbar_field_border_focus": "#00c8ff",
+      "toolbar_field_highlight": "rgba(255, 0, 128, 0.3)",
+      "toolbar_field_highlight_text": "#e6ebf5",
+      "toolbar_top_separator": "transparent",
+      "toolbar_bottom_separator": "#282d3c",
+      "ntp_background": "#191c2a",
+      "ntp_text": "#e6ebf5",
+      "popup": "#191c2a",
+      "popup_text": "#e6ebf5",
+      "popup_border": "#282d3c",
+      "popup_highlight": "#282d3c",
+      "popup_highlight_text": "#e6ebf5",
+      "sidebar": "#12141f",
+      "sidebar_text": "#e6ebf5",
+      "sidebar_border": "#282d3c",
+      "sidebar_highlight": "#282d3c",
+      "sidebar_highlight_text": "#e6ebf5",
+      "bookmark_text": "#a0a8b8",
+      "button_background_hover": "#282d3c",
+      "button_background_active": "#353b4d",
+      "icons": "#a0a8b8",
+      "icons_attention": "#ff0080"
+    }
+  }
+}

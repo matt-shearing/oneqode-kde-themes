@@ -1,0 +1,50 @@
+{
+  "manifest_version": 2,
+  "name": "OneQode Light Glass",
+  "version": "1.0.0",
+  "description": "A light, glass-inspired theme with ice cyan accents for comfortable daytime browsing",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "oneqode-light-glass@oneqode.theme",
+      "strict_min_version": "55.0"
+    }
+  },
+  "theme": {
+    "colors": {
+      "frame": "#f0f4f8",
+      "frame_inactive": "#e8eef3",
+      "tab_background_text": "#232d37",
+      "tab_selected": "#fafcff",
+      "tab_text": "#5a6570",
+      "tab_line": "#00b4c8",
+      "toolbar": "#f0f4f8",
+      "toolbar_text": "#232d37",
+      "toolbar_field": "#fafcff",
+      "toolbar_field_text": "#232d37",
+      "toolbar_field_border": "#d8e0e8",
+      "toolbar_field_focus": "#fafcff",
+      "toolbar_field_border_focus": "#00b4c8",
+      "toolbar_field_highlight": "rgba(0, 180, 200, 0.25)",
+      "toolbar_field_highlight_text": "#232d37",
+      "toolbar_top_separator": "transparent",
+      "toolbar_bottom_separator": "#d8e0e8",
+      "ntp_background": "#fafcff",
+      "ntp_text": "#232d37",
+      "popup": "#fafcff",
+      "popup_text": "#232d37",
+      "popup_border": "#d8e0e8",
+      "popup_highlight": "#e8f0f5",
+      "popup_highlight_text": "#232d37",
+      "sidebar": "#f0f4f8",
+      "sidebar_text": "#232d37",
+      "sidebar_border": "#d8e0e8",
+      "sidebar_highlight": "#e8f0f5",
+      "sidebar_highlight_text": "#232d37",
+      "bookmark_text": "#5a6570",
+      "button_background_hover": "#e8f0f5",
+      "button_background_active": "#d8e0e8",
+      "icons": "#5a6570",
+      "icons_attention": "#00b4c8"
+    }
+  }
+}

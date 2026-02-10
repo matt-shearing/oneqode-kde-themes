@@ -40,6 +40,10 @@ install_obsidian() {
         cp -r "$assets_dir/OneQode Light Glass" "$themes_dir/"
     done
 
+    # Mark as installed for fast status checks
+    mkdir -p "$LOCAL_STATE/oneqode"
+    touch "$LOCAL_STATE/oneqode/obsidian-installed"
+
     success "Obsidian themes installed to ${#vaults[@]} vault(s)"
     info "Open Obsidian > Settings > Appearance > Themes to select OneQode themes"
 }
@@ -56,6 +60,9 @@ uninstall_obsidian() {
             done < <(find "$dir" -maxdepth 4 -path "*/.obsidian/themes" -type d -print0 2>/dev/null)
         fi
     done
+
+    # Remove state file
+    rm -f "$LOCAL_STATE/oneqode/obsidian-installed"
 
     success "Obsidian themes removed"
 }
