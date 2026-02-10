@@ -215,7 +215,7 @@ Defaults must set:
   - Light: `Papirus`
   - Night: `Papirus-Dark`
 - Plasma theme can remain Breeze/Breeze Dark to reduce fragility:
-  - Light: `breeze`
+  - Light: `breeze-light`
   - Night: `breeze-dark`
 
 Do NOT force decoration plugin IDs.
@@ -318,7 +318,7 @@ Light defaults:
 - ColorScheme=OneQodeLightGlass
 - widgetStyle=klassy
 - Icons=Papirus
-- Plasma theme=breeze
+- Plasma theme=breeze-light
 
 Night defaults:
 - ColorScheme=OneQodeNightRide
