@@ -120,10 +120,8 @@ detect_apply_tool() {
     fi
 }
 
-# Ensure Klassy decoration is set
+# Ensure Klassy decoration is set (plasma-apply-lookandfeel resets this to Breeze)
 ensure_klassy_decoration() {
-    local kwinrc="${XDG_CONFIG_HOME:-$HOME/.config}/kwinrc"
-
     # Check if Klassy is installed (check for plugin file)
     if [[ ! -f /usr/lib/qt6/plugins/org.kde.kdecoration3/org.kde.klassy.so ]] && \
        ! pacman -Qq klassy klassy-bin 2>/dev/null | grep -q klassy; then
@@ -131,22 +129,14 @@ ensure_klassy_decoration() {
         return 0
     fi
 
-    # Check if decoration section exists
-    if ! grep -q '\[org.kde.kdecoration2\]' "$kwinrc" 2>/dev/null; then
-        debug "Adding Klassy decoration section to kwinrc"
-        echo -e "\n[org.kde.kdecoration2]\nlibrary=org.kde.klassy\ntheme=Klassy" >> "$kwinrc"
-    elif ! grep -A2 '\[org.kde.kdecoration2\]' "$kwinrc" | grep -q 'library=org.kde.klassy'; then
-        debug "Updating decoration to Klassy"
-        # Update existing section - use sed to replace library line
-        sed -i '/\[org.kde.kdecoration2\]/,/^\[/ s/^library=.*/library=org.kde.klassy/' "$kwinrc"
-        # Ensure theme line exists
-        if ! grep -A2 '\[org.kde.kdecoration2\]' "$kwinrc" | grep -q '^theme='; then
-            sed -i '/\[org.kde.kdecoration2\]/a theme=Klassy' "$kwinrc"
-        fi
-    fi
+    # Use kwriteconfig6 for reliable INI section handling
+    kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key library "org.kde.klassy"
+    kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key theme "Klassy"
 
-    # Reload KWin config
-    dbus-send --type=signal --dest=org.kde.KWin /KWin org.kde.KWin.reloadConfig 2>/dev/null || true
+    # Reconfigure KWin via proper DBus method call (not just a signal)
+    qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
+
+    debug "Klassy decoration ensured and KWin reconfigured"
 }
 
 # Apply Klassy decoration config for the current theme variant
