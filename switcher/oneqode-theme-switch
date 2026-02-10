@@ -227,6 +227,13 @@ apply_theme() {
         }
     fi
 
+    # Set the system accent color (plasma-apply-lookandfeel doesn't propagate this)
+    if [[ "$theme" == *"lightglass"* ]]; then
+        kwriteconfig6 --file kdeglobals --group General --key AccentColor "0,180,200"
+    else
+        kwriteconfig6 --file kdeglobals --group General --key AccentColor "255,0,128"
+    fi
+
     # Ensure Klassy decoration is properly set (plasma-apply-lookandfeel often misses this)
     ensure_klassy_decoration
 
