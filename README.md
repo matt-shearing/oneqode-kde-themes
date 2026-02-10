@@ -78,6 +78,8 @@ This checks:
 
 ### Theme Switcher
 
+> **Important:** Disable KDE's built-in "Switch to Dark Mode at Night" toggle in System Settings → Colors & Themes → Global Theme. The OneQode switcher handles day/night transitions itself — including color scheme, wallpaper, Klassy presets, terminal themes, and SDDM background. Running both will cause conflicts where each system fights to apply different settings.
+
 Edit the switcher configuration:
 
 ```bash
@@ -193,6 +195,15 @@ systemctl --user restart oneqode-theme-watcher.service
 ```
 
 ## Troubleshooting
+
+### Theme flickering or partially applied
+
+If the theme seems to switch back and forth, or you get a mix of light/dark elements:
+
+1. Make sure KDE's built-in dark mode scheduling is **disabled**:
+   - System Settings → Colors & Themes → Global Theme → uncheck "Switch to Dark Mode at Night"
+
+2. The OneQode switcher manages the full theme stack (colors, wallpaper, Klassy, terminals, SDDM). KDE's toggle only switches the color scheme preference, so running both causes race conditions where settings get partially overwritten.
 
 ### Theme not applying
 
