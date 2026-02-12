@@ -93,6 +93,10 @@ is_installed() {
             done
             return 1
             ;;
+        gtk)
+            [[ -f "$CONFIG_DIR/gtk-3.0/gtk.css" ]] && \
+            grep -q 'OneQode GTK3' "$CONFIG_DIR/gtk-3.0/gtk.css" 2>/dev/null
+            ;;
         switcher)
             [[ -x "$LOCAL_BIN/oneqode-theme-switch" ]]
             ;;

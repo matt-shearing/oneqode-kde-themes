@@ -63,6 +63,7 @@ show_status() {
     echo -e "  $(status_icon typora) Typora Themes"
     echo -e "  $(status_icon obsidian) Obsidian Themes"
     echo -e "  $(status_icon firefox) Firefox Themes"
+    echo -e "  $(status_icon gtk) GTK Overrides"
     echo -e "  $(status_icon switcher) Theme Switcher"
     echo -e "  $(status_icon sddm) SDDM Login Screen"
     echo ""
@@ -184,6 +185,9 @@ do_install_all() {
     source "$SCRIPT_DIR/lib/install-firefox.sh"
     install_firefox
 
+    source "$SCRIPT_DIR/lib/install-gtk.sh"
+    install_gtk
+
     source "$SCRIPT_DIR/lib/install-switcher.sh"
     install_switcher
     enable_switcher
@@ -227,6 +231,7 @@ do_install_selective() {
         "Typora Themes" \
         "Obsidian Themes" \
         "Firefox Themes" \
+        "GTK Overrides" \
         "Theme Switcher" \
         "SDDM Login Screen")
 
@@ -290,6 +295,10 @@ do_install_selective() {
                 source "$SCRIPT_DIR/lib/install-firefox.sh"
                 install_firefox
                 ;;
+            "GTK Overrides")
+                source "$SCRIPT_DIR/lib/install-gtk.sh"
+                install_gtk
+                ;;
             "Theme Switcher")
                 source "$SCRIPT_DIR/lib/install-switcher.sh"
                 install_switcher
@@ -336,6 +345,9 @@ do_uninstall() {
 
     source "$SCRIPT_DIR/lib/install-firefox.sh"
     uninstall_firefox
+
+    source "$SCRIPT_DIR/lib/install-gtk.sh"
+    uninstall_gtk
 
     source "$SCRIPT_DIR/lib/install-konsole.sh"
     uninstall_konsole
