@@ -16,6 +16,8 @@
 | Konsole | `assets/konsole/` (2 colorschemes) | `install-konsole.sh` | `update_konsole_theme()` + DBus | Full 16-color + opacity 0.92 + cursor |
 | Ghostty | `assets/ghostty/` (2 themes) | `install-ghostty.sh` | `update_ghostty_theme()` symlink | — |
 | Firefox (chrome) | `assets/firefox/` (3 CSS + XPIs) | `install-firefox.sh` | `update_firefox_theme()` | Auto-switching via `prefers-color-scheme` |
+| Firefox (content) | `assets/firefox/` (3 userContent CSS) | `install-firefox.sh` | `update_firefox_theme()` | about:newtab, preferences, addons, error pages |
+| GTK3/4 Overrides | `assets/gtk/` (gtk3.css + gtk4.css) | `install-gtk.sh` | Auto (KDE color sync) | Accent, scrollbar, libadwaita, Chromium .chromium class |
 | SDDM | `sddm/10-oneqode.conf` | `install-sddm.sh` (sudo) | `update_sddm_background()` | Breeze theme + OneQode wallpaper |
 | Cursors | Downloaded at install | `install-cursors.sh` | via look-and-feel defaults | Bibata-Modern-Ice v2.0.6 |
 | Zed Editor | `assets/zed/oneqode.json` | `install-zed.sh` | System mode (auto) | — |
@@ -27,8 +29,6 @@
 ### Not Yet Implemented
 | Component | Priority | Notes |
 |-----------|----------|-------|
-| Firefox userContent.css | High | Internal pages (newtab, settings) unthemed |
-| GTK3/4 CSS overrides | High | GTK apps (Inkscape, GIMP, Electron) look inconsistent |
 | Kvantum theme | Medium | Deeper Qt widget styling beyond Klassy |
 | Vivaldi custom CSS | Medium | Only Chromium browser with full CSS injection support |
 | Chrome/Brave theme extensions | Low | Static manifest-only themes, no auto-switch |
