@@ -399,22 +399,22 @@ update_ghostty_theme() {
     debug "Ghostty theme symlink updated to: $theme_name"
 }
 
-# Update Firefox userChrome.css to the auto-switching version
+# Update Firefox userChrome.css + userContent.css to the auto-switching versions
 update_firefox_theme() {
     local firefox_dir="$HOME/.mozilla/firefox"
     local repo_dir="$HOME/dev/oneqode-kde-themes/assets/firefox"
     local installed_dir="/usr/share/oneqode-kde-themes/firefox"
 
-    # Find the auto CSS source
-    local auto_css=""
+    # Find the auto CSS source directory
+    local source_dir=""
     for dir in "$repo_dir" "$installed_dir"; do
         if [[ -f "$dir/userChrome-auto.css" ]]; then
-            auto_css="$dir/userChrome-auto.css"
+            source_dir="$dir"
             break
         fi
     done
 
-    if [[ -z "$auto_css" ]]; then
+    if [[ -z "$source_dir" ]]; then
         debug "Firefox auto CSS not found, skipping"
         return 0
     fi
@@ -422,11 +422,20 @@ update_firefox_theme() {
     # Find Firefox profiles and ensure auto CSS is deployed
     for profile_dir in "$firefox_dir"/*.default-release "$firefox_dir"/*.default; do
         if [[ -d "$profile_dir/chrome" ]]; then
-            local target="$profile_dir/chrome/userChrome.css"
-            # Only update if userChrome.css is missing or is one of our static themes
-            if [[ ! -f "$target" ]] || grep -q 'OneQode.*Firefox Theme' "$target" 2>/dev/null; then
-                cp "$auto_css" "$target"
-                debug "Firefox userChrome.css updated to auto-switching version in $profile_dir"
+            # Deploy userChrome.css (browser UI)
+            local chrome_target="$profile_dir/chrome/userChrome.css"
+            if [[ ! -f "$chrome_target" ]] || grep -q 'OneQode.*Firefox' "$chrome_target" 2>/dev/null; then
+                cp "$source_dir/userChrome-auto.css" "$chrome_target"
+                debug "Firefox userChrome.css updated in $profile_dir"
+            fi
+
+            # Deploy userContent.css (internal pages)
+            local content_target="$profile_dir/chrome/userContent.css"
+            if [[ -f "$source_dir/userContent-auto.css" ]]; then
+                if [[ ! -f "$content_target" ]] || grep -q 'OneQode.*Firefox' "$content_target" 2>/dev/null; then
+                    cp "$source_dir/userContent-auto.css" "$content_target"
+                    debug "Firefox userContent.css updated in $profile_dir"
+                fi
             fi
         fi
     done

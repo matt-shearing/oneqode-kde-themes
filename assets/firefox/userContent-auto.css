@@ -1,0 +1,470 @@
+/* OneQode Auto-Switching Firefox Content Theme
+ * Themes internal about: pages to match Light Glass / Night Ride
+ * Uses prefers-color-scheme media query to follow KDE's light/dark mode
+ *
+ * Installation:
+ * 1. Open about:config and set toolkit.legacyUserProfileCustomizations.stylesheets to true
+ * 2. Find your Firefox profile folder (about:profiles)
+ * 3. Create a 'chrome' folder inside your profile folder
+ * 4. Copy this file as 'userContent.css' into the chrome folder
+ * 5. Restart Firefox
+ */
+
+/* ============================================================
+ * Color definitions — one block per scheme
+ * ============================================================ */
+
+/* ==================== about:newtab / about:home ==================== */
+
+@-moz-document url("about:home"), url("about:newtab") {
+  @media (prefers-color-scheme: light) {
+    :root {
+      --newtab-background-color: #f0f4f8 !important;
+      --newtab-background-color-secondary: #fafcff !important;
+      --newtab-text-primary-color: #232d37 !important;
+      --newtab-text-secondary-color: #5a6570 !important;
+
+      /* Search */
+      --newtab-textbox-background-color: #fafcff !important;
+      --newtab-textbox-border: 1px solid #d8e0e8 !important;
+      --newtab-textbox-focus-color: #00b4c8 !important;
+      --newtab-textbox-focus-boxshadow: 0 0 0 2px rgba(0, 180, 200, 0.25) !important;
+      --newtab-search-border-color: #d8e0e8 !important;
+      --newtab-search-dropdown-color: #fafcff !important;
+      --newtab-search-dropdown-header-color: #f0f4f8 !important;
+      --newtab-search-icon-color: #8090a0 !important;
+
+      /* Top sites */
+      --newtab-topsites-background-color: #fafcff !important;
+      --newtab-topsites-label-color: #5a6570 !important;
+      --newtab-topsites-icon-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+
+      /* Cards */
+      --newtab-card-background-color: #fafcff !important;
+      --newtab-card-hairline-color: #d8e0e8 !important;
+      --newtab-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+      --newtab-card-active-outline-color: #00b4c8 !important;
+
+      /* Section headings */
+      --newtab-section-header-text-color: #5a6570 !important;
+      --newtab-section-navigation-text-color: #5a6570 !important;
+
+      /* Links & buttons */
+      --newtab-link-primary-color: #0095a8 !important;
+      --newtab-link-secondary-color: #00b4c8 !important;
+      --newtab-button-primary-color: #00b4c8 !important;
+      --newtab-button-secondary-color: #e8f0f5 !important;
+
+      /* Interactions */
+      --newtab-element-hover-color: rgba(0, 180, 200, 0.08) !important;
+      --newtab-element-active-color: rgba(0, 180, 200, 0.15) !important;
+
+      /* Icons */
+      --newtab-icon-primary-color: #5a6570 !important;
+      --newtab-icon-secondary-color: #8090a0 !important;
+
+      /* Context menus & overlays */
+      --newtab-contextmenu-background-color: #fafcff !important;
+      --newtab-contextmenu-button-color: #232d37 !important;
+      --newtab-modal-color: rgba(240, 244, 248, 0.9) !important;
+      --newtab-overlay-color: rgba(250, 252, 255, 0.7) !important;
+
+      /* Borders */
+      --newtab-border-primary-color: #d8e0e8 !important;
+      --newtab-border-secondary-color: rgba(0, 0, 0, 0.06) !important;
+      --newtab-inner-box-shadow-color: rgba(0, 0, 0, 0.04) !important;
+
+      /* Wordmark */
+      --newtab-search-wordmark-color: #8090a0 !important;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --newtab-background-color: #12141f !important;
+      --newtab-background-color-secondary: #191c2a !important;
+      --newtab-text-primary-color: #e6ebf5 !important;
+      --newtab-text-secondary-color: #a0a8b8 !important;
+
+      /* Search */
+      --newtab-textbox-background-color: #191c2a !important;
+      --newtab-textbox-border: 1px solid #282d3c !important;
+      --newtab-textbox-focus-color: #ff0080 !important;
+      --newtab-textbox-focus-boxshadow: 0 0 0 2px rgba(255, 0, 128, 0.2) !important;
+      --newtab-search-border-color: #282d3c !important;
+      --newtab-search-dropdown-color: #191c2a !important;
+      --newtab-search-dropdown-header-color: #12141f !important;
+      --newtab-search-icon-color: #6a7080 !important;
+
+      /* Top sites */
+      --newtab-topsites-background-color: #191c2a !important;
+      --newtab-topsites-label-color: #a0a8b8 !important;
+      --newtab-topsites-icon-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+
+      /* Cards */
+      --newtab-card-background-color: #191c2a !important;
+      --newtab-card-hairline-color: #282d3c !important;
+      --newtab-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+      --newtab-card-active-outline-color: #ff0080 !important;
+
+      /* Section headings */
+      --newtab-section-header-text-color: #a0a8b8 !important;
+      --newtab-section-navigation-text-color: #a0a8b8 !important;
+
+      /* Links & buttons */
+      --newtab-link-primary-color: #00c8ff !important;
+      --newtab-link-secondary-color: #ff0080 !important;
+      --newtab-button-primary-color: #ff0080 !important;
+      --newtab-button-secondary-color: #282d3c !important;
+
+      /* Interactions */
+      --newtab-element-hover-color: rgba(255, 0, 128, 0.08) !important;
+      --newtab-element-active-color: rgba(255, 0, 128, 0.15) !important;
+
+      /* Icons */
+      --newtab-icon-primary-color: #a0a8b8 !important;
+      --newtab-icon-secondary-color: #6a7080 !important;
+
+      /* Context menus & overlays */
+      --newtab-contextmenu-background-color: #191c2a !important;
+      --newtab-contextmenu-button-color: #e6ebf5 !important;
+      --newtab-modal-color: rgba(18, 20, 31, 0.9) !important;
+      --newtab-overlay-color: rgba(25, 28, 42, 0.7) !important;
+
+      /* Borders */
+      --newtab-border-primary-color: #282d3c !important;
+      --newtab-border-secondary-color: rgba(255, 255, 255, 0.04) !important;
+      --newtab-inner-box-shadow-color: rgba(0, 0, 0, 0.2) !important;
+
+      /* Wordmark */
+      --newtab-search-wordmark-color: #6a7080 !important;
+    }
+  }
+
+  /* Search handoff button — give it the right background */
+  .search-handoff-button {
+    border-radius: 8px !important;
+  }
+
+  /* Top site tiles — rounded corners */
+  .top-site-outer .tile {
+    border-radius: 10px !important;
+  }
+
+  /* Cards — consistent radius */
+  .card-outer .card {
+    border-radius: 10px !important;
+  }
+
+  .ds-card {
+    border-radius: 10px !important;
+  }
+}
+
+/* ==================== about:blank ==================== */
+
+@-moz-document url("about:blank") {
+  @media (prefers-color-scheme: light) {
+    body {
+      background-color: #f0f4f8 !important;
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #12141f !important;
+    }
+  }
+}
+
+/* ==================== about:preferences ==================== */
+
+@-moz-document url-prefix("about:preferences") {
+  @media (prefers-color-scheme: light) {
+    :root {
+      --background-color-canvas: #f0f4f8 !important;
+      --background-color-box: #fafcff !important;
+      --text-color: #232d37 !important;
+      --text-color-deemphasized: #5a6570 !important;
+      --border-color: #d8e0e8 !important;
+      --border-color-card: #d8e0e8 !important;
+      --color-accent-primary: #00b4c8 !important;
+      --color-accent-primary-active: #0095a8 !important;
+      --focus-outline-color: #00b4c8 !important;
+      --link-color: #0095a8 !important;
+      --link-color-hover: #00b4c8 !important;
+      --button-background-color: #e8f0f5 !important;
+      --button-background-color-hover: #d8e0e8 !important;
+      --button-background-color-active: #c8d8e5 !important;
+      --button-background-color-primary: #00b4c8 !important;
+      --button-background-color-primary-hover: #0095a8 !important;
+      --button-background-color-primary-active: #007888 !important;
+      --button-text-color-primary: #ffffff !important;
+    }
+
+    .category[selected] {
+      background-color: rgba(0, 180, 200, 0.1) !important;
+      color: #00b4c8 !important;
+    }
+
+    .category:hover:not([selected]) {
+      background-color: rgba(0, 180, 200, 0.06) !important;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color-canvas: #12141f !important;
+      --background-color-box: #191c2a !important;
+      --text-color: #e6ebf5 !important;
+      --text-color-deemphasized: #a0a8b8 !important;
+      --border-color: #282d3c !important;
+      --border-color-card: #282d3c !important;
+      --color-accent-primary: #ff0080 !important;
+      --color-accent-primary-active: #cc0066 !important;
+      --focus-outline-color: #ff0080 !important;
+      --link-color: #00c8ff !important;
+      --link-color-hover: #40d8ff !important;
+      --button-background-color: #282d3c !important;
+      --button-background-color-hover: #333850 !important;
+      --button-background-color-active: #3e4460 !important;
+      --button-background-color-primary: #ff0080 !important;
+      --button-background-color-primary-hover: #e60073 !important;
+      --button-background-color-primary-active: #cc0066 !important;
+      --button-text-color-primary: #ffffff !important;
+    }
+
+    .category[selected] {
+      background-color: rgba(255, 0, 128, 0.1) !important;
+      color: #ff0080 !important;
+    }
+
+    .category:hover:not([selected]) {
+      background-color: rgba(255, 0, 128, 0.06) !important;
+    }
+  }
+}
+
+/* ==================== about:addons ==================== */
+
+@-moz-document url-prefix("about:addons") {
+  @media (prefers-color-scheme: light) {
+    :root {
+      --background-color-canvas: #f0f4f8 !important;
+      --background-color-box: #fafcff !important;
+      --text-color: #232d37 !important;
+      --text-color-deemphasized: #5a6570 !important;
+      --border-color: #d8e0e8 !important;
+      --border-color-card: #d8e0e8 !important;
+      --color-accent-primary: #00b4c8 !important;
+      --color-accent-primary-active: #0095a8 !important;
+      --focus-outline-color: #00b4c8 !important;
+      --link-color: #0095a8 !important;
+      --link-color-hover: #00b4c8 !important;
+      --button-background-color: #e8f0f5 !important;
+      --button-background-color-hover: #d8e0e8 !important;
+      --button-background-color-active: #c8d8e5 !important;
+      --button-background-color-primary: #00b4c8 !important;
+      --button-background-color-primary-hover: #0095a8 !important;
+      --button-text-color-primary: #ffffff !important;
+    }
+
+    .addon.card {
+      background-color: #fafcff !important;
+      border-color: #d8e0e8 !important;
+    }
+
+    category-button[selected] {
+      background-color: rgba(0, 180, 200, 0.1) !important;
+      color: #00b4c8 !important;
+    }
+
+    category-button:hover:not([selected]) {
+      background-color: rgba(0, 180, 200, 0.06) !important;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color-canvas: #12141f !important;
+      --background-color-box: #191c2a !important;
+      --text-color: #e6ebf5 !important;
+      --text-color-deemphasized: #a0a8b8 !important;
+      --border-color: #282d3c !important;
+      --border-color-card: #282d3c !important;
+      --color-accent-primary: #ff0080 !important;
+      --color-accent-primary-active: #cc0066 !important;
+      --focus-outline-color: #ff0080 !important;
+      --link-color: #00c8ff !important;
+      --link-color-hover: #40d8ff !important;
+      --button-background-color: #282d3c !important;
+      --button-background-color-hover: #333850 !important;
+      --button-background-color-active: #3e4460 !important;
+      --button-background-color-primary: #ff0080 !important;
+      --button-background-color-primary-hover: #e60073 !important;
+      --button-text-color-primary: #ffffff !important;
+    }
+
+    .addon.card {
+      background-color: #191c2a !important;
+      border-color: #282d3c !important;
+    }
+
+    category-button[selected] {
+      background-color: rgba(255, 0, 128, 0.1) !important;
+      color: #ff0080 !important;
+    }
+
+    category-button:hover:not([selected]) {
+      background-color: rgba(255, 0, 128, 0.06) !important;
+    }
+  }
+}
+
+/* ==================== about:privatebrowsing ==================== */
+
+@-moz-document url("about:privatebrowsing") {
+  @media (prefers-color-scheme: light) {
+    :root {
+      --background-color-canvas: #f0f4f8 !important;
+      --link-color: #0095a8 !important;
+      --link-color-hover: #00b4c8 !important;
+      --button-background-color-hover: rgba(0, 180, 200, 0.08) !important;
+      --button-background-color-active: rgba(0, 180, 200, 0.15) !important;
+      --content-search-handoff-ui-background-color: #fafcff !important;
+      --content-search-handoff-ui-color: #232d37 !important;
+      --content-search-handoff-ui-unfocused-border-color: #d8e0e8 !important;
+      --content-search-handoff-ui-fakefocus-border-color: #00b4c8 !important;
+    }
+
+    body {
+      background-color: #f0f4f8 !important;
+      color: #232d37 !important;
+    }
+
+    .info {
+      background-color: #fafcff !important;
+      border-color: #d8e0e8 !important;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color-canvas: #12141f !important;
+      --link-color: #00c8ff !important;
+      --link-color-hover: #40d8ff !important;
+      --button-background-color-hover: rgba(255, 0, 128, 0.08) !important;
+      --button-background-color-active: rgba(255, 0, 128, 0.15) !important;
+      --content-search-handoff-ui-background-color: #191c2a !important;
+      --content-search-handoff-ui-color: #e6ebf5 !important;
+      --content-search-handoff-ui-unfocused-border-color: #282d3c !important;
+      --content-search-handoff-ui-fakefocus-border-color: #ff0080 !important;
+    }
+
+    body {
+      background-color: #12141f !important;
+      color: #e6ebf5 !important;
+    }
+
+    .info {
+      background-color: #191c2a !important;
+      border-color: #282d3c !important;
+    }
+  }
+}
+
+/* ==================== Error pages ==================== */
+
+@-moz-document url-prefix("about:neterror"), url-prefix("about:certerror") {
+  @media (prefers-color-scheme: light) {
+    body {
+      background-color: #f0f4f8 !important;
+      color: #232d37 !important;
+    }
+
+    .title-text {
+      color: #232d37 !important;
+    }
+
+    #returnButton,
+    #neterrorTryAgainButton {
+      background-color: #00b4c8 !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    #returnButton:hover,
+    #neterrorTryAgainButton:hover {
+      background-color: #0095a8 !important;
+    }
+
+    #advancedButton {
+      background-color: #e8f0f5 !important;
+      color: #232d37 !important;
+      border: 1px solid #d8e0e8 !important;
+    }
+
+    a {
+      color: #0095a8 !important;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #12141f !important;
+      color: #e6ebf5 !important;
+    }
+
+    .title-text {
+      color: #e6ebf5 !important;
+    }
+
+    #returnButton,
+    #neterrorTryAgainButton {
+      background-color: #ff0080 !important;
+      color: #ffffff !important;
+      border: none !important;
+    }
+
+    #returnButton:hover,
+    #neterrorTryAgainButton:hover {
+      background-color: #e60073 !important;
+    }
+
+    #advancedButton {
+      background-color: #282d3c !important;
+      color: #e6ebf5 !important;
+      border: 1px solid #282d3c !important;
+    }
+
+    a {
+      color: #00c8ff !important;
+    }
+  }
+}
+
+/* ==================== Selection (all about: pages) ==================== */
+
+@-moz-document
+  url("about:home"),
+  url("about:newtab"),
+  url("about:blank"),
+  url("about:privatebrowsing"),
+  url-prefix("about:preferences"),
+  url-prefix("about:addons"),
+  url-prefix("about:neterror"),
+  url-prefix("about:certerror") {
+
+  @media (prefers-color-scheme: light) {
+    ::selection {
+      background-color: rgba(0, 180, 200, 0.25) !important;
+      color: #232d37 !important;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    ::selection {
+      background-color: rgba(255, 0, 128, 0.3) !important;
+      color: #e6ebf5 !important;
+    }
+  }
+}

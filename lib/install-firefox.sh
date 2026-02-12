@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install Firefox themes (userChrome.css)
+# Install Firefox themes (userChrome.css + userContent.css)
 
 install_firefox() {
     info "Installing Firefox themes..."
@@ -31,28 +31,38 @@ install_firefox() {
     local chrome_dir="$profile_dir/chrome"
     mkdir -p "$chrome_dir"
 
-    # Copy all theme files
+    # Copy all browser chrome theme files
     cp "$assets_dir/userChrome-night-ride.css" "$chrome_dir/"
     cp "$assets_dir/userChrome-light-glass.css" "$chrome_dir/"
     cp "$assets_dir/userChrome-auto.css" "$chrome_dir/"
 
-    # Install auto-switching CSS as the active theme
+    # Copy all content (internal pages) theme files
+    cp "$assets_dir/userContent-night-ride.css" "$chrome_dir/"
+    cp "$assets_dir/userContent-light-glass.css" "$chrome_dir/"
+    cp "$assets_dir/userContent-auto.css" "$chrome_dir/"
+
+    # Install auto-switching CSS as the active themes
     cp "$assets_dir/userChrome-auto.css" "$chrome_dir/userChrome.css"
+    cp "$assets_dir/userContent-auto.css" "$chrome_dir/userContent.css"
 
     # Create README with instructions
     cat > "$chrome_dir/README-OneQode.txt" << 'EOF'
 OneQode Firefox Themes
 ======================
 
-The auto-switching theme is installed as userChrome.css by default.
-It follows KDE's light/dark mode via prefers-color-scheme media queries.
+Auto-switching themes are installed by default:
+- userChrome.css  — browser UI (toolbar, tabs, sidebar, menus)
+- userContent.css — internal pages (new tab, settings, addons, error pages)
 
-Three theme files are available:
-- userChrome-auto.css (auto-switches with system theme - RECOMMENDED)
-- userChrome-night-ride.css (dark synthwave, always)
-- userChrome-light-glass.css (light teal, always)
+Both follow KDE's light/dark mode via prefers-color-scheme media queries.
 
-To use a static theme instead, copy it over userChrome.css and restart Firefox.
+Static variants are also available:
+- userChrome-auto.css / userContent-auto.css (auto-switch - RECOMMENDED)
+- userChrome-night-ride.css / userContent-night-ride.css (dark synthwave)
+- userChrome-light-glass.css / userContent-light-glass.css (light teal)
+
+To use a static theme, copy the matching pair over userChrome.css
+and userContent.css, then restart Firefox.
 EOF
 
     success "Firefox auto-switching theme installed to: $chrome_dir"
@@ -61,7 +71,7 @@ EOF
     echo "  1. Open about:config"
     echo "  2. Set toolkit.legacyUserProfileCustomizations.stylesheets to true"
     echo "  3. Restart Firefox"
-    echo "  (userChrome.css is already installed with auto light/dark switching)"
+    echo "  (userChrome.css + userContent.css are installed with auto light/dark switching)"
 }
 
 uninstall_firefox() {
@@ -73,6 +83,9 @@ uninstall_firefox() {
         if [[ -d "$profile_dir/chrome" ]]; then
             rm -f "$profile_dir/chrome/userChrome-night-ride.css"
             rm -f "$profile_dir/chrome/userChrome-light-glass.css"
+            rm -f "$profile_dir/chrome/userContent-night-ride.css"
+            rm -f "$profile_dir/chrome/userContent-light-glass.css"
+            rm -f "$profile_dir/chrome/userContent-auto.css"
             rm -f "$profile_dir/chrome/README-OneQode.txt"
         fi
     done

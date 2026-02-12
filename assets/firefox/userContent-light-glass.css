@@ -1,0 +1,203 @@
+/* OneQode Light Glass - Firefox Content Theme
+ * Themes internal about: pages with the Light Glass aesthetic
+ *
+ * Installation:
+ * 1. Open about:config and set toolkit.legacyUserProfileCustomizations.stylesheets to true
+ * 2. Find your Firefox profile folder (about:profiles)
+ * 3. Create a 'chrome' folder inside your profile folder
+ * 4. Copy this file as 'userContent.css' into the chrome folder
+ * 5. Restart Firefox
+ */
+
+/* ==================== about:newtab / about:home ==================== */
+
+@-moz-document url("about:home"), url("about:newtab") {
+  :root {
+    --newtab-background-color: #f0f4f8 !important;
+    --newtab-background-color-secondary: #fafcff !important;
+    --newtab-text-primary-color: #232d37 !important;
+    --newtab-text-secondary-color: #5a6570 !important;
+    --newtab-textbox-background-color: #fafcff !important;
+    --newtab-textbox-border: 1px solid #d8e0e8 !important;
+    --newtab-textbox-focus-color: #00b4c8 !important;
+    --newtab-textbox-focus-boxshadow: 0 0 0 2px rgba(0, 180, 200, 0.25) !important;
+    --newtab-search-border-color: #d8e0e8 !important;
+    --newtab-search-dropdown-color: #fafcff !important;
+    --newtab-search-dropdown-header-color: #f0f4f8 !important;
+    --newtab-search-icon-color: #8090a0 !important;
+    --newtab-topsites-background-color: #fafcff !important;
+    --newtab-topsites-label-color: #5a6570 !important;
+    --newtab-topsites-icon-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+    --newtab-card-background-color: #fafcff !important;
+    --newtab-card-hairline-color: #d8e0e8 !important;
+    --newtab-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+    --newtab-card-active-outline-color: #00b4c8 !important;
+    --newtab-section-header-text-color: #5a6570 !important;
+    --newtab-section-navigation-text-color: #5a6570 !important;
+    --newtab-link-primary-color: #0095a8 !important;
+    --newtab-link-secondary-color: #00b4c8 !important;
+    --newtab-button-primary-color: #00b4c8 !important;
+    --newtab-button-secondary-color: #e8f0f5 !important;
+    --newtab-element-hover-color: rgba(0, 180, 200, 0.08) !important;
+    --newtab-element-active-color: rgba(0, 180, 200, 0.15) !important;
+    --newtab-icon-primary-color: #5a6570 !important;
+    --newtab-icon-secondary-color: #8090a0 !important;
+    --newtab-contextmenu-background-color: #fafcff !important;
+    --newtab-contextmenu-button-color: #232d37 !important;
+    --newtab-modal-color: rgba(240, 244, 248, 0.9) !important;
+    --newtab-overlay-color: rgba(250, 252, 255, 0.7) !important;
+    --newtab-border-primary-color: #d8e0e8 !important;
+    --newtab-border-secondary-color: rgba(0, 0, 0, 0.06) !important;
+    --newtab-inner-box-shadow-color: rgba(0, 0, 0, 0.04) !important;
+    --newtab-search-wordmark-color: #8090a0 !important;
+  }
+
+  .search-handoff-button { border-radius: 8px !important; }
+  .top-site-outer .tile { border-radius: 10px !important; }
+  .card-outer .card { border-radius: 10px !important; }
+  .ds-card { border-radius: 10px !important; }
+}
+
+/* ==================== about:blank ==================== */
+
+@-moz-document url("about:blank") {
+  body { background-color: #f0f4f8 !important; }
+}
+
+/* ==================== about:preferences ==================== */
+
+@-moz-document url-prefix("about:preferences") {
+  :root {
+    --background-color-canvas: #f0f4f8 !important;
+    --background-color-box: #fafcff !important;
+    --text-color: #232d37 !important;
+    --text-color-deemphasized: #5a6570 !important;
+    --border-color: #d8e0e8 !important;
+    --border-color-card: #d8e0e8 !important;
+    --color-accent-primary: #00b4c8 !important;
+    --color-accent-primary-active: #0095a8 !important;
+    --focus-outline-color: #00b4c8 !important;
+    --link-color: #0095a8 !important;
+    --link-color-hover: #00b4c8 !important;
+    --button-background-color: #e8f0f5 !important;
+    --button-background-color-hover: #d8e0e8 !important;
+    --button-background-color-active: #c8d8e5 !important;
+    --button-background-color-primary: #00b4c8 !important;
+    --button-background-color-primary-hover: #0095a8 !important;
+    --button-background-color-primary-active: #007888 !important;
+    --button-text-color-primary: #ffffff !important;
+  }
+
+  .category[selected] {
+    background-color: rgba(0, 180, 200, 0.1) !important;
+    color: #00b4c8 !important;
+  }
+
+  .category:hover:not([selected]) {
+    background-color: rgba(0, 180, 200, 0.06) !important;
+  }
+}
+
+/* ==================== about:addons ==================== */
+
+@-moz-document url-prefix("about:addons") {
+  :root {
+    --background-color-canvas: #f0f4f8 !important;
+    --background-color-box: #fafcff !important;
+    --text-color: #232d37 !important;
+    --text-color-deemphasized: #5a6570 !important;
+    --border-color: #d8e0e8 !important;
+    --border-color-card: #d8e0e8 !important;
+    --color-accent-primary: #00b4c8 !important;
+    --color-accent-primary-active: #0095a8 !important;
+    --focus-outline-color: #00b4c8 !important;
+    --link-color: #0095a8 !important;
+    --link-color-hover: #00b4c8 !important;
+    --button-background-color: #e8f0f5 !important;
+    --button-background-color-hover: #d8e0e8 !important;
+    --button-background-color-active: #c8d8e5 !important;
+    --button-background-color-primary: #00b4c8 !important;
+    --button-background-color-primary-hover: #0095a8 !important;
+    --button-text-color-primary: #ffffff !important;
+  }
+
+  .addon.card {
+    background-color: #fafcff !important;
+    border-color: #d8e0e8 !important;
+  }
+
+  category-button[selected] {
+    background-color: rgba(0, 180, 200, 0.1) !important;
+    color: #00b4c8 !important;
+  }
+
+  category-button:hover:not([selected]) {
+    background-color: rgba(0, 180, 200, 0.06) !important;
+  }
+}
+
+/* ==================== about:privatebrowsing ==================== */
+
+@-moz-document url("about:privatebrowsing") {
+  :root {
+    --background-color-canvas: #f0f4f8 !important;
+    --link-color: #0095a8 !important;
+    --link-color-hover: #00b4c8 !important;
+    --content-search-handoff-ui-background-color: #fafcff !important;
+    --content-search-handoff-ui-color: #232d37 !important;
+    --content-search-handoff-ui-unfocused-border-color: #d8e0e8 !important;
+    --content-search-handoff-ui-fakefocus-border-color: #00b4c8 !important;
+  }
+
+  body {
+    background-color: #f0f4f8 !important;
+    color: #232d37 !important;
+  }
+
+  .info {
+    background-color: #fafcff !important;
+    border-color: #d8e0e8 !important;
+  }
+}
+
+/* ==================== Error pages ==================== */
+
+@-moz-document url-prefix("about:neterror"), url-prefix("about:certerror") {
+  body {
+    background-color: #f0f4f8 !important;
+    color: #232d37 !important;
+  }
+
+  .title-text { color: #232d37 !important; }
+
+  #returnButton, #neterrorTryAgainButton {
+    background-color: #00b4c8 !important;
+    color: #ffffff !important;
+    border: none !important;
+  }
+  #returnButton:hover, #neterrorTryAgainButton:hover {
+    background-color: #0095a8 !important;
+  }
+
+  #advancedButton {
+    background-color: #e8f0f5 !important;
+    color: #232d37 !important;
+    border: 1px solid #d8e0e8 !important;
+  }
+
+  a { color: #0095a8 !important; }
+}
+
+/* ==================== Selection ==================== */
+
+@-moz-document
+  url("about:home"), url("about:newtab"), url("about:blank"),
+  url("about:privatebrowsing"), url-prefix("about:preferences"),
+  url-prefix("about:addons"), url-prefix("about:neterror"),
+  url-prefix("about:certerror") {
+
+  ::selection {
+    background-color: rgba(0, 180, 200, 0.25) !important;
+    color: #232d37 !important;
+  }
+}
