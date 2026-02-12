@@ -223,10 +223,16 @@ apply_theme() {
         }
     fi
 
-    # Set the system accent color (plasma-apply-lookandfeel doesn't propagate this)
+    # Apply color scheme with accent color. plasma-apply-lookandfeel sets the
+    # ColorScheme name but doesn't propagate accent-derived colors (selection,
+    # hover, decoration focus). plasma-apply-colorscheme -a re-derives them all.
+    # We also write AccentColor via kwriteconfig6 since plasma-apply-colorscheme
+    # doesn't update that key itself.
     if [[ "$theme" == *"lightglass"* ]]; then
+        plasma-apply-colorscheme OneQodeLightGlass -a "#00b4c8" 2>&1 || true
         kwriteconfig6 --file kdeglobals --group General --key AccentColor "0,180,200"
     else
+        plasma-apply-colorscheme OneQodeNightRide -a "#ff0080" 2>&1 || true
         kwriteconfig6 --file kdeglobals --group General --key AccentColor "255,0,128"
     fi
 
