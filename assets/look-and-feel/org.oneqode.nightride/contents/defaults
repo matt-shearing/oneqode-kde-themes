@@ -12,10 +12,6 @@ Theme=Papirus-Dark
 [plasmarc][Theme]
 name=breeze-dark
 
-[kwinrc][org.kde.kdecoration2]
-library=org.kde.klassy
-theme=Klassy
-
 [Wallpaper]
 Image=OneQode-Night-Ride
 

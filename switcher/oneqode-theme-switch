@@ -120,7 +120,7 @@ detect_apply_tool() {
     fi
 }
 
-# Ensure Klassy decoration is set (plasma-apply-lookandfeel resets this to Breeze)
+# Ensure Klassy decoration is set (safety net for first-time setup)
 ensure_klassy_decoration() {
     # Check if Klassy is installed (check for plugin file)
     if [[ ! -f /usr/lib/qt6/plugins/org.kde.kdecoration3/org.kde.klassy.so ]] && \
@@ -129,14 +129,20 @@ ensure_klassy_decoration() {
         return 0
     fi
 
-    # Use kwriteconfig6 for reliable INI section handling
+    # Check if Klassy is already configured — skip if nothing to do
+    local current_lib
+    current_lib=$(kreadconfig6 --file kwinrc --group org.kde.kdecoration2 --key library 2>/dev/null || echo "")
+    if [[ "$current_lib" == "org.kde.klassy" ]]; then
+        debug "Klassy decoration already configured"
+        return 0
+    fi
+
+    # Klassy not set — write config and reconfigure KWin
     kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key library "org.kde.klassy"
     kwriteconfig6 --file kwinrc --group org.kde.kdecoration2 --key theme "Klassy"
-
-    # Reconfigure KWin via proper DBus method call (not just a signal)
     qdbus6 org.kde.KWin /KWin reconfigure 2>/dev/null || true
 
-    debug "Klassy decoration ensured and KWin reconfigured"
+    info "Klassy decoration configured and KWin reconfigured"
 }
 
 # Apply Klassy decoration config for the current theme variant

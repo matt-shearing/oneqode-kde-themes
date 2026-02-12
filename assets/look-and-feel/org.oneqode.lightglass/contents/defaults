@@ -12,10 +12,6 @@ Theme=Papirus
 [plasmarc][Theme]
 name=breeze-light
 
-[kwinrc][org.kde.kdecoration2]
-library=org.kde.klassy
-theme=Klassy
-
 [Wallpaper]
 Image=OneQode-Light-Glass
 
