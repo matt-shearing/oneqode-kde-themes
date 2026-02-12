@@ -9,8 +9,6 @@
  * 5. Restart Firefox
  */
 
-@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
-
 :root {
   /* Night Ride colors */
   --oneqode-bg-primary: #191c2a;

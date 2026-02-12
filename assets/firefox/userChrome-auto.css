@@ -3,8 +3,6 @@
  * Uses prefers-color-scheme media query to follow KDE's light/dark mode
  */
 
-@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
-
 /* Light mode (Light Glass) */
 @media (prefers-color-scheme: light) {
   :root {
@@ -16,8 +14,10 @@
     --oneqode-text-muted: #8090a0;
     --oneqode-accent-primary: #00b4c8;
     --oneqode-accent-secondary: #0095a8;
-    --oneqode-accent-highlight: #d33682;
+    --oneqode-accent-glow: rgba(0, 180, 200, 0.12);
+    --oneqode-accent-border: rgba(0, 180, 200, 0.3);
     --oneqode-border: #d8e0e8;
+    --oneqode-border-subtle: rgba(0, 0, 0, 0.06);
     --oneqode-scrollbar-thumb: #c8d4dc;
     --oneqode-scrollbar-hover: rgba(0, 180, 200, 0.5);
     --oneqode-selection: rgba(0, 180, 200, 0.25);
@@ -36,8 +36,10 @@
     --oneqode-text-muted: #6a7080;
     --oneqode-accent-primary: #ff0080;
     --oneqode-accent-secondary: #00c8ff;
-    --oneqode-accent-highlight: #50ffb4;
+    --oneqode-accent-glow: rgba(255, 0, 128, 0.1);
+    --oneqode-accent-border: rgba(255, 0, 128, 0.25);
     --oneqode-border: #282d3c;
+    --oneqode-border-subtle: rgba(255, 255, 255, 0.04);
     --oneqode-scrollbar-thumb: #282d3c;
     --oneqode-scrollbar-hover: rgba(255, 0, 128, 0.4);
     --oneqode-selection: rgba(255, 0, 128, 0.3);
@@ -47,13 +49,17 @@
 
 /* Firefox color overrides - shared between themes */
 :root {
+  /* Disable LWT header image (causes CSD toolbar transparency) */
+  --lwt-header-image: none !important;
+  --lwt-additional-images: none !important;
+
   --toolbar-bgcolor: var(--oneqode-bg-secondary) !important;
   --toolbar-color: var(--oneqode-text-primary) !important;
   --toolbar-field-background-color: var(--oneqode-bg-primary) !important;
   --toolbar-field-color: var(--oneqode-text-primary) !important;
   --toolbar-field-border-color: var(--oneqode-border) !important;
   --toolbar-field-focus-background-color: var(--oneqode-bg-primary) !important;
-  --toolbar-field-focus-border-color: var(--oneqode-accent-secondary) !important;
+  --toolbar-field-focus-border-color: var(--oneqode-accent-primary) !important;
   --urlbar-box-bgcolor: var(--oneqode-bg-tertiary) !important;
   --urlbar-box-focus-bgcolor: var(--oneqode-bg-tertiary) !important;
   --urlbar-box-hover-bgcolor: var(--oneqode-bg-tertiary) !important;
@@ -74,7 +80,7 @@
 
   --autocomplete-popup-background: var(--oneqode-bg-secondary) !important;
   --autocomplete-popup-color: var(--oneqode-text-primary) !important;
-  --autocomplete-popup-highlight-background: var(--oneqode-bg-tertiary) !important;
+  --autocomplete-popup-highlight-background: var(--oneqode-accent-glow) !important;
   --autocomplete-popup-highlight-color: var(--oneqode-text-primary) !important;
 
   --sidebar-background-color: var(--oneqode-bg-secondary) !important;
@@ -83,50 +89,84 @@
 
   --in-content-page-background: var(--oneqode-bg-primary) !important;
   --in-content-page-color: var(--oneqode-text-primary) !important;
+
+  --focus-outline-color: var(--oneqode-accent-primary) !important;
 }
 
-/* Main window background */
+/* Main window background — use background shorthand to clear any theme images */
 #main-window,
 #browser,
 #navigator-toolbox {
-  background-color: var(--oneqode-bg-secondary) !important;
+  background: var(--oneqode-bg-secondary) !important;
 }
 
-/* Tab bar */
+/* ==================== Tab bar ==================== */
+
 #titlebar,
 #TabsToolbar {
-  background-color: var(--oneqode-bg-secondary) !important;
+  background: var(--oneqode-bg-secondary) !important;
 }
 
+/* Inactive tabs */
 .tab-background {
   background-color: transparent !important;
+  border-radius: 6px 6px 0 0 !important;
+  transition: background-color 0.15s ease !important;
 }
 
+/* Active tab */
 .tabbrowser-tab[selected="true"] .tab-background {
   background-color: var(--oneqode-bg-primary) !important;
-  border-top: 2px solid var(--oneqode-accent-primary) !important;
+  box-shadow: 0 -2px 0 var(--oneqode-accent-primary) inset,
+              0 1px 3px var(--oneqode-shadow) !important;
 }
 
+/* Tab hover */
+.tabbrowser-tab:not([selected="true"]):hover .tab-background {
+  background-color: var(--oneqode-accent-glow) !important;
+}
+
+/* Tab text */
 .tab-text {
-  color: var(--oneqode-text-secondary) !important;
+  color: var(--oneqode-text-muted) !important;
+  transition: color 0.15s ease !important;
 }
 
 .tabbrowser-tab[selected="true"] .tab-text {
   color: var(--oneqode-text-primary) !important;
 }
 
-.tabbrowser-tab:hover .tab-background:not([selected="true"]) {
-  background-color: var(--oneqode-bg-tertiary) !important;
+.tabbrowser-tab:not([selected="true"]):hover .tab-text {
+  color: var(--oneqode-text-secondary) !important;
 }
 
-/* Tab line indicator */
+/* Tab line indicator — use accent */
 .tab-line {
   background-color: var(--oneqode-accent-primary) !important;
 }
 
-/* Navigation toolbar */
+/* Tab separator between inactive tabs */
+.tabbrowser-tab::after {
+  border-color: var(--oneqode-border-subtle) !important;
+}
+
+/* New tab button */
+#tabs-newtab-button,
+#new-tab-button {
+  color: var(--oneqode-text-muted) !important;
+  transition: color 0.15s ease, background-color 0.15s ease !important;
+}
+
+#tabs-newtab-button:hover,
+#new-tab-button:hover {
+  background-color: var(--oneqode-accent-glow) !important;
+  color: var(--oneqode-accent-primary) !important;
+}
+
+/* ==================== Navigation toolbar ==================== */
+
 #nav-bar {
-  background-color: var(--oneqode-bg-secondary) !important;
+  background: var(--oneqode-bg-secondary) !important;
   border-bottom: 1px solid var(--oneqode-border) !important;
 }
 
@@ -134,11 +174,16 @@
 #urlbar-background {
   background-color: var(--oneqode-bg-primary) !important;
   border: 1px solid var(--oneqode-border) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+#urlbar:hover:not([focused="true"]) #urlbar-background {
+  border-color: var(--oneqode-accent-border) !important;
 }
 
 #urlbar[focused="true"] #urlbar-background {
-  border-color: var(--oneqode-accent-secondary) !important;
-  box-shadow: 0 0 0 1px var(--oneqode-accent-secondary) !important;
+  border-color: var(--oneqode-accent-primary) !important;
+  box-shadow: 0 0 0 1px var(--oneqode-accent-border) !important;
 }
 
 #urlbar-input {
@@ -146,56 +191,59 @@
 }
 
 /* Toolbar buttons */
-#back-button,
-#forward-button,
-#reload-button,
-#stop-button,
-#home-button,
-#downloads-button,
-#library-button,
-#sidebar-button,
-#fxa-toolbar-menu-button,
 .toolbarbutton-1 {
   color: var(--oneqode-text-secondary) !important;
+  transition: color 0.15s ease, background-color 0.15s ease !important;
 }
 
 .toolbarbutton-1:hover {
-  background-color: var(--oneqode-bg-tertiary) !important;
+  background-color: var(--oneqode-accent-glow) !important;
   color: var(--oneqode-text-primary) !important;
 }
 
-/* Bookmarks bar */
+.toolbarbutton-1:active,
+.toolbarbutton-1[checked="true"] {
+  background-color: var(--oneqode-accent-glow) !important;
+  color: var(--oneqode-accent-primary) !important;
+}
+
+/* ==================== Bookmarks bar ==================== */
+
 #PersonalToolbar {
-  background-color: var(--oneqode-bg-secondary) !important;
+  background: var(--oneqode-bg-secondary) !important;
   border-bottom: 1px solid var(--oneqode-border) !important;
 }
 
 .bookmark-item {
   color: var(--oneqode-text-secondary) !important;
+  transition: color 0.15s ease, background-color 0.15s ease !important;
 }
 
 .bookmark-item:hover {
-  background-color: var(--oneqode-bg-tertiary) !important;
+  background-color: var(--oneqode-accent-glow) !important;
   color: var(--oneqode-text-primary) !important;
 }
 
-/* Sidebar */
+/* ==================== Sidebar ==================== */
+
 #sidebar-box {
-  background-color: var(--oneqode-bg-secondary) !important;
+  background: var(--oneqode-bg-secondary) !important;
+  border-right: 1px solid var(--oneqode-border) !important;
 }
 
 #sidebar-header {
-  background-color: var(--oneqode-bg-secondary) !important;
+  background: var(--oneqode-bg-secondary) !important;
   border-bottom: 1px solid var(--oneqode-border) !important;
 }
 
-/* Dropdown menus */
+/* ==================== Dropdown menus ==================== */
+
 menupopup,
 panel {
   background-color: var(--oneqode-bg-secondary) !important;
   color: var(--oneqode-text-primary) !important;
   border: 1px solid var(--oneqode-border) !important;
-  box-shadow: 0 4px 12px var(--oneqode-shadow) !important;
+  box-shadow: 0 4px 16px var(--oneqode-shadow) !important;
 }
 
 menuitem,
@@ -205,7 +253,8 @@ menu {
 
 menuitem:hover,
 menu:hover {
-  background-color: var(--oneqode-bg-tertiary) !important;
+  background-color: var(--oneqode-accent-glow) !important;
+  color: var(--oneqode-text-primary) !important;
 }
 
 menuitem[disabled="true"] {
@@ -216,7 +265,8 @@ menuseparator {
   border-color: var(--oneqode-border) !important;
 }
 
-/* Find bar */
+/* ==================== Find bar ==================== */
+
 findbar {
   background-color: var(--oneqode-bg-secondary) !important;
   border-top: 1px solid var(--oneqode-border) !important;
@@ -228,7 +278,8 @@ findbar {
   border: 1px solid var(--oneqode-border) !important;
 }
 
-/* Scrollbar */
+/* ==================== Scrollbar ==================== */
+
 scrollbar {
   background-color: var(--oneqode-bg-primary) !important;
 }
@@ -242,28 +293,18 @@ scrollbar thumb:hover {
   background-color: var(--oneqode-scrollbar-hover) !important;
 }
 
-/* Selection highlight */
+/* ==================== Selection ==================== */
+
 ::selection {
   background-color: var(--oneqode-selection) !important;
   color: var(--oneqode-text-primary) !important;
 }
 
-/* Focus outline */
-:focus-visible {
-  outline: 2px solid var(--oneqode-accent-secondary) !important;
-  outline-offset: 2px !important;
-}
+/* ==================== Focus — scoped to input fields only ==================== */
 
-/* New tab button */
-#tabs-newtab-button,
-#new-tab-button {
-  color: var(--oneqode-text-secondary) !important;
-}
-
-#tabs-newtab-button:hover,
-#new-tab-button:hover {
-  background-color: var(--oneqode-bg-tertiary) !important;
-  color: var(--oneqode-accent-secondary) !important;
+#urlbar[focused="true"] #urlbar-background,
+.findbar-textbox:focus {
+  outline: none !important;
 }
 
 /* Private browsing indicator */
@@ -272,12 +313,14 @@ scrollbar thumb:hover {
   color: white !important;
 }
 
-/* Links in UI (light mode only) */
+/* ==================== Links in UI ==================== */
+
 @media (prefers-color-scheme: light) {
-  a {
-    color: var(--oneqode-accent-secondary) !important;
-  }
-  a:hover {
-    color: var(--oneqode-accent-primary) !important;
-  }
+  a { color: var(--oneqode-accent-secondary) !important; }
+  a:hover { color: var(--oneqode-accent-primary) !important; }
+}
+
+@media (prefers-color-scheme: dark) {
+  a { color: var(--oneqode-accent-secondary) !important; }
+  a:hover { color: var(--oneqode-accent-primary) !important; }
 }
