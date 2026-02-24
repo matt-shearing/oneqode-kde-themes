@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneQode KDE Theme Suite</title>
+  <meta name="description" content="A polished KDE Plasma 6 theme suite with automatic day/night switching. Light Glass and Night Ride themes for a cohesive desktop experience.">
+  <meta name="theme-color" content="#191c2a">
+  <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg hero-bg--light"></div>
+    <div class="hero-bg hero-bg--dark"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <nav class="nav">
+        <div class="nav-brand">
+          <img src="img/logo.svg" alt="OneQode" class="nav-logo" width="36" height="36">
+          <span class="nav-name">OneQode</span>
+        </div>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <span class="toggle-track">
+              <span class="toggle-icon toggle-icon--sun">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              </span>
+              <span class="toggle-icon toggle-icon--moon">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              </span>
+              <span class="toggle-thumb"></span>
+            </span>
+          </button>
+          <a href="https://github.com/matt-shearing/oneqode-kde-themes" class="btn btn--ghost" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </nav>
+
+      <div class="hero-text">
+        <h1 class="hero-title">
+          KDE Plasma 6<br>
+          <span class="hero-title-accent">Theme Suite</span>
+        </h1>
+        <p class="hero-subtitle">
+          Two polished themes with automatic day/night switching.
+          From login screen to terminal &mdash; every detail, unified.
+        </p>
+        <div class="hero-install">
+          <div class="code-block">
+            <code>git clone https://github.com/matt-shearing/oneqode-kde-themes.git</code>
+            <code>cd oneqode-kde-themes && ./oneqode</code>
+          </div>
+        </div>
+        <div class="hero-badges">
+          <span class="badge">Plasma 6</span>
+          <span class="badge">Wayland</span>
+          <span class="badge">Arch / EndeavourOS</span>
+          <span class="badge">MIT License</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Themes -->
+  <section class="themes" id="themes">
+    <div class="container">
+      <h2 class="section-title">Two Themes, One Vision</h2>
+      <p class="section-desc">Toggle the switch above to preview each theme live on this page.</p>
+      <div class="theme-cards">
+        <div class="theme-card theme-card--light">
+          <div class="theme-card-preview">
+            <img src="img/wallpaper-light.jpg" alt="Light Glass wallpaper" loading="lazy" width="960" height="540">
+          </div>
+          <div class="theme-card-body">
+            <div class="theme-card-header">
+              <img src="img/icon-light.svg" alt="" width="28" height="28">
+              <h3>Light Glass</h3>
+            </div>
+            <p>Glass-inspired with ice cyan accents. Clean, airy, and comfortable for daytime work.</p>
+            <div class="color-swatches">
+              <span class="swatch" style="background:#fafcff" title="#fafcff"></span>
+              <span class="swatch" style="background:#00b4c8" title="#00b4c8"></span>
+              <span class="swatch" style="background:#0095a8" title="#0095a8"></span>
+              <span class="swatch" style="background:#232d37" title="#232d37"></span>
+              <span class="swatch" style="background:#d8e0e8" title="#d8e0e8"></span>
+            </div>
+          </div>
+        </div>
+        <div class="theme-card theme-card--dark">
+          <div class="theme-card-preview">
+            <img src="img/wallpaper-dark.jpg" alt="Night Ride wallpaper" loading="lazy" width="960" height="540">
+          </div>
+          <div class="theme-card-body">
+            <div class="theme-card-header">
+              <img src="img/icon-dark.svg" alt="" width="28" height="28">
+              <h3>Night Ride</h3>
+            </div>
+            <p>Synthwave-inspired with neon magenta and cyan accents. Bold and immersive for nighttime coding.</p>
+            <div class="color-swatches">
+              <span class="swatch" style="background:#191c2a" title="#191c2a"></span>
+              <span class="swatch" style="background:#ff0080" title="#ff0080"></span>
+              <span class="swatch" style="background:#00c8ff" title="#00c8ff"></span>
+              <span class="swatch" style="background:#50ffb4" title="#50ffb4"></span>
+              <span class="swatch" style="background:#282d3c" title="#282d3c"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="container">
+      <h2 class="section-title">Everything Themed</h2>
+      <p class="section-desc">20+ components styled cohesively. The installer handles it all.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <h3>Desktop</h3>
+          <p>Color scheme, wallpaper, Plasma style, icons, cursors, fonts, splash screen</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>Window Decoration</h3>
+          <p>Klassy presets with custom button layout, transparency, and corner radius</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          </div>
+          <h3>Terminals</h3>
+          <p>Konsole, Yakuake, and Ghostty with matching colors and transparency</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <h3>Firefox</h3>
+          <p>Browser chrome and internal pages via userChrome/userContent CSS with auto light/dark</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+          </div>
+          <h3>GTK3/4</h3>
+          <p>Accent colors, scrollbars, and libadwaita integration. Auto-updates via KDE color sync</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+          <h3>Editors</h3>
+          <p>Zed (follows system), Obsidian, and Typora themes</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <h3>Auto Switching</h3>
+          <p>Solar-based or fixed-time day/night switching via systemd timer</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </div>
+          <h3>Login Screen</h3>
+          <p>SDDM themed with matching wallpaper that switches with your active theme</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Install -->
+  <section class="install" id="install">
+    <div class="container">
+      <h2 class="section-title">Get Started</h2>
+      <p class="section-desc">Interactive TUI installer with modular component selection.</p>
+      <div class="install-steps">
+        <div class="install-step">
+          <span class="step-number">1</span>
+          <div class="step-content">
+            <h3>Clone</h3>
+            <div class="code-block">
+              <code>git clone https://github.com/matt-shearing/oneqode-kde-themes.git</code>
+            </div>
+          </div>
+        </div>
+        <div class="install-step">
+          <span class="step-number">2</span>
+          <div class="step-content">
+            <h3>Run the installer</h3>
+            <div class="code-block">
+              <code>cd oneqode-kde-themes && ./oneqode</code>
+            </div>
+          </div>
+        </div>
+        <div class="install-step">
+          <span class="step-number">3</span>
+          <div class="step-content">
+            <h3>Log out &amp; back in</h3>
+            <p>All changes take full effect after re-login.</p>
+          </div>
+        </div>
+      </div>
+      <p class="install-note">
+        Optional: install <code>gum</code> (<code>yay -S gum</code>) for a prettier TUI experience.
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="img/logo.svg" alt="OneQode" width="24" height="24">
+        <span>OneQode KDE Theme Suite</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/matt-shearing/oneqode-kde-themes" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/matt-shearing/oneqode-kde-themes/releases" target="_blank" rel="noopener">Releases</a>
+        <a href="https://github.com/matt-shearing/oneqode-kde-themes/blob/master/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p class="footer-credits">
+        Built with
+        <a href="https://github.com/paulmcauley/klassy" target="_blank" rel="noopener">Klassy</a>,
+        <a href="https://github.com/PapirusDevelopmentTeam/papirus-icon-theme" target="_blank" rel="noopener">Papirus</a>,
+        <a href="https://rsms.me/inter/" target="_blank" rel="noopener">Inter</a>, and
+        <a href="https://www.jetbrains.com/lp/mono/" target="_blank" rel="noopener">JetBrains Mono</a>.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    function setTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      document.querySelector('meta[name="theme-color"]').content =
+        theme === 'dark' ? '#191c2a' : '#fafcff';
+      localStorage.setItem('theme', theme);
+    }
+
+    toggle.addEventListener('click', () => {
+      setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // Restore saved preference or respect system preference
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      setTheme(saved);
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setTheme('light');
+    }
+  </script>
+</body>
+</html>
