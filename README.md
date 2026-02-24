@@ -41,23 +41,30 @@ Without gum, the TUI falls back to basic bash menus.
 
 Each theme sets:
 
-| Component | Included | Notes |
-|-----------|----------|-------|
-| Color scheme | Yes | Custom OneQode colors |
-| Wallpaper | Yes | 4K backgrounds |
-| Window decoration | Yes | Klassy (Breeze fallback) |
-| Application style | Yes | Klassy (Breeze fallback) |
-| Plasma style | Yes | Breeze Light / Breeze Dark |
-| Icons | Yes | Papirus / Papirus-Dark |
-| Fonts | Yes | Inter + JetBrains Mono Nerd |
-| Cursors | Yes | Bibata Modern Ice |
-| Splash screen | Yes | Minimal branded KSplash |
-| Login screen (SDDM) | Yes | Breeze + OneQode background |
-| Konsole | Yes | Matching terminal colors with transparency |
-| Ghostty | Yes | Matching terminal colors with transparency |
-| Zed | Yes | Matching editor theme (follows system) |
+| Component | Notes |
+|-----------|-------|
+| Color scheme | Custom OneQode colors |
+| Wallpaper | 4K backgrounds |
+| Window decoration | Klassy (Breeze fallback) |
+| Application style | Klassy (Breeze fallback) |
+| Plasma style | Breeze Light / Breeze Dark |
+| Icons | Papirus / Papirus-Dark |
+| Fonts | Inter + JetBrains Mono Nerd |
+| Cursors | Bibata Modern Ice |
+| Splash screen | Minimal branded KSplash |
+| Login screen (SDDM) | Breeze + OneQode background |
+| GTK3/4 | Accent colors, scrollbars, libadwaita integration (auto-updates via KDE color sync) |
+| Konsole | Matching terminal colors with transparency |
+| Yakuake | Themed via Konsole profiles (auto-applied via DBus) |
+| Ghostty | Matching terminal colors with transparency |
+| Firefox | Browser chrome + internal pages via userChrome/userContent CSS (auto light/dark) |
+| Zed | Matching editor theme (follows system) |
+| Obsidian | Vault themes for both variants |
+| Typora | Matching markdown editor themes |
+| Mattermost | Custom sidebar/UI color schemes (manual import) |
+| Opera | Follows system theme; color reference provided for Stylus CSS |
 
-The themes provide a cohesive experience from login to desktop, including terminal emulators.
+The themes provide a cohesive experience from login to desktop, including terminals, browsers, and editors.
 
 ## Verification
 
@@ -110,6 +117,24 @@ Find your coordinates:
 - [latlong.net](https://www.latlong.net/)
 - [Google Maps](https://maps.google.com) - right-click any location
 
+### Firefox
+
+The installer sets up `userChrome.css` (browser UI) and `userContent.css` (internal pages like new tab, settings, addons) with auto light/dark switching via `prefers-color-scheme`.
+
+After installing, you must enable custom stylesheets in Firefox:
+
+1. Open `about:config`
+2. Set `toolkit.legacyUserProfileCustomizations.stylesheets` to `true`
+3. Restart Firefox
+
+Static variants (force light or dark) are also available in `~/.mozilla/firefox/<profile>/chrome/`.
+
+### GTK3/4
+
+GTK overrides set accent colors, selection highlights, scrollbar styling, and libadwaita integration for GTK apps running under KDE. Colors are referenced from KDE's color sync (`colors.css`), so they **auto-update when you switch themes** — no restart needed for GTK3 apps. GTK4/libadwaita apps may need a restart.
+
+Chromium-based browsers in "Use GTK+" appearance mode also pick up the accent colors.
+
 ### Zed Editor
 
 Zed themes are configured to follow the system theme automatically:
@@ -123,6 +148,18 @@ Zed themes are configured to follow the system theme automatically:
 ```
 
 When KDE switches between light/dark modes, Zed will follow automatically. You can also select themes manually via the Zed Command Palette → "theme selector: toggle".
+
+### Obsidian
+
+Themes are installed to all detected vaults. Select "OneQode Light Glass" or "OneQode Night Ride" in Obsidian → Settings → Appearance → Themes.
+
+### Typora
+
+Themes are installed to `~/.config/Typora/themes/`. Select them via Typora → Themes menu.
+
+### Mattermost
+
+Mattermost themes require manual import: Settings → Display → Theme → Custom Theme, then paste the contents of the JSON files from `assets/mattermost/`.
 
 ### Terminal Transparency
 
@@ -365,7 +402,12 @@ The installer is idempotent and preserves your configuration.
 | Wallpapers | `~/.local/share/wallpapers/OneQode/` |
 | Konsole themes | `~/.local/share/konsole/` |
 | Ghostty themes | `~/.config/ghostty/themes/` |
+| Firefox CSS | `~/.mozilla/firefox/<profile>/chrome/` |
+| GTK3 overrides | `~/.config/gtk-3.0/gtk.css` |
+| GTK4 overrides | `~/.config/gtk-4.0/gtk.css` |
 | Zed themes | `~/.config/zed/themes/` |
+| Obsidian themes | `<vault>/.obsidian/themes/` |
+| Typora themes | `~/.config/Typora/themes/` |
 | Cursors | `~/.local/share/icons/Bibata-Modern-Ice/` |
 | Switcher script | `~/.local/bin/oneqode-theme-switch` |
 | Watcher script | `~/.local/bin/oneqode-theme-watcher` |
@@ -389,37 +431,31 @@ oneqode-kde-themes/
 │   ├── install-cursors.sh
 │   ├── install-konsole.sh
 │   ├── install-ghostty.sh
+│   ├── install-firefox.sh
+│   ├── install-gtk.sh
 │   ├── install-zed.sh
+│   ├── install-obsidian.sh
+│   ├── install-typora.sh
 │   ├── install-switcher.sh
 │   ├── install-sddm.sh
 │   └── install-deps.sh
 ├── assets/              # Theme assets
+│   ├── color-schemes/   # KDE color schemes
+│   ├── firefox/         # userChrome/userContent CSS + XPI extensions
+│   ├── ghostty/         # Terminal themes
+│   ├── gtk/             # GTK3/4 CSS overrides
+│   ├── klassy/          # Window decoration presets
+│   ├── konsole/         # Terminal color schemes
+│   ├── look-and-feel/   # KDE look-and-feel packages
+│   ├── mattermost/      # Chat client themes (manual import)
+│   ├── obsidian/        # Vault themes
+│   ├── opera/           # Theming guide + color reference
+│   ├── typora/          # Markdown editor themes
+│   ├── wallpapers/      # 4K backgrounds
+│   └── zed/             # Editor theme
 ├── switcher/            # Theme switcher scripts
-└── sddm/                # SDDM configuration
+└── sddm/               # SDDM configuration
 ```
-
-## Publishing to GitHub
-
-1. Create a new repository on GitHub
-
-2. Initialize and push:
-   ```bash
-   cd oneqode-kde-themes
-   git init
-   git add .
-   git commit -m "Initial release: OneQode KDE Theme Suite v1.0.0"
-   git branch -M main
-   git remote add origin git@github.com:matt-shearing/oneqode-kde-themes.git
-   git push -u origin main
-   ```
-
-3. Create a release:
-   ```bash
-   git tag -a v1.0.0 -m "Version 1.0.0"
-   git push origin v1.0.0
-   ```
-
-4. On GitHub, go to Releases and create a new release from the tag.
 
 ## License
 
