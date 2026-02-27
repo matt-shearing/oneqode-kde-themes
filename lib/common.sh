@@ -9,22 +9,37 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 # Directories
 ONEQODE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ASSETS_DIR="$ONEQODE_DIR/assets"
 LOCAL_SHARE="$HOME/.local/share"
 LOCAL_BIN="$HOME/.local/bin"
 LOCAL_STATE="$HOME/.local/state"
 CONFIG_DIR="$HOME/.config"
 SYSTEMD_USER_DIR="$CONFIG_DIR/systemd/user"
+SYSTEMD_USER="$SYSTEMD_USER_DIR"
 
 # Helper functions
 info() { printf "${BLUE}[INFO]${NC} %s\n" "$1"; }
 success() { printf "${GREEN}[OK]${NC} %s\n" "$1"; }
 warn() { printf "${YELLOW}[WARN]${NC} %s\n" "$1"; }
 error() { printf "${RED}[ERROR]${NC} %s\n" "$1" >&2; }
+debug() { [[ "${ONEQODE_DEBUG:-}" == "1" ]] && printf "${CYAN}[DEBUG]${NC} %s\n" "$1" || true; }
+
+# Check if a command exists
+has_cmd() { command -v "$1" &>/dev/null; }
+
+# Ensure not running as root
+check_not_root() {
+    if [[ $EUID -eq 0 ]]; then
+        error "Do not run this script as root. It installs to user directories."
+        exit 1
+    fi
+}
 
 # Detect theme apply command
 detect_apply_tool() {
