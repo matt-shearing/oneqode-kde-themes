@@ -184,7 +184,7 @@ apply_klassy_config() {
     fi
 
     # Import the preset (updates windecopresetsrc)
-    klassy-settings --import-preset "$preset_file" 2>/dev/null || {
+    klassy-settings --force-import-invalid-version --import-preset "$preset_file" 2>/dev/null || {
         error "Failed to import Klassy preset: $preset_file"
         return 0
     }
