@@ -204,6 +204,20 @@ do_install_all() {
         install_sddm
     fi
 
+    # Apply the current theme so accent colors, Klassy presets, and terminal
+    # themes are all active immediately — not just files on disk.
+    # Clear any saved state so the switcher applies even if it thinks the
+    # theme is already set (files were just reinstalled).
+    echo ""
+    info "Applying theme..."
+    if [[ -x "$LOCAL_BIN/oneqode-theme-switch" ]]; then
+        rm -f "$LOCAL_STATE/oneqode/theme-state" 2>/dev/null || true
+        "$LOCAL_BIN/oneqode-theme-switch" 2>&1 | grep -v "^$" || true
+        success "Theme applied for current time of day"
+    else
+        warn "Theme switcher not found — run 'oneqode-theme-switch --force-day' manually"
+    fi
+
     echo ""
     success "Installation complete!"
     warn "Log out and back in for best results"
