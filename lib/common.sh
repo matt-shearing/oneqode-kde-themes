@@ -82,7 +82,7 @@ is_installed() {
             [[ -d "$LOCAL_SHARE/icons/Bibata-Modern-Ice" ]]
             ;;
         konsole)
-            [[ -f "$LOCAL_SHARE/konsole/OneQode-Night-Ride.colorscheme" ]]
+            [[ -f "$LOCAL_SHARE/konsole/OneQodeNightRide.colorscheme" ]]
             ;;
         ghostty)
             [[ -f "$CONFIG_DIR/ghostty/themes/oneqode-night-ride" ]]
