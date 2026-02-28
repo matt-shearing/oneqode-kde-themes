@@ -112,6 +112,11 @@ is_installed() {
             [[ -f "$CONFIG_DIR/gtk-3.0/gtk.css" ]] && \
             grep -q 'OneQode GTK3' "$CONFIG_DIR/gtk-3.0/gtk.css" 2>/dev/null
             ;;
+        fastfetch)
+            [[ -f "$LOCAL_SHARE/fastfetch/assets/oneqode-knot-alpha.png" ]] && \
+            [[ -f "$CONFIG_DIR/fastfetch/config.jsonc" ]] && \
+            grep -q 'oneqode-knot-alpha' "$CONFIG_DIR/fastfetch/config.jsonc" 2>/dev/null
+            ;;
         switcher)
             [[ -x "$LOCAL_BIN/oneqode-theme-switch" ]]
             ;;

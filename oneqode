@@ -64,6 +64,7 @@ show_status() {
     echo -e "  $(status_icon obsidian) Obsidian Themes"
     echo -e "  $(status_icon firefox) Firefox Themes"
     echo -e "  $(status_icon gtk) GTK Overrides"
+    echo -e "  $(status_icon fastfetch) Fastfetch Config"
     echo -e "  $(status_icon switcher) Theme Switcher"
     echo -e "  $(status_icon sddm) SDDM Login Screen"
     echo ""
@@ -188,6 +189,9 @@ do_install_all() {
     source "$SCRIPT_DIR/lib/install-gtk.sh"
     install_gtk
 
+    source "$SCRIPT_DIR/lib/install-fastfetch.sh"
+    install_fastfetch
+
     source "$SCRIPT_DIR/lib/install-switcher.sh"
     install_switcher
     enable_switcher
@@ -246,6 +250,7 @@ do_install_selective() {
         "Obsidian Themes" \
         "Firefox Themes" \
         "GTK Overrides" \
+        "Fastfetch Config" \
         "Theme Switcher" \
         "SDDM Login Screen")
 
@@ -313,6 +318,10 @@ do_install_selective() {
                 source "$SCRIPT_DIR/lib/install-gtk.sh"
                 install_gtk
                 ;;
+            "Fastfetch Config")
+                source "$SCRIPT_DIR/lib/install-fastfetch.sh"
+                install_fastfetch
+                ;;
             "Theme Switcher")
                 source "$SCRIPT_DIR/lib/install-switcher.sh"
                 install_switcher
@@ -362,6 +371,9 @@ do_uninstall() {
 
     source "$SCRIPT_DIR/lib/install-gtk.sh"
     uninstall_gtk
+
+    source "$SCRIPT_DIR/lib/install-fastfetch.sh"
+    uninstall_fastfetch
 
     source "$SCRIPT_DIR/lib/install-konsole.sh"
     uninstall_konsole
