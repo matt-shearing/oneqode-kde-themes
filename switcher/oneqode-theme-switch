@@ -248,7 +248,78 @@ apply_theme() {
     # Update terminal themes
     update_terminal_themes "$theme"
 
+    # Update Mattermost (via its API — pushes the theme to the server)
+    update_mattermost_theme "$theme"
+
     info "Successfully applied theme: $theme"
+    return 0
+}
+
+# Update Mattermost theme via the API. The desktop app stores its session token
+# (MMAUTHTOKEN) in plaintext in its Cookies DB; we read it at runtime so token
+# rotation is handled automatically. All failures are non-fatal.
+update_mattermost_theme() {
+    local theme="$1"
+    local variant="night"
+    [[ "$theme" == *"lightglass"* ]] && variant="light"
+
+    # Skip silently if the Mattermost desktop app isn't set up
+    [[ -d "$HOME/.config/Mattermost" ]] || { debug "Mattermost not installed"; return 0; }
+
+    # Locate theme assets (installed location, then dev repo, then system)
+    local assets_dir=""
+    for dir in "$HOME/.local/share/oneqode/mattermost" \
+               "$HOME/dev/oneqode-kde-themes/assets/mattermost" \
+               "/usr/share/oneqode-kde-themes/mattermost"; do
+        [[ -f "$dir/oneqode-night-ride.json" ]] && { assets_dir="$dir"; break; }
+    done
+    [[ -z "$assets_dir" ]] && { debug "Mattermost assets not found"; return 0; }
+
+    python3 - "$variant" "$assets_dir" <<'PYEOF' && debug "Mattermost theme set to $variant" || debug "Mattermost theme update skipped"
+import sys, json, sqlite3, os, urllib.request
+
+variant, assets_dir = sys.argv[1], sys.argv[2]
+mm = os.path.expanduser("~/.config/Mattermost")
+cookies, config = os.path.join(mm, "Cookies"), os.path.join(mm, "config.json")
+
+try:
+    if not (os.path.exists(cookies) and os.path.exists(config)):
+        sys.exit(1)
+    servers = json.load(open(config)).get("servers", [])
+    if not servers:
+        sys.exit(1)
+    base = servers[0]["url"].rstrip("/")
+
+    con = sqlite3.connect("file:%s?mode=ro&immutable=1" % cookies, uri=True)
+    row = con.execute("SELECT value FROM cookies WHERE name='MMAUTHTOKEN'").fetchone()
+    token = row[0] if row else ""
+    if not token:
+        sys.exit(1)  # logged out
+
+    fname = "oneqode-night-ride.json" if variant == "night" else "oneqode-light-glass.json"
+    theme = json.load(open(os.path.join(assets_dir, fname)))
+    theme.pop("mentionBj", None)  # drop stray typo key if present
+    theme["type"] = "custom"
+    value = json.dumps(theme)
+
+    def api(method, path, data=None):
+        req = urllib.request.Request(base + path, method=method, headers={
+            "Authorization": "Bearer " + token, "Content-Type": "application/json"})
+        body = json.dumps(data).encode() if data is not None else None
+        with urllib.request.urlopen(req, body, timeout=10) as r:
+            return json.loads(r.read() or "null")
+
+    uid = api("GET", "/api/v4/users/me")["id"]
+    prefs = api("GET", "/api/v4/users/me/preferences")
+    names = sorted({p["name"] for p in prefs if p["category"] == "theme"})
+    if "" not in names:
+        names.append("")  # ensure the all-teams default is set too
+    api("PUT", "/api/v4/users/me/preferences",
+        [{"user_id": uid, "category": "theme", "name": n, "value": value} for n in names])
+    sys.exit(0)
+except Exception:
+    sys.exit(1)
+PYEOF
     return 0
 }
 
@@ -297,8 +368,35 @@ update_terminal_themes() {
     # Update Ghostty
     update_ghostty_theme "$is_light"
 
+    # Update fastfetch
+    update_fastfetch_theme "$is_light"
+
     # Ensure Firefox has auto-switching CSS
     update_firefox_theme
+}
+
+# Update fastfetch config (OQ logo + accent colors) for the active theme
+update_fastfetch_theme() {
+    local is_light="$1"
+    local ff_dir="$HOME/.config/fastfetch"
+
+    local config_name
+    if [[ "$is_light" == "true" ]]; then
+        config_name="config-light-glass.jsonc"
+    else
+        config_name="config-night-ride.jsonc"
+    fi
+
+    # Check if our configs are installed
+    if [[ ! -f "$ff_dir/$config_name" ]]; then
+        debug "fastfetch config not found: $config_name"
+        return 0
+    fi
+
+    # fastfetch reads config.jsonc — point it at the active variant.
+    # New terminals pick it up automatically.
+    ln -sf "$config_name" "$ff_dir/config.jsonc"
+    debug "fastfetch config symlink updated to: $config_name"
 }
 
 # Update Konsole color scheme for default profile

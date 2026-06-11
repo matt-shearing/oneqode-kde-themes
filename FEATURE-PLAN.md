@@ -23,7 +23,8 @@
 | Zed Editor | `assets/zed/oneqode.json` | `install-zed.sh` | System mode (auto) | — |
 | Typora | `assets/typora/` (2 CSS) | `install-typora.sh` | No switcher (manual) | — |
 | Obsidian | `assets/obsidian/` (2 themes) | `install-obsidian.sh` | No switcher integration | — |
-| Mattermost | `assets/mattermost/` (2 JSON) | No installer | No switcher | Manual import |
+| Mattermost | `assets/mattermost/` (2 JSON) | `install-mattermost.sh` | `update_mattermost_theme()` | Pushed to server via API (token from app cookie); switches all teams live |
+| Fastfetch | `assets/fastfetch/` (2 jsonc + logo) | `install-fastfetch.sh` | `update_fastfetch_theme()` | OQ ASCII logo, theme-accent colors; symlink to active variant |
 | Theme Switcher | `switcher/` (script + tray + systemd) | `install-switcher.sh` | — | Solar or fixed-time auto-switch |
 
 ### Not Yet Implemented
@@ -32,7 +33,6 @@
 | Kvantum theme | Medium | Deeper Qt widget styling beyond Klassy |
 | Vivaldi custom CSS | Medium | Only Chromium browser with full CSS injection support |
 | Chrome/Brave theme extensions | Low | Static manifest-only themes, no auto-switch |
-| Fastfetch config | Low | Terminal greeting — cosmetic only |
 
 ---
 
@@ -180,20 +180,39 @@
 
 ---
 
-## Phase 6 — Fastfetch Config (Cosmetic)
+## Phase 6 — Fastfetch Config (Cosmetic) ✅ Done
 
 **Goal**: Themed terminal greeting matching the active theme.
 
 **Approach**: Ship two config files with OneQode colors/logo. Switcher symlinks the active one.
 
-**Files to create**:
+**Files created**:
 - `assets/fastfetch/config-light-glass.jsonc`
 - `assets/fastfetch/config-night-ride.jsonc`
+- `assets/fastfetch/oneqode.txt` (OQ symbol rendered to ASCII)
 - `lib/install-fastfetch.sh`
 
-**Install path**: `~/.config/fastfetch/config.jsonc`
+**Install path**: `~/.config/fastfetch/config.jsonc` (symlink → active variant)
 
-**Switcher changes**: Add `update_fastfetch_theme()` — symlink or copy the active config.
+**Switcher changes**: `update_fastfetch_theme()` repoints the symlink to the active config.
+
+---
+
+## Phase 7 — Mattermost Auto-Switch ✅ Done
+
+**Goal**: Mattermost follows the desktop day/night theme (was manual import only).
+
+**Approach**: Mattermost stores theme as a server-side user preference, so the switcher
+pushes the active variant via the API instead of editing local files. The desktop app's
+session token (`MMAUTHTOKEN`) is read from `~/.config/Mattermost/Cookies` at runtime
+(handles token rotation); the theme is `PUT` to `/api/v4/users/me/preferences` for every
+team plus the all-teams default, so all clients update live.
+
+**Files created**:
+- `lib/install-mattermost.sh` (deploys theme JSONs to `~/.local/share/oneqode/mattermost/`)
+
+**Switcher changes**: `update_mattermost_theme()` — called from `apply_theme`; non-fatal on
+any failure (logged out, app not installed, cookie format change).
 
 ---
 

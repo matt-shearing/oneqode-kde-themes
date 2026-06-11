@@ -59,12 +59,13 @@ show_status() {
     echo -e "  $(status_icon cursors) Cursors (Bibata)"
     echo -e "  $(status_icon konsole) Konsole Themes"
     echo -e "  $(status_icon ghostty) Ghostty Themes"
+    echo -e "  $(status_icon fastfetch) Fastfetch Config"
     echo -e "  $(status_icon zed) Zed Themes"
     echo -e "  $(status_icon typora) Typora Themes"
     echo -e "  $(status_icon obsidian) Obsidian Themes"
     echo -e "  $(status_icon firefox) Firefox Themes"
+    echo -e "  $(status_icon mattermost) Mattermost Themes"
     echo -e "  $(status_icon gtk) GTK Overrides"
-    echo -e "  $(status_icon fastfetch) Fastfetch Config"
     echo -e "  $(status_icon switcher) Theme Switcher"
     echo -e "  $(status_icon sddm) SDDM Login Screen"
     echo ""
@@ -174,6 +175,9 @@ do_install_all() {
     source "$SCRIPT_DIR/lib/install-ghostty.sh"
     install_ghostty
 
+    source "$SCRIPT_DIR/lib/install-fastfetch.sh"
+    install_fastfetch
+
     source "$SCRIPT_DIR/lib/install-zed.sh"
     install_zed
 
@@ -186,11 +190,11 @@ do_install_all() {
     source "$SCRIPT_DIR/lib/install-firefox.sh"
     install_firefox
 
+    source "$SCRIPT_DIR/lib/install-mattermost.sh"
+    install_mattermost
+
     source "$SCRIPT_DIR/lib/install-gtk.sh"
     install_gtk
-
-    source "$SCRIPT_DIR/lib/install-fastfetch.sh"
-    install_fastfetch
 
     source "$SCRIPT_DIR/lib/install-switcher.sh"
     install_switcher
@@ -245,12 +249,13 @@ do_install_selective() {
         "Cursors (Bibata)" \
         "Konsole Themes" \
         "Ghostty Themes" \
+        "Fastfetch Config" \
         "Zed Themes" \
         "Typora Themes" \
         "Obsidian Themes" \
         "Firefox Themes" \
+        "Mattermost Themes" \
         "GTK Overrides" \
-        "Fastfetch Config" \
         "Theme Switcher" \
         "SDDM Login Screen")
 
@@ -298,6 +303,10 @@ do_install_selective() {
                 source "$SCRIPT_DIR/lib/install-ghostty.sh"
                 install_ghostty
                 ;;
+            "Fastfetch Config")
+                source "$SCRIPT_DIR/lib/install-fastfetch.sh"
+                install_fastfetch
+                ;;
             "Zed Themes")
                 source "$SCRIPT_DIR/lib/install-zed.sh"
                 install_zed
@@ -314,13 +323,13 @@ do_install_selective() {
                 source "$SCRIPT_DIR/lib/install-firefox.sh"
                 install_firefox
                 ;;
+            "Mattermost Themes")
+                source "$SCRIPT_DIR/lib/install-mattermost.sh"
+                install_mattermost
+                ;;
             "GTK Overrides")
                 source "$SCRIPT_DIR/lib/install-gtk.sh"
                 install_gtk
-                ;;
-            "Fastfetch Config")
-                source "$SCRIPT_DIR/lib/install-fastfetch.sh"
-                install_fastfetch
                 ;;
             "Theme Switcher")
                 source "$SCRIPT_DIR/lib/install-switcher.sh"
@@ -357,6 +366,9 @@ do_uninstall() {
     source "$SCRIPT_DIR/lib/install-ghostty.sh"
     uninstall_ghostty
 
+    source "$SCRIPT_DIR/lib/install-fastfetch.sh"
+    uninstall_fastfetch
+
     source "$SCRIPT_DIR/lib/install-zed.sh"
     uninstall_zed
 
@@ -369,11 +381,11 @@ do_uninstall() {
     source "$SCRIPT_DIR/lib/install-firefox.sh"
     uninstall_firefox
 
+    source "$SCRIPT_DIR/lib/install-mattermost.sh"
+    uninstall_mattermost
+
     source "$SCRIPT_DIR/lib/install-gtk.sh"
     uninstall_gtk
-
-    source "$SCRIPT_DIR/lib/install-fastfetch.sh"
-    uninstall_fastfetch
 
     source "$SCRIPT_DIR/lib/install-konsole.sh"
     uninstall_konsole

@@ -1,52 +1,45 @@
 #!/usr/bin/env bash
-# Install Fastfetch config with OneQode logo
+# Install OneQode fastfetch config (OQ ASCII logo, theme-aware)
 
 install_fastfetch() {
-    info "Installing Fastfetch config..."
+    info "Installing fastfetch config..."
 
-    local assets_dir="$ONEQODE_DIR/assets/fastfetch"
+    local ff_dir="$CONFIG_DIR/fastfetch"
+    mkdir -p "$ff_dir"
 
-    # Check if fastfetch is installed
-    if ! command -v fastfetch &>/dev/null; then
-        warn "Fastfetch is not installed"
-        warn "Install it first: pacman -S fastfetch (or yay -S fastfetch)"
-        return 1
+    # Back up a pre-existing (non-OneQode) config the first time we touch it
+    if [[ -f "$ff_dir/config.jsonc" && ! -L "$ff_dir/config.jsonc" \
+          && ! -f "$ff_dir/config.jsonc.pre-oneqode" ]]; then
+        cp "$ff_dir/config.jsonc" "$ff_dir/config.jsonc.pre-oneqode"
     fi
 
-    # Install logo asset
-    local logo_dir="$LOCAL_SHARE/fastfetch/assets"
-    mkdir -p "$logo_dir"
-    cp "$assets_dir/oneqode-knot-alpha.png" "$logo_dir/"
+    cp "$ASSETS_DIR/fastfetch/oneqode.txt" "$ff_dir/oneqode.txt"
+    cp "$ASSETS_DIR/fastfetch/config-night-ride.jsonc" "$ff_dir/config-night-ride.jsonc"
+    cp "$ASSETS_DIR/fastfetch/config-light-glass.jsonc" "$ff_dir/config-light-glass.jsonc"
 
-    # Install config (back up existing if not ours)
-    local config_dir="$CONFIG_DIR/fastfetch"
-    mkdir -p "$config_dir"
+    # fastfetch reads config.jsonc — symlink it to the active variant (default: night ride)
+    ln -sf "config-night-ride.jsonc" "$ff_dir/config.jsonc"
 
-    if [[ -f "$config_dir/config.jsonc" ]] && ! grep -q 'oneqode-knot-alpha' "$config_dir/config.jsonc" 2>/dev/null; then
-        cp "$config_dir/config.jsonc" "$config_dir/config.jsonc.bak"
-        debug "Backed up existing fastfetch config"
-    fi
-
-    cp "$assets_dir/config.jsonc" "$config_dir/"
-
-    success "Fastfetch config installed with OneQode logo"
-    info "Run 'fastfetch' to see it in action"
+    success "fastfetch config installed (OQ logo, theme-aware)"
+    info "Logo + colors switch with the desktop theme"
 }
 
 uninstall_fastfetch() {
-    info "Removing Fastfetch config..."
+    info "Removing fastfetch config..."
 
-    rm -f "$LOCAL_SHARE/fastfetch/assets/oneqode-knot-alpha.png"
+    local ff_dir="$CONFIG_DIR/fastfetch"
+    rm -f "$ff_dir/oneqode.txt" \
+          "$ff_dir/config-night-ride.jsonc" \
+          "$ff_dir/config-light-glass.jsonc"
 
-    # Restore backup if it exists
-    if [[ -f "$CONFIG_DIR/fastfetch/config.jsonc.bak" ]]; then
-        mv "$CONFIG_DIR/fastfetch/config.jsonc.bak" "$CONFIG_DIR/fastfetch/config.jsonc"
-        debug "Restored backup fastfetch config"
-    else
-        rm -f "$CONFIG_DIR/fastfetch/config.jsonc"
+    if [[ -L "$ff_dir/config.jsonc" ]]; then
+        rm -f "$ff_dir/config.jsonc"
+        # Restore a backed-up config if we had one
+        [[ -f "$ff_dir/config.jsonc.pre-oneqode" ]] && \
+            mv "$ff_dir/config.jsonc.pre-oneqode" "$ff_dir/config.jsonc"
     fi
 
-    success "Fastfetch config removed"
+    success "fastfetch config removed"
 }
 
 # Run if executed directly

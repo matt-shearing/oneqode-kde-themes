@@ -2,7 +2,22 @@
 
 Custom themes for Mattermost desktop and web client.
 
-## Installation
+## Automatic switching (recommended)
+
+When installed via `oneqode` (or `lib/install-mattermost.sh`), the theme switches
+automatically with the desktop day/night theme. The switcher pushes the active
+variant to the Mattermost server via its API on every switch, so all your clients
+(and all teams) update live — no manual paste needed.
+
+How it works: the switcher reads the desktop app's session token (`MMAUTHTOKEN`)
+from `~/.config/Mattermost/Cookies` at runtime and `PUT`s the theme to
+`/api/v4/users/me/preferences` for every team plus the all-teams default. The token
+is read fresh each time, so rotation is handled automatically; if you're logged out
+the update is skipped silently.
+
+Requires the Mattermost desktop app to be set up (logged in) before installing.
+
+## Manual installation (fallback)
 
 1. Open Mattermost (desktop app or web)
 2. Click the **Settings** icon (gear) in the top right
