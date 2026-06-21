@@ -66,6 +66,20 @@ Each theme sets:
 
 The themes provide a cohesive experience from login to desktop, including terminals, browsers, and editors.
 
+### Experimental: office suites
+
+Two office editors have OneQode theming under `assets/`, kept **standalone** —
+they are not yet wired into the `oneqode` TUI or the day/night switcher:
+
+- **ONLYOFFICE Desktop Editors** (`assets/onlyoffice/`) — `patch-builtin.py`
+  re-tints ONLYOFFICE's built-in dark theme to Night Ride (and brands the light
+  theme with Light Glass teal). Run `sudo python3 assets/onlyoffice/patch-builtin.py`
+  (re-run after app updates; `--revert` restores originals). Note: the desktop
+  app runs under XWayland and mis-scales its UI on KDE Wayland — a known upstream
+  bug with no clean fix yet.
+- **WPS Office** (`assets/wps/`, `lib/install-wps.sh`) — drives WPS's built-in
+  light/dark skins for a persistent dark chrome.
+
 ## Verification
 
 Run the verification script to check your installation:

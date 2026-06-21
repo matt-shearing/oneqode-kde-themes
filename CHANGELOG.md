@@ -1,6 +1,25 @@
 # Changelog
 
-## Unreleased
+## v1.1.0 — 2026-06-21
+
+### Added (experimental)
+
+- **ONLYOFFICE Desktop Editors theming** (`assets/onlyoffice/`) — a Word-like
+  editor with strong track-changes/DOCX fidelity, themed to match OneQode.
+  `patch-builtin.py` re-tints ONLYOFFICE's built-in dark theme CSS to Night Ride
+  (navy chrome + magenta/cyan accents) and brands the light theme with Light
+  Glass teal; run with `sudo python3 patch-builtin.py` (re-run after app
+  updates; `--revert` restores originals). ONLYOFFICE's custom-theme JSON loader
+  silently ignores accent keys, so editing the built-in theme is the only way to
+  get accents — `build-theme.py` + the `*.json` are kept as the documented
+  (background-only) JSON approach. **Known limitation:** the desktop app runs
+  under XWayland and mis-handles fractional scaling on KDE Wayland, so its UI
+  renders oversized — a documented upstream bug with no clean fix yet. Not wired
+  into the `oneqode` TUI or day/night switcher.
+- **WPS Office day/night skins** (`assets/wps/`, `lib/install-wps.sh`) — drives
+  WPS's built-in `2018white` / `2018white_dark` skins for a persistent dark
+  chrome (WPS's integrity check discards custom skins). `build-skin.py` can
+  generate a re-tinted OneQode palette. Standalone; not wired into the TUI.
 
 ### Fixed
 

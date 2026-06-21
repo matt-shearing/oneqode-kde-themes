@@ -1,6 +1,11 @@
 # Local files
 TODO.local
 *.local
+CLAUDE_CONTEXT.md
+
+# Python build artifacts
+__pycache__/
+*.pyc
 
 # Editor
 *.swp
