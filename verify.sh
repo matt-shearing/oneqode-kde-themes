@@ -393,6 +393,46 @@ verify_dependencies() {
     fi
 }
 
+# Verify the LIVE desktop config actually has the theme applied.
+# Some Plasma 6.7 updates silently clear these keys from kdeglobals while leaving
+# the look-and-feel selected, producing a half-applied (default-looking) desktop.
+verify_applied_config() {
+    section "Applied Desktop Config (live)"
+
+    if ! command -v kreadconfig6 &>/dev/null; then
+        warn "kreadconfig6 not available, skipping live config checks"
+        return
+    fi
+
+    local lnf
+    lnf="$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage 2>/dev/null)"
+    if [[ "$lnf" != org.oneqode.* ]]; then
+        info "Active look-and-feel is '${lnf:-none}' (not a OneQode theme); skipping applied-key checks"
+        return
+    fi
+
+    local cs ws icons
+    cs="$(kreadconfig6 --file kdeglobals --group General --key ColorScheme 2>/dev/null)"
+    ws="$(kreadconfig6 --file kdeglobals --group KDE --key widgetStyle 2>/dev/null)"
+    icons="$(kreadconfig6 --file kdeglobals --group Icons --key Theme 2>/dev/null)"
+
+    [[ -n "$cs" ]]    && pass "kdeglobals ColorScheme set ($cs)"   || fail "kdeglobals ColorScheme empty — theme half-applied. Fix: plasma-apply-lookandfeel -a $lnf"
+    [[ -n "$ws" ]]    && pass "kdeglobals widgetStyle set ($ws)"   || fail "kdeglobals widgetStyle empty — theme half-applied. Fix: plasma-apply-lookandfeel -a $lnf"
+    [[ -n "$icons" ]] && pass "kdeglobals Icons theme set ($icons)" || fail "kdeglobals Icons theme empty — theme half-applied. Fix: plasma-apply-lookandfeel -a $lnf"
+
+    # Day/night switching is dead if the timer has no future trigger.
+    if systemctl --user is-enabled oneqode-theme-switcher.timer &>/dev/null; then
+        local nr nm
+        nr="$(systemctl --user show oneqode-theme-switcher.timer -p NextElapseUSecRealtime --value 2>/dev/null)"
+        nm="$(systemctl --user show oneqode-theme-switcher.timer -p NextElapseUSecMonotonic --value 2>/dev/null)"
+        if [[ -n "$nr" && "$nr" != "0" ]] || { [[ -n "$nm" && "$nm" != "0" && "$nm" != "infinity" ]]; }; then
+            pass "Switcher timer has a scheduled next run"
+        else
+            fail "Switcher timer has no next trigger — day/night switching stalled. Fix: systemctl --user restart oneqode-theme-switcher.timer"
+        fi
+    fi
+}
+
 # Print summary
 print_summary() {
     echo ""
@@ -431,6 +471,7 @@ main() {
     verify_dependencies
     verify_theme_tools
     verify_installation
+    verify_applied_config
     test_switcher
     test_theme_apply
 

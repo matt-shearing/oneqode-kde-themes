@@ -1,5 +1,33 @@
 # Changelog
 
+## v1.2.0 — 2026-07-16
+
+### Fixed
+
+- **Day/night switching could silently stop after a reboot or system update.**
+  The systemd timer used `OnUnitActiveSec=5min`, which re-arms from the switcher
+  service's *last activation*. If the first post-boot trigger was lost — e.g. a
+  `systemctl daemon-reload` during a package upgrade consuming the pending
+  trigger — the timer never re-armed and auto-switching stalled with
+  `Trigger: n/a`, sometimes for days. Switched to a wall-clock `OnCalendar=*:0/5`
+  schedule (kept `OnBootSec=1min` for a prompt first run); wall-clock triggers are
+  computed from the clock and re-arm reliably across daemon-reloads and missed
+  runs.
+- **Plasma updates can drop applied theme keys, leaving a half-applied desktop.**
+  Some Plasma 6.7 updates cleared `ColorScheme`, `widgetStyle`, and the `[Icons]`
+  theme from `kdeglobals` while leaving the look-and-feel *selected*, so the
+  desktop rendered with default colours/style/icons. `verify.sh` now checks these
+  live keys (and that the switcher timer has a scheduled next run) and prints the
+  one-line re-apply fix when they're missing.
+
+### Changed
+
+- `lib/install-switcher.sh` now restarts the timer after enabling it, so
+  reinstalls and upgrades always leave it with a fresh, scheduled trigger rather
+  than inheriting a stale/elapsed state.
+- Bumped look-and-feel package version to **1.2.0** (metadata was still `1.0.0`
+  despite the `v1.1.0` tag).
+
 ## v1.1.0 — 2026-06-21
 
 ### Added (experimental)

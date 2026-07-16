@@ -3,8 +3,13 @@ Description=OneQode Theme Switcher Timer
 Documentation=https://github.com/matt-shearing/oneqode-kde-themes
 
 [Timer]
+# Prompt first run shortly after boot/login...
 OnBootSec=1min
-OnUnitActiveSec=5min
+# ...then re-check on a wall-clock schedule (every 5 min, on :00/:05/...).
+# OnCalendar is computed from the clock, so — unlike OnUnitActiveSec — it always
+# re-arms even if a trigger is lost to a `systemctl daemon-reload` during a
+# package upgrade. Persistent=true catches up runs missed while suspended/off.
+OnCalendar=*:0/5
 Persistent=true
 
 [Install]

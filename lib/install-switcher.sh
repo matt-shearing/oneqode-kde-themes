@@ -45,6 +45,11 @@ enable_switcher() {
     systemctl --user enable --now oneqode-theme-switcher.timer
     systemctl --user enable --now oneqode-theme-watcher.service
 
+    # Force a clean re-arm. `enable --now` on an already-enabled timer will not
+    # re-compute its next trigger if it was left in a stale/elapsed state
+    # (Trigger: n/a) by a prior daemon-reload — a restart guarantees a fresh one.
+    systemctl --user restart oneqode-theme-switcher.timer
+
     success "Timer and watcher enabled"
 }
 
