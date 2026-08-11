@@ -276,7 +276,7 @@ update_mattermost_theme() {
     [[ -z "$assets_dir" ]] && { debug "Mattermost assets not found"; return 0; }
 
     python3 - "$variant" "$assets_dir" <<'PYEOF' && debug "Mattermost theme set to $variant" || debug "Mattermost theme update skipped"
-import sys, json, sqlite3, os, urllib.request
+import sys, json, sqlite3, os, urllib.request, urllib.parse
 
 variant, assets_dir = sys.argv[1], sys.argv[2]
 mm = os.path.expanduser("~/.config/Mattermost")
@@ -289,12 +289,20 @@ try:
     if not servers:
         sys.exit(1)
     base = servers[0]["url"].rstrip("/")
+    host = urllib.parse.urlsplit(base).hostname or ""
 
     con = sqlite3.connect("file:%s?mode=ro&immutable=1" % cookies, uri=True)
-    row = con.execute("SELECT value FROM cookies WHERE name='MMAUTHTOKEN'").fetchone()
+    # Chromium keys cookies by host, and never drops rows for servers you've
+    # since stopped using — so a box that once logged into a different Mattermost
+    # keeps that stale MMAUTHTOKEN forever. Match the configured server's host and
+    # take the most recently used row rather than whichever one comes first.
+    row = con.execute(
+        "SELECT value FROM cookies WHERE name='MMAUTHTOKEN'"
+        " AND host_key IN (?, ?) ORDER BY last_access_utc DESC LIMIT 1",
+        (host, "." + host)).fetchone()
     token = row[0] if row else ""
     if not token:
-        sys.exit(1)  # logged out
+        sys.exit(1)  # logged out, or no cookie for the configured server
 
     fname = "oneqode-night-ride.json" if variant == "night" else "oneqode-light-glass.json"
     theme = json.load(open(os.path.join(assets_dir, fname)))
@@ -455,14 +463,16 @@ update_konsole_theme() {
     if command -v qdbus6 &>/dev/null && [[ -n "$profile_name" ]]; then
         for service in $(qdbus6 2>/dev/null | grep 'org\.kde\.konsole-' | tr -d ' '); do
             for session in $(qdbus6 "$service" 2>/dev/null | grep '/Sessions/'); do
-                qdbus6 "$service" "$session" org.kde.konsole.Session.setProfile "$profile_name" 2>/dev/null || true
+                # qdbus6 reports DBus errors on stdout, not stderr, so both are
+                # dropped — otherwise a denied call prints through the switcher.
+                qdbus6 "$service" "$session" org.kde.konsole.Session.setProfile "$profile_name" >/dev/null 2>&1 || true
             done
         done
 
         # Signal Yakuake sessions (Yakuake embeds Konsole's KPart)
         if qdbus6 org.kde.yakuake /yakuake/sessions 2>/dev/null | grep -q 'activeSessionId'; then
             for session_path in $(qdbus6 org.kde.yakuake 2>/dev/null | grep '/Sessions/'); do
-                qdbus6 org.kde.yakuake "$session_path" org.kde.konsole.Session.setProfile "$profile_name" 2>/dev/null || true
+                qdbus6 org.kde.yakuake "$session_path" org.kde.konsole.Session.setProfile "$profile_name" >/dev/null 2>&1 || true
             done
             debug "Signalled Yakuake sessions to reload profile"
         fi

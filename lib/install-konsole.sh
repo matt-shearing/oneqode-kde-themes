@@ -22,6 +22,12 @@ install_konsole() {
     # Enable DBus remote operations (needed for live theme switching)
     kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "AllowRemoteOperations" "true" 2>/dev/null || true
 
+    # KDE Gear 25.12 moved setProfile behind a second, separate opt-in that
+    # defaults to false; without it live re-theming of running Konsole/Yakuake
+    # sessions fails with DBus AccessDenied. Read at startup, so already-open
+    # windows keep the old value until they are restarted.
+    kwriteconfig6 --file konsolerc --group "KonsoleWindow" --key "EnableSecuritySensitiveDBusAPI" "true" 2>/dev/null || true
+
     success "Konsole color schemes installed (with blinking cursor)"
 }
 
