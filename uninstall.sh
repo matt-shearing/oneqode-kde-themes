@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OneQode KDE Theme Suite - Uninstaller (Legacy Shim)
+# OneQode Linux Theme - Uninstaller (Legacy Shim)
 # ===================================================
 # This script now calls the new TUI-based uninstaller.
 # For the full experience, run: ./oneqode

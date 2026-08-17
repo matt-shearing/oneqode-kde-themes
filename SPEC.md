@@ -1,7 +1,14 @@
-# OneQode KDE Theme Suite (Plasma 6 / Wayland) — Spec
+# OneQode Linux Theme — Spec
+
+> Product name is **OneQode Linux Theme**. This spec started as the KDE
+> Plasma 6 design; Omarchy (Hyprland) is now a first-class install target
+> with the same Light Glass / Night Ride pair. Shared app themes live
+> under `assets/` and are installed on both desktops. KDE-only packaging
+> notes below still apply to the Plasma half.
 
 ## 0) Goal
-Create a reproducible, GitHub-friendly KDE Plasma 6 theme suite for EndeavourOS (Arch) on Wayland, focused on:
+Create a reproducible, GitHub-friendly theme suite for Arch/Omarchy and
+EndeavourOS on Wayland, focused on:
 
 - **OneQode Light Glass** (day / work-friendly light theme with tasteful translucency)
 - **OneQode Night Ride** (night / synth-adjacent dark theme)
@@ -15,8 +22,8 @@ This repo must be usable on a fresh machine by cloning and running a single inst
 ---
 
 ## 1) Target Environment & Assumptions
-- OS: **EndeavourOS / Arch Linux**
-- Desktop: **KDE Plasma 6**, **Wayland**
+- OS: **Arch Linux** (Omarchy or EndeavourOS)
+- Desktop: **KDE Plasma 6** or **Omarchy (Hyprland)**, **Wayland**
 - Installer assumes the user has:
   - `pacman`
   - `sudo`

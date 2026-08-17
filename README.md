@@ -41,35 +41,41 @@ Without gum, the TUI falls back to basic bash menus.
 
 ## What's Included
 
-Each theme sets:
+Shared on both desktops:
 
 | Component | Notes |
 |-----------|-------|
-| Color scheme | Custom OneQode colors |
-| Wallpaper | 4K backgrounds |
-| Window decoration | Klassy (Breeze fallback) |
-| Application style | Klassy (Breeze fallback) |
-| Plasma style | Breeze Light / Breeze Dark |
-| Icons | Papirus / Papirus-Dark |
-| Fonts | Inter + JetBrains Mono Nerd |
-| Cursors | Bibata Modern Ice |
-| Splash screen | Minimal branded KSplash |
-| Login screen (SDDM) | Breeze + OneQode background |
-| GTK3/4 | Accent colors, scrollbars, libadwaita integration (auto-updates via KDE color sync) |
-| Konsole | Matching terminal colors with transparency |
-| Yakuake | Themed via Konsole profiles (auto-applied via DBus) |
+| Wallpaper | 4K Light Glass / Night Ride backgrounds |
 | Ghostty | Matching terminal colors with transparency |
-| Herdr | Agent-workspace TUI chrome (Light Glass / Night Ride, switched with the desktop) |
-| Firefox | Browser chrome + internal pages via userChrome/userContent CSS (auto light/dark) |
-| Zed | Matching editor theme (follows system) |
+| Herdr | Agent-workspace TUI chrome (sidebar titles included) |
+| Grok Build | `grokday` / `groknight`, flipped with the desktop |
+| Firefox | Browser chrome + internal pages via userChrome/userContent CSS |
+| Zed | Editor theme (follows system) |
 | Obsidian | Vault themes for both variants |
 | Typora | Matching markdown editor themes |
-| Mattermost | Custom sidebar/UI color schemes (manual import) |
-| Opera | Follows system theme; color reference provided for Stylus CSS |
+| Mattermost | Custom sidebar/UI color schemes |
+| GTK3/4 | Accent colors, scrollbars, libadwaita |
+| Keychron RGB | Ice cyan by day, magenta by night |
+| Fastfetch | Logo + accent colors |
 
-On **Omarchy**, the same palettes land as `omarchy-oq-light-glass` / `omarchy-oq-night-ride`. A user systemd timer (`omarchy-oq-auto-theme.timer`) rechecks every five minutes and calls `omarchy theme set` at sunrise and sunset. Location is read from `~/.config/oneqode/oneqode-theme-switcher.conf` — the same file the KDE switcher uses.
+KDE only (skipped on Omarchy):
 
-The themes provide a cohesive experience from login to desktop, including terminals, browsers, and editors.
+| Component | Notes |
+|-----------|-------|
+| Color scheme / Look-and-Feel | `org.oneqode.lightglass` / `org.oneqode.nightride` |
+| Window decoration | Klassy (Breeze fallback) |
+| Konsole / Yakuake | Matching terminal colors |
+| Splash + SDDM | Branded KSplash and login wallpaper |
+| Icons / cursors / fonts | Papirus, Bibata Modern Ice, Inter, JetBrains Mono |
+
+Omarchy only (skipped on KDE):
+
+| Component | Notes |
+|-----------|-------|
+| Desktop themes | `omarchy-oq-light-glass` / `omarchy-oq-night-ride` |
+| Solar timer | `omarchy-oq-auto-theme.timer` — rechecks every 5 minutes |
+
+Both switchers read `~/.config/oneqode/oneqode-theme-switcher.conf` for location.
 
 ### Experimental: office suites
 
@@ -426,11 +432,11 @@ Your Klassy customizations (button layout, transparency, etc.) are stored separa
 ```
 
 This will:
-- Disable and remove the systemd timer
-- Remove all theme assets from `~/.local/share/`
+- Disable and remove the systemd timer (KDE switcher or Omarchy solar timer)
+- Remove theme assets from `~/.local/share/` and `~/.config/omarchy/themes/`
 - Remove the switcher script
-- Optionally remove configuration and restore kwinrc backup
-- Apply the default Breeze theme
+- Optionally remove configuration and restore kwinrc backup (KDE)
+- Apply the default Breeze theme (KDE)
 
 **Note:** Installed packages (python-astral, klassy, etc.) are not removed automatically.
 
@@ -455,12 +461,14 @@ is enough for script changes; re-run install when new components land
 
 | Component | Location |
 |-----------|----------|
-| Color schemes | `~/.local/share/color-schemes/` |
-| Look-and-feel | `~/.local/share/plasma/look-and-feel/` |
-| Wallpapers | `~/.local/share/wallpapers/OneQode/` |
-| Konsole themes | `~/.local/share/konsole/` |
+| Color schemes | `~/.local/share/color-schemes/` (KDE) |
+| Look-and-feel | `~/.local/share/plasma/look-and-feel/` (KDE) |
+| Omarchy themes | `~/.config/omarchy/themes/omarchy-oq-*` |
+| Wallpapers | `~/.local/share/wallpapers/OneQode/` (KDE) / theme `backgrounds/` (Omarchy) |
+| Konsole themes | `~/.local/share/konsole/` (KDE) |
 | Ghostty themes | `~/.config/ghostty/themes/` |
 | Herdr themes | `~/.config/herdr/themes/` + `~/.config/herdr/config.toml` |
+| Grok Build | `~/.grok/config.toml` (`[ui].theme`) |
 | Firefox CSS | `~/.mozilla/firefox/<profile>/chrome/` |
 | GTK3 overrides | `~/.config/gtk-3.0/gtk.css` |
 | GTK4 overrides | `~/.config/gtk-4.0/gtk.css` |
@@ -468,8 +476,9 @@ is enough for script changes; re-run install when new components land
 | Obsidian themes | `<vault>/.obsidian/themes/` |
 | Typora themes | `~/.config/Typora/themes/` |
 | Cursors | `~/.local/share/icons/Bibata-Modern-Ice/` |
-| Switcher script | `~/.local/bin/oneqode-theme-switch` |
-| Watcher script | `~/.local/bin/oneqode-theme-watcher` |
+| Switcher script | `~/.local/bin/oneqode-theme-switch` (KDE) |
+| Omarchy solar timer | `~/.local/bin/omarchy-oq-auto-theme` |
+| Watcher script | `~/.local/bin/oneqode-theme-watcher` (KDE) |
 | Configuration | `~/.config/oneqode/oneqode-theme-switcher.conf` |
 | State file | `~/.local/state/oneqode/theme-state` |
 | Systemd units | `~/.config/systemd/user/` |
@@ -491,6 +500,8 @@ oneqode-kde-themes/
 │   ├── install-konsole.sh
 │   ├── install-ghostty.sh
 │   ├── install-herdr.sh
+│   ├── install-omarchy.sh
+│   ├── install-keychron.sh
 │   ├── install-firefox.sh
 │   ├── install-gtk.sh
 │   ├── install-zed.sh
@@ -504,6 +515,8 @@ oneqode-kde-themes/
 │   ├── firefox/         # userChrome/userContent CSS + XPI extensions
 │   ├── ghostty/         # Terminal themes
 │   ├── herdr/           # Agent-workspace TUI palettes
+│   ├── omarchy/         # Omarchy desktop themes + solar timer units
+│   ├── keychron/        # Keychron RGB helper + udev rule
 │   ├── gtk/             # GTK3/4 CSS overrides
 │   ├── klassy/          # Window decoration presets
 │   ├── konsole/         # Terminal color schemes

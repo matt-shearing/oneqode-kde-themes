@@ -4,6 +4,9 @@
 
 ### Added
 
+- **Docs rebranded to OneQode Linux Theme** — README, landing page
+  (`docs/index.html`), spec, feature plan, verify/uninstall banners.
+
 - **Omarchy desktop themes** — Light Glass / Night Ride as
   `omarchy-oq-light-glass` and `omarchy-oq-night-ride`, with a solar
   systemd timer (`omarchy-oq-auto-theme`) that shares

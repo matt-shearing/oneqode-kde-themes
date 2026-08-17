@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OneQode KDE Theme Suite - Verification Script
+# OneQode Linux Theme - Verification Script
 # ==============================================
 # Validates installation, checks unit files, and runs diagnostics
 
@@ -514,8 +514,8 @@ print_summary() {
 # Main
 main() {
     echo ""
-    echo -e "${BLUE}OneQode KDE Theme Suite - Verification${NC}"
-    echo -e "${BLUE}=======================================${NC}"
+    echo -e "${BLUE}OneQode Linux Theme - Verification${NC}"
+    echo -e "${BLUE}=================================${NC}"
 
     verify_repo_structure
     verify_json_files

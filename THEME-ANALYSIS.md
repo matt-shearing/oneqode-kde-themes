@@ -1,8 +1,8 @@
-# OneQode KDE Theme Suite - Comprehensive Analysis
+# OneQode Linux Theme - Comprehensive Analysis
 
 ## 1. Project Structure & Overview
 
-**OneQode** is a complete KDE Plasma 6 theme suite for EndeavourOS/Arch Linux on Wayland. The project features two complementary theme variants with automatic day/night switching capabilities.
+**OneQode Linux Theme** is Light Glass / Night Ride for KDE Plasma 6 and Omarchy on Wayland. The same day/night pair, with automatic sunrise/sunset switching and shared app palettes (Herdr, Grok Build, Ghostty, Firefox, editors).
 
 ### Two Main Theme Variants
 

@@ -1,6 +1,6 @@
-# OneQode KDE Themes — Feature Plan
+# OneQode Linux Theme — Feature Plan
 
-> Reference document for planned enhancements. Updated Feb 2026.
+> Reference document for planned enhancements. Updated Aug 2026.
 
 ---
 
@@ -26,7 +26,10 @@
 | Obsidian | `assets/obsidian/` (2 themes) | `install-obsidian.sh` | No switcher integration | — |
 | Mattermost | `assets/mattermost/` (2 JSON) | `install-mattermost.sh` | `update_mattermost_theme()` | Pushed to server via API (token from app cookie); switches all teams live |
 | Fastfetch | `assets/fastfetch/` (2 jsonc + logo) | `install-fastfetch.sh` | `update_fastfetch_theme()` | OQ ASCII logo, theme-accent colors; symlink to active variant |
-| Theme Switcher | `switcher/` (script + tray + systemd) | `install-switcher.sh` | — | Solar or fixed-time auto-switch |
+| Theme Switcher | `switcher/` (script + tray + systemd) | `install-switcher.sh` | — | Solar or fixed-time auto-switch (KDE) |
+| Omarchy desktop | `assets/omarchy/` (2 themes + timer) | `install-omarchy.sh` | `omarchy-oq-auto-theme` | Solar timer; skipped on KDE |
+| Grok Build | via `assets/herdr/apply-theme.py` | `install-herdr.sh` | `--grok-theme grokday/groknight` | Shared with Herdr apply |
+| Keychron RGB | `assets/keychron/` | `install-keychron.sh` | `update_keychron_theme()` | Ice cyan / magenta |
 
 ### Not Yet Implemented
 | Component | Priority | Notes |
