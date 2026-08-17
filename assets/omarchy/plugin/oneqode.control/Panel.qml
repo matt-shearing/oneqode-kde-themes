@@ -12,21 +12,11 @@ Panel {
   manageIpc: false
 
   property var status: Model.emptyStatus()
-  property bool cursorActive: false
-  property int focusIndex: 0
+  readonly property color fg: bar ? bar.foreground : Color.foreground
+  readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property bool night: Model.isNight(status.theme)
   readonly property bool showLabel: setting("showLabel", false) === true
-  readonly property var themeChoices: [
-    { id: "day", label: "Light Glass" },
-    { id: "night", label: "Night Ride" }
-  ]
-  readonly property var effectChoices: [
-    { id: "heatmap", label: "Heatmap" },
-    { id: "solid", label: "Solid" },
-    { id: "off", label: "Off" }
-  ]
-  readonly property var brightnessChoices: [40, 70, 100]
-  readonly property int controlCount: 8
+  readonly property string themeValue: night ? "night" : (status.isOqTheme ? "day" : "")
 
   function refresh() {
     if (!statusProc.running) statusProc.running = true
@@ -36,22 +26,6 @@ Panel {
     if (actionProc.running) return
     actionProc.command = ["oneqode-control"].concat(args)
     actionProc.running = true
-  }
-
-  function setTheme(which) { runControl(["theme", which]) }
-  function setAuto(which) { runControl(["auto", which]) }
-  function setEffect(which) { runControl(["keyboard", "effect", which]) }
-  function setBrightness(value) { runControl(["keyboard", "brightness", String(value)]) }
-
-  function activateFocused() {
-    if (focusIndex === 0) setTheme("day")
-    else if (focusIndex === 1) setTheme("night")
-    else if (focusIndex === 2) setAuto(status.autoEnabled ? "off" : "on")
-    else if (focusIndex === 3) setEffect("heatmap")
-    else if (focusIndex === 4) setEffect("solid")
-    else if (focusIndex === 5) setEffect("off")
-    else if (focusIndex === 6) setBrightness(70)
-    else if (focusIndex === 7) setBrightness(100)
   }
 
   IpcHandler {
@@ -64,6 +38,7 @@ Panel {
   }
 
   onOpenedChanged: if (opened) refresh()
+  Component.onCompleted: refresh()
 
   Process {
     id: statusProc
@@ -79,10 +54,8 @@ Panel {
     onExited: Qt.callLater(root.refresh)
   }
 
-  Timer { interval: 4000; running: true; repeat: true; onTriggered: root.refresh() }
+  Timer { interval: 5000; running: true; repeat: true; onTriggered: root.refresh() }
   Timer { interval: 2000; running: root.opened; repeat: true; onTriggered: root.refresh() }
-
-  Component.onCompleted: refresh()
 
   BarIconButton {
     id: button
@@ -92,30 +65,23 @@ Panel {
     slotSize: Style.bar.iconSlot * (root.showLabel ? 1.6 : 1)
     tooltipText: "OneQode · " + root.status.themeLabel
     onPressed: function(b) {
-      if (b === Qt.RightButton) root.setTheme("toggle")
+      if (b === Qt.RightButton) root.runControl(["theme", "toggle"])
       else root.toggle()
     }
   }
 
   KeyboardPanel {
-    id: panel
     anchorItem: button
     owner: root
     bar: root.bar
     open: root.opened
     focusTarget: keyCatcher
-    contentWidth: panel.fittedContentWidth(Style.space(380))
-    contentHeight: panel.fittedContentHeight(column.implicitHeight)
+    contentWidth: fittedContentWidth(Style.space(380))
+    contentHeight: fittedContentHeight(column.implicitHeight)
 
     PanelKeyCatcher {
       id: keyCatcher
       anchors.fill: parent
-      onMoveRequested: function(dx, dy) {
-        root.cursorActive = true
-        if (dx !== 0) root.focusIndex = Math.max(0, Math.min(root.controlCount - 1, root.focusIndex + dx))
-        else if (dy !== 0) root.focusIndex = Math.max(0, Math.min(root.controlCount - 1, root.focusIndex + dy))
-      }
-      onActivateRequested: if (root.cursorActive) root.activateFocused()
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
 
@@ -126,204 +92,103 @@ Panel {
         anchors.top: parent.top
         spacing: Style.space(14)
 
-        Item {
+        PanelHero {
+          title: "OneQode"
+          meta: root.status.themeLabel + (root.status.autoEnabled ? " · " + root.status.period : "")
+          detail: root.status.autoEnabled ? "AUTO" : "MANUAL"
+          foreground: root.fg
+          fontFamily: root.fontFamily
+          iconComponent: Component {
+            Text {
+              text: "◈"
+              color: root.fg
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.display
+            }
+          }
+        }
+
+        PanelSeparator { foreground: root.fg }
+
+        PanelSectionHeader {
+          text: "THEME"
+          foreground: root.fg
+          fontFamily: root.fontFamily
+        }
+
+        ButtonGroup {
           width: parent.width
-          implicitHeight: Math.max(heroMark.implicitHeight, heroLabels.implicitHeight)
+          foreground: root.fg
+          fontFamily: root.fontFamily
+          value: root.themeValue
+          options: [
+            { value: "day", label: "Light Glass" },
+            { value: "night", label: "Night Ride" }
+          ]
+          onChanged: function(v) { root.runControl(["theme", v]) }
+        }
+
+        Toggle {
+          width: parent.width
+          label: "Auto day / night"
+          description: root.status.sunrise !== ""
+            ? ("Sunrise " + root.status.sunrise + " · sunset " + root.status.sunset)
+            : "Brisbane solar schedule"
+          checked: root.status.autoEnabled
+          foreground: root.fg
+          fontFamily: root.fontFamily
+          onClicked: root.runControl(["auto", "toggle"])
+        }
+
+        PanelSeparator { foreground: root.fg }
+
+        PanelSectionHeader {
+          text: "KEYBOARD"
+          foreground: root.fg
+          fontFamily: root.fontFamily
+        }
+
+        ButtonGroup {
+          width: parent.width
+          foreground: root.fg
+          fontFamily: root.fontFamily
+          value: root.status.effect
+          options: [
+            { value: "heatmap", label: "Heatmap" },
+            { value: "solid", label: "Solid" },
+            { value: "off", label: "Off" }
+          ]
+          onChanged: function(v) { root.runControl(["keyboard", "effect", v]) }
+        }
+
+        Column {
+          width: parent.width
+          spacing: Style.space(6)
 
           Text {
-            id: heroMark
-            text: "◈"
-            color: root.bar.foreground
-            font.family: root.bar.fontFamily
-            font.pixelSize: Style.font.display
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
+            text: "Brightness  " + root.status.brightness + "%"
+            color: Qt.darker(root.fg, 1.4)
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            font.bold: true
+            font.letterSpacing: 1.2
           }
 
-          Column {
-            id: heroLabels
-            anchors.left: heroMark.right
-            anchors.leftMargin: Style.space(14)
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Style.space(2)
-
-            Text {
-              text: "OneQode"
-              color: root.bar.foreground
-              font.family: root.bar.fontFamily
-              font.pixelSize: Style.font.title
-            }
-
-            Text {
-              text: root.status.themeLabel + (root.status.autoEnabled ? " · auto " + root.status.period : " · manual")
-              color: root.bar.foreground
-              opacity: 0.65
-              font.family: root.bar.fontFamily
-              font.pixelSize: Style.font.bodySmall
-            }
-          }
-        }
-
-        Row {
-          width: parent.width
-          spacing: Style.space(20)
-          Column {
-            width: (parent.width - parent.spacing) / 2
-            spacing: Style.spacing.labelGap
-            InfoPair { label: "Sunrise"; value: root.status.sunrise || "—" }
-            InfoPair { label: "Sunset"; value: root.status.sunset || "—" }
-          }
-          Column {
-            width: (parent.width - parent.spacing) / 2
-            spacing: Style.spacing.labelGap
-            InfoPair { label: "Keyboard"; value: root.status.keyboardPresent ? "Framework 16" : "Not found" }
-            InfoPair { label: "Lights"; value: root.status.effect + " · " + root.status.brightness + "%" }
-          }
-        }
-
-        PanelSeparator { foreground: root.bar.foreground }
-
-        Column {
-          width: parent.width
-          spacing: Style.space(10)
-
-          PanelSectionHeader {
-            text: "THEME"
-            foreground: root.bar.foreground
-            fontFamily: root.bar.fontFamily
-          }
-
-          Row {
-            id: themeRow
+          PanelSlider {
             width: parent.width
-            spacing: Style.space(6)
-            readonly property real cellWidth: (width - spacing) / 2
-
-            Repeater {
-              model: root.themeChoices
-              Button {
-                required property var modelData
-                required property int index
-                width: themeRow.cellWidth
-                text: modelData.label
-                fontSize: Style.font.bodySmall
-                foreground: root.bar.foreground
-                fontFamily: root.bar.fontFamily
-                horizontalPadding: Style.spacing.controlPaddingX
-                verticalPadding: Style.spacing.controlPaddingY + Style.space(2)
-                bordered: true
-                active: (modelData.id === "night" && root.night) || (modelData.id === "day" && !root.night && root.status.isOqTheme)
-                hasCursor: root.cursorActive && root.focusIndex === index
-                onClicked: root.setTheme(modelData.id)
-                onHovered: function(h) { if (h) { root.cursorActive = true; root.focusIndex = index } }
-              }
-            }
-          }
-
-          Button {
-            width: parent.width
-            text: root.status.autoEnabled ? "Auto day / night is on" : "Auto day / night is off"
-            fontSize: Style.font.bodySmall
-            foreground: root.bar.foreground
-            fontFamily: root.bar.fontFamily
-            horizontalPadding: Style.spacing.controlPaddingX
-            verticalPadding: Style.spacing.controlPaddingY + Style.space(2)
-            bordered: true
-            active: root.status.autoEnabled
-            hasCursor: root.cursorActive && root.focusIndex === 2
-            onClicked: root.setAuto("toggle")
-            onHovered: function(h) { if (h) { root.cursorActive = true; root.focusIndex = 2 } }
-          }
-        }
-
-        PanelSeparator { foreground: root.bar.foreground }
-
-        Column {
-          width: parent.width
-          spacing: Style.space(10)
-
-          PanelSectionHeader {
-            text: "KEYBOARD"
-            foreground: root.bar.foreground
-            fontFamily: root.bar.fontFamily
-          }
-
-          Row {
-            id: effectRow
-            width: parent.width
-            spacing: Style.space(6)
-            readonly property real cellWidth: (width - spacing * 2) / 3
-
-            Repeater {
-              model: root.effectChoices
-              Button {
-                required property var modelData
-                required property int index
-                width: effectRow.cellWidth
-                text: modelData.label
-                fontSize: Style.font.bodySmall
-                foreground: root.bar.foreground
-                fontFamily: root.bar.fontFamily
-                horizontalPadding: Style.spacing.controlPaddingX
-                verticalPadding: Style.spacing.controlPaddingY + Style.space(2)
-                bordered: true
-                active: root.status.effect === modelData.id
-                hasCursor: root.cursorActive && root.focusIndex === (3 + index)
-                onClicked: root.setEffect(modelData.id)
-                onHovered: function(h) { if (h) { root.cursorActive = true; root.focusIndex = 3 + index } }
-              }
-            }
-          }
-
-          Row {
-            id: brightRow
-            width: parent.width
-            spacing: Style.space(6)
-            readonly property real cellWidth: (width - spacing * 2) / 3
-
-            Repeater {
-              model: root.brightnessChoices
-              Button {
-                required property var modelData
-                required property int index
-                width: brightRow.cellWidth
-                text: modelData + "%"
-                fontSize: Style.font.bodySmall
-                foreground: root.bar.foreground
-                fontFamily: root.bar.fontFamily
-                horizontalPadding: Style.spacing.controlPaddingX
-                verticalPadding: Style.spacing.controlPaddingY + Style.space(2)
-                bordered: true
-                active: root.status.brightness === modelData
-                hasCursor: root.cursorActive && root.focusIndex === (6 + Math.min(index, 1))
-                onClicked: root.setBrightness(modelData)
-              }
+            bar: root.bar
+            minimum: 20
+            maximum: 100
+            step: 10
+            integer: true
+            tickCount: 5
+            value: root.status.brightness
+            onReleased: function(v) {
+              root.runControl(["keyboard", "brightness", String(Math.round(v))])
             }
           }
         }
       }
-    }
-  }
-
-  component InfoPair: Row {
-    property string label: ""
-    property string value: ""
-    width: parent.width
-    spacing: Style.space(8)
-    Text {
-      text: label
-      color: root.bar.foreground
-      opacity: 0.6
-      font.family: root.bar.fontFamily
-      font.pixelSize: Style.font.bodySmall
-    }
-    Item { width: Math.max(0, parent.width - parent.children[0].implicitWidth - parent.children[2].implicitWidth - parent.spacing * 2); height: 1 }
-    Text {
-      text: value
-      color: root.bar.foreground
-      font.family: root.bar.fontFamily
-      font.pixelSize: Style.font.bodySmall
     }
   }
 }
