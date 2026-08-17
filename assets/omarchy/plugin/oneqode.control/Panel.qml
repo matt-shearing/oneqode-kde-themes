@@ -9,7 +9,7 @@ Panel {
   id: root
   moduleName: "oneqode.control"
   ipcTarget: "oneqode.control"
-  manageIpc: false
+  manageIpc: true
 
   property var status: Model.emptyStatus()
   readonly property color fg: bar ? bar.foreground : Color.foreground
@@ -23,19 +23,13 @@ Panel {
     if (!statusProc.running) statusProc.running = true
   }
 
+  implicitWidth: button.implicitWidth
+  implicitHeight: button.implicitHeight
+
   function runControl(args) {
     if (actionProc.running) return
     actionProc.command = ["oneqode-control"].concat(args)
     actionProc.running = true
-  }
-
-  IpcHandler {
-    target: "oneqode.control"
-    function open() { root.open() }
-    function close() { root.close() }
-    function show() { root.open() }
-    function hide() { root.close() }
-    function toggle() { root.toggle() }
   }
 
   onOpenedChanged: if (opened) refresh()
@@ -62,9 +56,7 @@ Panel {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: root.showLabel ? "OQ" : ""
-    iconComponent: root.showLabel ? null : logoIcon
-    slotSize: Style.bar.iconSlot * (root.showLabel ? 1.6 : 1)
+    iconComponent: logoIcon
     tooltipText: "OneQode · " + root.status.themeLabel
     onPressed: function(b) {
       if (b === Qt.RightButton) root.runControl(["theme", "toggle"])
@@ -74,18 +66,13 @@ Panel {
 
   Component {
     id: logoIcon
-    Item {
-      Image {
-        anchors.centerIn: parent
-        width: Style.bar.iconCanvas
-        height: Style.bar.iconCanvas
-        source: root.logo
-        sourceSize.width: width * 2
-        sourceSize.height: height * 2
-        fillMode: Image.PreserveAspectFit
-        smooth: true
-        asynchronous: true
-      }
+    Image {
+      anchors.fill: parent
+      source: root.logo
+      sourceSize.width: width * 2
+      sourceSize.height: height * 2
+      fillMode: Image.PreserveAspectFit
+      smooth: true
     }
   }
 
