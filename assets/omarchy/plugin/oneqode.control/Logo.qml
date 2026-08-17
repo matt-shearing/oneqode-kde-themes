@@ -17,6 +17,7 @@ Item {
     fillMode: Image.PreserveAspectFit
     smooth: true
     visible: !root.tint
+    layer.enabled: root.tint
   }
 
   MultiEffect {

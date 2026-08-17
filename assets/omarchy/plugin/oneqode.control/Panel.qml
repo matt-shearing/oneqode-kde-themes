@@ -17,7 +17,8 @@ Panel {
   readonly property bool night: Model.isNight(status.theme)
   readonly property bool showLabel: setting("showLabel", false) === true
   readonly property string themeValue: night ? "night" : (status.isOqTheme ? "day" : "")
-  readonly property url logo: Qt.resolvedUrl(night ? "assets/oneqode-dark.svg" : "assets/oneqode-light.svg")
+  readonly property url logo: Qt.resolvedUrl("assets/oneqode-mono.svg")
+  readonly property url logoBrand: Qt.resolvedUrl(night ? "assets/oneqode-dark.svg" : "assets/oneqode-light.svg")
 
   function refresh() {
     if (!statusProc.running) statusProc.running = true
@@ -106,9 +107,9 @@ Panel {
             Logo {
               width: Style.font.display
               height: Style.font.display
-              source: root.logo
+              source: root.logoBrand
               color: root.fg
-              tint: true
+              tint: false
             }
           }
         }
