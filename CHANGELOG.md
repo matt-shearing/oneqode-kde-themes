@@ -4,6 +4,15 @@
 
 ### Fixed
 
+- **Grok Build panes that were mid-turn stayed on the old palette.**
+  Config was updated, but live TUIs only honor `/theme`. The hook now
+  flips idle panes immediately and retries working ones once they
+  settle.
+
+- **Omarchy bar OQ knot stayed white on Light Glass.** Tinting the
+  mono mark to the bar foreground was turned off; it is on again so
+  the knot follows the desktop like the other bar icons.
+
 - **Omarchy morning switch stayed on Night Ride.** The NOAA sunrise
   equation was keyed off the current UTC instant, so before ~10:00 AEST
   it still used yesterday's sunset and thought it was night. It now

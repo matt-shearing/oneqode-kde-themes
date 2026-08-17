@@ -48,6 +48,8 @@ install_omarchy() {
     mkdir -p "$OMARCHY_HOOKS/theme-set.d" "$OMARCHY_HOOKS/post-boot.d"
     install -Dm755 "$ASSETS_DIR/omarchy/hooks/theme-set-herdr.sh" \
         "$OMARCHY_HOOKS/theme-set.d/herdr-theme.sh"
+    install -Dm755 "$ASSETS_DIR/omarchy/hooks/flip-grok-theme.py" \
+        "$OMARCHY_HOOKS/lib/flip-grok-theme.py"
     install -Dm755 "$ASSETS_DIR/omarchy/hooks/post-boot-auto-theme.sh" \
         "$OMARCHY_HOOKS/post-boot.d/oq-auto-theme.sh"
     install -Dm755 "$ASSETS_DIR/omarchy/hooks/framework-keyboard-heat.sh" \

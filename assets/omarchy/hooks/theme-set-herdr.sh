@@ -7,32 +7,43 @@ set -euo pipefail
 
 THEME=${1:-}
 THEMES_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/herdr/themes
+HOOKS_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/hooks
 APPLY="$THEMES_DIR/apply-theme.py"
+FLIP="$HOOKS_DIR/lib/flip-grok-theme.py"
 
 [[ -x $APPLY ]] || exit 0
+
+pick_fragment() {
+  local name
+  for name in "$@"; do
+    if [[ -f $THEMES_DIR/$name ]]; then
+      echo "$THEMES_DIR/$name"
+      return 0
+    fi
+  done
+  return 1
+}
 
 grok_theme=groknight
 case "$THEME" in
 omarchy-oq-light-glass)
-  fragment=$THEMES_DIR/oneqode-light-glass.toml
+  fragment=$(pick_fragment oneqode-light-glass.toml omarchy-oq-light-glass.toml) || exit 0
   grok_theme=grokday
   ;;
 omarchy-oq-night-ride)
-  fragment=$THEMES_DIR/oneqode-night-ride.toml
+  fragment=$(pick_fragment oneqode-night-ride.toml omarchy-oq-night-ride.toml) || exit 0
   grok_theme=groknight
   ;;
 *)
   if [[ -f ${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme/light.mode ]]; then
-    fragment=$THEMES_DIR/oneqode-light-glass.toml
+    fragment=$(pick_fragment oneqode-light-glass.toml omarchy-oq-light-glass.toml) || exit 0
     grok_theme=grokday
   else
-    fragment=$THEMES_DIR/terminal.toml
+    fragment=$(pick_fragment terminal.toml) || exit 0
     grok_theme=groknight
   fi
   ;;
 esac
-
-[[ -f $fragment ]] || exit 0
 
 python3 "$APPLY" "$fragment" --grok-theme "$grok_theme" || {
   echo "herdr-theme hook: apply failed" >&2
@@ -41,27 +52,14 @@ python3 "$APPLY" "$fragment" --grok-theme "$grok_theme" || {
 
 if herdr status server >/dev/null 2>&1; then
   herdr server reload-config >/dev/null 2>&1 || true
-  GROK_THEME=$grok_theme python3 - <<'PY' || true
-import json, os, subprocess
-
-theme = os.environ["GROK_THEME"]
-try:
-    raw = subprocess.check_output(["herdr", "agent", "list"], text=True)
-    agents = json.loads(raw).get("result", {}).get("agents", [])
-except Exception:
-    raise SystemExit(0)
-
-for agent in agents:
-    if agent.get("agent") != "grok":
-        continue
-    if agent.get("agent_status") == "working":
-        continue
-    pane = agent.get("pane_id")
-    if not pane:
-        continue
-    subprocess.run(["herdr", "pane", "send-text", pane, f"/theme {theme}"], check=False,
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    subprocess.run(["herdr", "pane", "send-keys", pane, "enter"], check=False,
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-PY
+  if [[ -f $FLIP ]]; then
+    # Detached: idle panes flip now, working panes flip once they settle.
+    systemctl --user stop oneqode-grok-theme-flip.service >/dev/null 2>&1 || true
+    systemctl --user reset-failed oneqode-grok-theme-flip.service >/dev/null 2>&1 || true
+    systemd-run --user --collect --quiet \
+      --unit=oneqode-grok-theme-flip \
+      --setenv=GROK_THEME="$grok_theme" \
+      python3 "$FLIP" >/dev/null 2>&1 || \
+      GROK_THEME=$grok_theme nohup python3 "$FLIP" >/dev/null 2>&1 &
+  fi
 fi
