@@ -71,7 +71,7 @@ Panel {
       anchors.fill: parent
       source: root.logo
       color: root.fg
-      tint: true
+      tint: false
     }
   }
 
