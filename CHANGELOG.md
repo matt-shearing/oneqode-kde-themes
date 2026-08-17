@@ -9,9 +9,10 @@
   flips idle panes immediately and retries working ones once they
   settle.
 
-- **Omarchy bar OQ knot stayed white on Light Glass.** Tinting the
-  mono mark to the bar foreground was turned off; it is on again so
-  the knot follows the desktop like the other bar icons.
+- **Omarchy bar OQ knot stayed white on Light Glass.** SVG tint and a
+  `light.mode` FileView both left the baked-white mark in place. The
+  knot is now drawn as a path in `Color.bar.text`, so it follows the
+  bar like the other icons.
 
 - **Omarchy morning switch stayed on Night Ride.** The NOAA sunrise
   equation was keyed off the current UTC instant, so before ~10:00 AEST

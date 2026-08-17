@@ -12,23 +12,12 @@ Panel {
   manageIpc: true
 
   property var status: Model.emptyStatus()
-  readonly property color fg: bar ? bar.foreground : Color.foreground
+  readonly property color fg: bar ? bar.barForeground : Color.bar.text
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property bool night: Model.isNight(status.theme)
-  property bool lightMode: false
   readonly property bool showLabel: setting("showLabel", false) === true
   readonly property string themeValue: night ? "night" : (status.isOqTheme ? "day" : "")
-  readonly property url logo: Qt.resolvedUrl(lightMode ? "assets/oneqode-ink.svg" : "assets/oneqode-mono.svg")
   readonly property url logoBrand: Qt.resolvedUrl(night ? "assets/oneqode-dark.svg" : "assets/oneqode-light.svg")
-
-  FileView {
-    path: Quickshell.env("HOME") + "/.local/state/omarchy/current/theme/light.mode"
-    watchChanges: true
-    printErrors: false
-    onLoaded: root.lightMode = true
-    onLoadFailed: root.lightMode = false
-    onFileChanged: reload()
-  }
 
   function refresh() {
     if (!statusProc.running) statusProc.running = true
@@ -79,7 +68,6 @@ Panel {
     id: logoIcon
     Logo {
       anchors.fill: parent
-      source: root.logo
       color: root.fg
       tint: true
     }
