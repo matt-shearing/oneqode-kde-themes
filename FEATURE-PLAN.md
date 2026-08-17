@@ -14,7 +14,8 @@
 | Klassy Decoration | `assets/klassy/` (2 presets + 2 configs) | via switcher | `klassy-settings --import/--load` | Presets + fast-path check |
 | Wallpapers | `assets/wallpapers/` (2 4K JPGs) | `install-wallpapers.sh` | via look-and-feel | — |
 | Konsole | `assets/konsole/` (2 colorschemes) | `install-konsole.sh` | `update_konsole_theme()` + DBus | Full 16-color + opacity 0.92 + cursor |
-| Ghostty | `assets/ghostty/` (2 themes) | `install-ghostty.sh` | `update_ghostty_theme()` symlink | — |
+| Ghostty | `assets/ghostty/` (2 themes) | `install-ghostty.sh` | native `theme = light:…,dark:…` + D-Bus `reload-config` | Follows system appearance; no USR1 |
+| Herdr | `assets/herdr/` (2 TOML palettes) | `install-herdr.sh` | `update_herdr_theme()` + `herdr server reload-config` | `[theme.custom]` override; Herdr has no user-named themes |
 | Firefox (chrome) | `assets/firefox/` (3 CSS + XPIs) | `install-firefox.sh` | `update_firefox_theme()` | Auto-switching via `prefers-color-scheme` |
 | Firefox (content) | `assets/firefox/` (3 userContent CSS) | `install-firefox.sh` | `update_firefox_theme()` | about:newtab, preferences, addons, error pages |
 | GTK3/4 Overrides | `assets/gtk/` (gtk3.css + gtk4.css) | `install-gtk.sh` | Auto (KDE color sync) | Accent, scrollbar, libadwaita, Chromium .chromium class |

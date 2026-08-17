@@ -14,10 +14,11 @@ install_switcher() {
     mkdir -p "$LOCAL_SHARE/oneqode/icons"
     mkdir -p "$CONFIG_DIR/autostart"
 
-    # Install scripts (symlink oneqode so it can find its lib folder)
+    # Symlink so `git pull` on another machine is enough for the next
+    # timer tick / TUI run to pick up switcher and watcher changes.
     ln -sf "$ONEQODE_DIR/oneqode" "$LOCAL_BIN/oneqode"
-    install -m 755 "$switcher_dir/oneqode-theme-switch" "$LOCAL_BIN/"
-    install -m 755 "$switcher_dir/oneqode-theme-watcher" "$LOCAL_BIN/"
+    ln -sf "$switcher_dir/oneqode-theme-switch" "$LOCAL_BIN/oneqode-theme-switch"
+    ln -sf "$switcher_dir/oneqode-theme-watcher" "$LOCAL_BIN/oneqode-theme-watcher"
 
     # Install config if not exists
     if [[ ! -f "$CONFIG_DIR/oneqode/oneqode-theme-switcher.conf" ]]; then

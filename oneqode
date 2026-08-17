@@ -59,6 +59,7 @@ show_status() {
     echo -e "  $(status_icon cursors) Cursors (Bibata)"
     echo -e "  $(status_icon konsole) Konsole Themes"
     echo -e "  $(status_icon ghostty) Ghostty Themes"
+    echo -e "  $(status_icon herdr) Herdr Themes"
     echo -e "  $(status_icon fastfetch) Fastfetch Config"
     echo -e "  $(status_icon zed) Zed Themes"
     echo -e "  $(status_icon typora) Typora Themes"
@@ -175,6 +176,9 @@ do_install_all() {
     source "$SCRIPT_DIR/lib/install-ghostty.sh"
     install_ghostty
 
+    source "$SCRIPT_DIR/lib/install-herdr.sh"
+    install_herdr
+
     source "$SCRIPT_DIR/lib/install-fastfetch.sh"
     install_fastfetch
 
@@ -249,6 +253,7 @@ do_install_selective() {
         "Cursors (Bibata)" \
         "Konsole Themes" \
         "Ghostty Themes" \
+        "Herdr Themes" \
         "Fastfetch Config" \
         "Zed Themes" \
         "Typora Themes" \
@@ -302,6 +307,10 @@ do_install_selective() {
             "Ghostty Themes")
                 source "$SCRIPT_DIR/lib/install-ghostty.sh"
                 install_ghostty
+                ;;
+            "Herdr Themes")
+                source "$SCRIPT_DIR/lib/install-herdr.sh"
+                install_herdr
                 ;;
             "Fastfetch Config")
                 source "$SCRIPT_DIR/lib/install-fastfetch.sh"
@@ -365,6 +374,9 @@ do_uninstall() {
 
     source "$SCRIPT_DIR/lib/install-ghostty.sh"
     uninstall_ghostty
+
+    source "$SCRIPT_DIR/lib/install-herdr.sh"
+    uninstall_herdr
 
     source "$SCRIPT_DIR/lib/install-fastfetch.sh"
     uninstall_fastfetch
@@ -746,10 +758,9 @@ do_configure_transparency() {
         success "Transparency updated"
     fi
 
-    # Reload Ghostty if running
+    # Reload Ghostty if running (D-Bus action — SIGUSR1 used to crash it)
     if pgrep -x ghostty &>/dev/null; then
-        sleep 0.1
-        killall -USR1 ghostty 2>/dev/null || true
+        reload_ghostty
         info "Ghostty reloaded with new settings"
     fi
 

@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Herdr Light Glass / Night Ride themes** with day/night auto-switch.
+  Herdr has no user-named theme files, so the palettes live as
+  `[theme]` + `[theme.custom]` fragments (`assets/herdr/`). The installer
+  writes the matching variant into `~/.config/herdr/config.toml` and the
+  switcher swaps it on look-and-feel change, then runs
+  `herdr server reload-config`. `name = "terminal"` was picking up Ghostty's
+  ANSI map and looking wrong once the terminal went Light Glass.
+
+### Changed
+
+- Switcher and watcher installs are now symlinks into the repo, so a
+  `git pull` on another machine is enough for the next timer tick to pick
+  up script changes. New components (Ghostty pairing, Herdr palettes)
+  still need a re-run of `./install.sh`.
+
+### Fixed
+
+- **Ghostty stayed on Night Ride after the daytime switch.** The switcher only
+  retargeted the `themes/oneqode-current` symlink, and Ghostty's
+  `gtk-single-instance` daemon never reloads on a symlink flip — new windows
+  inherit the already-loaded (night) palette. SIGUSR1 was also dropped earlier
+  because it crashed Ghostty. Installer and switcher now write
+  `theme = light:oneqode-light-glass,dark:oneqode-night-ride` so Ghostty follows
+  the desktop appearance, drop the old `config-file` include (it loaded *after*
+  `theme =` and pinned a single palette), and reload via the official GTK
+  `reload-config` D-Bus action.
+
 ## v1.2.0 — 2026-07-16
 
 ### Fixed

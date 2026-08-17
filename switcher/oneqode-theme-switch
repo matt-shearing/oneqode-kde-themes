@@ -376,6 +376,9 @@ update_terminal_themes() {
     # Update Ghostty
     update_ghostty_theme "$is_light"
 
+    # Update Herdr (agent workspace TUI)
+    update_herdr_theme "$is_light"
+
     # Update fastfetch
     update_fastfetch_theme "$is_light"
 
@@ -481,6 +484,59 @@ update_konsole_theme() {
     debug "Konsole theme updated to: $scheme_name"
 }
 
+# Ghostty 1.1+ pairs light/dark themes and follows the desktop appearance.
+# The old `config-file = themes/oneqode-current` include loaded AFTER `theme =`
+# and pinned a single palette, so the gtk-single-instance daemon never swapped
+# at sunrise. SIGUSR1 reload also crashed Ghostty on some systems.
+GHOSTTY_THEME_PAIR="theme = light:oneqode-light-glass,dark:oneqode-night-ride"
+
+ensure_ghostty_theme_pairing() {
+    local ghostty_config="$HOME/.config/ghostty/config"
+    mkdir -p "$(dirname "$ghostty_config")"
+
+    if [[ ! -f "$ghostty_config" ]]; then
+        printf '%s\n' \
+            "# Ghostty config" \
+            "# OneQode theme (follows system light/dark)" \
+            "$GHOSTTY_THEME_PAIR" \
+            > "$ghostty_config"
+        return 0
+    fi
+
+    if grep -q 'oneqode-current' "$ghostty_config"; then
+        sed -i \
+            -e '/# OneQode theme/d' \
+            -e '/oneqode-current/d' \
+            "$ghostty_config"
+    fi
+
+    if grep -qE '^[[:space:]]*theme[[:space:]]*=[[:space:]]*(light:oneqode-light-glass,[[:space:]]*dark:oneqode-night-ride|dark:oneqode-night-ride,[[:space:]]*light:oneqode-light-glass)[[:space:]]*$' "$ghostty_config"; then
+        return 0
+    fi
+
+    if grep -qE '^[[:space:]]*theme[[:space:]]*=.*oneqode' "$ghostty_config"; then
+        sed -i -E 's|^[[:space:]]*theme[[:space:]]*=.*oneqode.*|'"$GHOSTTY_THEME_PAIR"'|' "$ghostty_config"
+        return 0
+    fi
+
+    if grep -qE '^[[:space:]]*theme[[:space:]]*=' "$ghostty_config"; then
+        return 0
+    fi
+
+    printf '\n# OneQode theme (follows system light/dark)\n%s\n' "$GHOSTTY_THEME_PAIR" >> "$ghostty_config"
+}
+
+reload_ghostty() {
+    # Official GTK action. New windows inherit the already-loaded config in
+    # gtk-single-instance mode, so a reload is required for a live swap.
+    busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty \
+        org.gtk.Actions Activate sava{sv} reload-config 0 0 >/dev/null 2>&1 \
+        || gdbus call --session --dest com.mitchellh.ghostty \
+            --object-path /com/mitchellh/ghostty \
+            --method org.gtk.Actions.Activate reload-config [] {} >/dev/null 2>&1 \
+        || true
+}
+
 # Update Ghostty theme
 update_ghostty_theme() {
     local is_light="$1"
@@ -499,12 +555,55 @@ update_ghostty_theme() {
         return 0
     fi
 
-    # Update the symlink
+    # Keep the symlink current for anyone still listing oneqode-current.
     ln -sf "$theme_name" "$ghostty_themes/oneqode-current"
 
-    # Note: Ghostty USR1 reload signal causes crashes on some systems.
-    # New Ghostty windows will pick up the theme automatically.
-    debug "Ghostty theme symlink updated to: $theme_name"
+    # Prefer Ghostty's native light/dark pairing so it follows KDE appearance
+    # without another signal. Self-heals older installs that still include the
+    # flipping symlink.
+    ensure_ghostty_theme_pairing
+
+    reload_ghostty
+    debug "Ghostty theme pairing ensured; reloaded to: $theme_name"
+}
+
+# Update Herdr UI palette (agent workspace TUI).
+# Herdr has no user-named themes — we write a [theme.custom] block and reload.
+update_herdr_theme() {
+    local is_light="$1"
+    local fragment_name
+    if [[ "$is_light" == "true" ]]; then
+        fragment_name="oneqode-light-glass.toml"
+    else
+        fragment_name="oneqode-night-ride.toml"
+    fi
+
+    local fragment="" apply=""
+    local dir
+    for dir in \
+        "$HOME/.config/herdr/themes" \
+        "$HOME/.local/share/oneqode/herdr" \
+        "$HOME/dev/oneqode-kde-themes/assets/herdr" \
+        "/usr/share/oneqode-kde-themes/herdr"
+    do
+        [[ -z "$fragment" && -f "$dir/$fragment_name" ]] && fragment="$dir/$fragment_name"
+        [[ -z "$apply" && -f "$dir/apply-theme.py" ]] && apply="$dir/apply-theme.py"
+    done
+
+    if [[ -z "$fragment" || -z "$apply" ]]; then
+        debug "Herdr theme assets not found, skipping"
+        return 0
+    fi
+
+    python3 "$apply" --config "$HOME/.config/herdr/config.toml" "$fragment" 2>/dev/null || {
+        debug "Herdr theme apply failed"
+        return 0
+    }
+
+    if command -v herdr &>/dev/null; then
+        herdr server reload-config >/dev/null 2>&1 || true
+    fi
+    debug "Herdr theme updated to: $fragment_name"
 }
 
 # Update Firefox userChrome.css + userContent.css to the auto-switching versions

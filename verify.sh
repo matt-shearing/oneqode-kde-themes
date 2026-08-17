@@ -137,6 +137,38 @@ verify_repo_structure() {
     check_file "$SCRIPT_DIR/assets/konsole/OneQodeNightRide.colorscheme" "Konsole Night Ride"
     check_file "$SCRIPT_DIR/assets/ghostty/oneqode-light-glass" "Ghostty Light Glass"
     check_file "$SCRIPT_DIR/assets/ghostty/oneqode-night-ride" "Ghostty Night Ride"
+    check_file "$SCRIPT_DIR/assets/herdr/oneqode-light-glass.toml" "Herdr Light Glass"
+    check_file "$SCRIPT_DIR/assets/herdr/oneqode-night-ride.toml" "Herdr Night Ride"
+    check_file "$SCRIPT_DIR/assets/herdr/apply-theme.py" "Herdr apply-theme.py"
+    check_file "$SCRIPT_DIR/lib/install-herdr.sh" "Herdr installer"
+
+    # Ghostty must use native light/dark pairing + D-Bus reload, not a
+    # flipping config-file include. The gtk-single-instance daemon never
+    # picks up a symlink retarget on its own.
+    if grep -q 'theme = light:oneqode-light-glass,dark:oneqode-night-ride' \
+            "$SCRIPT_DIR/lib/install-ghostty.sh" \
+            "$SCRIPT_DIR/switcher/oneqode-theme-switch"; then
+        pass "Ghostty installer/switcher use native light/dark pairing"
+    else
+        fail "Ghostty installer/switcher missing native light/dark theme pairing"
+    fi
+    if grep -qE '^[[:space:]]*(theme_include=|[^#[:space:]].*config-file = themes/oneqode-current)' \
+            "$SCRIPT_DIR/lib/install-ghostty.sh"; then
+        fail "Ghostty installer still writes the old oneqode-current include"
+    else
+        pass "Ghostty installer no longer writes oneqode-current include"
+    fi
+    if grep -q 'org.gtk.Actions Activate' "$SCRIPT_DIR/switcher/oneqode-theme-switch"; then
+        pass "Ghostty switcher reloads via D-Bus reload-config"
+    else
+        fail "Ghostty switcher missing D-Bus reload-config"
+    fi
+    if grep -q 'update_herdr_theme' "$SCRIPT_DIR/switcher/oneqode-theme-switch" \
+            && grep -q 'herdr server reload-config' "$SCRIPT_DIR/switcher/oneqode-theme-switch"; then
+        pass "Herdr switcher writes palette and reloads the server"
+    else
+        fail "Herdr switcher missing update_herdr_theme / server reload-config"
+    fi
 
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-switch" "Switcher script"
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-watcher" "Watcher script"
@@ -244,6 +276,27 @@ verify_installation() {
         check_executable "$LOCAL_BIN/oneqode-theme-switch" "Switcher executable"
     else
         info "Theme switcher not installed (run install.sh first)"
+    fi
+
+    local ghostty_config="$HOME/.config/ghostty/config"
+    if [[ -f "$ghostty_config" ]] && grep -q 'oneqode' "$ghostty_config"; then
+        if grep -qE '^[[:space:]]*theme[[:space:]]*=[[:space:]]*(light:oneqode-light-glass,[[:space:]]*dark:oneqode-night-ride|dark:oneqode-night-ride,[[:space:]]*light:oneqode-light-glass)' "$ghostty_config"; then
+            pass "Ghostty config uses native light/dark pairing"
+        else
+            fail "Ghostty config still uses the old oneqode-current include — daytime will not swap. Re-run: ./oneqode (Install → Ghostty) or lib/install-ghostty.sh"
+        fi
+        if grep -q 'oneqode-current' "$ghostty_config"; then
+            fail "Ghostty config still includes themes/oneqode-current (pins a single palette)"
+        fi
+    fi
+
+    local herdr_config="$HOME/.config/herdr/config.toml"
+    if [[ -f "$herdr_config" ]] && grep -q 'BEGIN ONEQODE THEME' "$herdr_config"; then
+        if grep -qE 'accent = "#(00b4c8|ff0080)"' "$herdr_config"; then
+            pass "Herdr config has a OneQode palette"
+        else
+            fail "Herdr config has the OneQode marker but no OQ accent"
+        fi
     fi
 
     if [[ -d "$LOCAL_SHARE/plasma/look-and-feel/org.oneqode.lightglass" ]]; then

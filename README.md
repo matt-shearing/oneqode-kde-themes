@@ -57,6 +57,7 @@ Each theme sets:
 | Konsole | Matching terminal colors with transparency |
 | Yakuake | Themed via Konsole profiles (auto-applied via DBus) |
 | Ghostty | Matching terminal colors with transparency |
+| Herdr | Agent-workspace TUI chrome (Light Glass / Night Ride, switched with the desktop) |
 | Firefox | Browser chrome + internal pages via userChrome/userContent CSS (auto light/dark) |
 | Zed | Matching editor theme (follows system) |
 | Obsidian | Vault themes for both variants |
@@ -163,6 +164,12 @@ Zed themes are configured to follow the system theme automatically:
 
 When KDE switches between light/dark modes, Zed will follow automatically. You can also select themes manually via the Zed Command Palette → "theme selector: toggle".
 
+### Herdr
+
+Herdr has no user-named theme files — only built-in names plus a `[theme.custom]` override table. OneQode ships two palettes (`assets/herdr/oneqode-light-glass.toml` and `oneqode-night-ride.toml`) and writes the active one into `~/.config/herdr/config.toml`. The day/night switcher swaps the block and runs `herdr server reload-config`.
+
+Don't set `theme.name = "terminal"` if you want the OneQode chrome. That mode maps the host terminal ANSI palette onto Herdr's UI and looks wrong once Ghostty goes Light Glass.
+
 ### Obsidian
 
 Themes are installed to all detected vaults. Select "OneQode Light Glass" or "OneQode Night Ride" in Obsidian → Settings → Appearance → Themes.
@@ -194,7 +201,14 @@ nano ~/.config/ghostty/themes/oneqode-light-glass
 nano ~/.config/ghostty/themes/oneqode-night-ride
 ```
 
-Values range from 0.0 (fully transparent) to 1.0 (opaque). After editing, reload Ghostty with `killall -USR1 ghostty`.
+Values range from 0.0 (fully transparent) to 1.0 (opaque). After editing, reload Ghostty from the TUI or with:
+
+```bash
+busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty \
+    org.gtk.Actions Activate sava{sv} reload-config 0 0
+```
+
+Ghostty is configured with a light/dark theme pair (`theme = light:oneqode-light-glass,dark:oneqode-night-ride`) so it follows the desktop appearance. Don't include `themes/oneqode-current` — that pins a single palette and the gtk-single-instance daemon will not swap at sunrise.
 
 ### Manual Theme Switching
 
@@ -403,7 +417,10 @@ git pull
 ./install.sh
 ```
 
-The installer is idempotent and preserves your configuration.
+The installer is idempotent and preserves your configuration. The TUI,
+switcher, and watcher are symlinked into `~/.local/bin`, so a `git pull`
+is enough for script changes; re-run install when new components land
+(Ghostty pairing, Herdr palettes, etc.).
 
 ## File Locations
 
@@ -416,6 +433,7 @@ The installer is idempotent and preserves your configuration.
 | Wallpapers | `~/.local/share/wallpapers/OneQode/` |
 | Konsole themes | `~/.local/share/konsole/` |
 | Ghostty themes | `~/.config/ghostty/themes/` |
+| Herdr themes | `~/.config/herdr/themes/` + `~/.config/herdr/config.toml` |
 | Firefox CSS | `~/.mozilla/firefox/<profile>/chrome/` |
 | GTK3 overrides | `~/.config/gtk-3.0/gtk.css` |
 | GTK4 overrides | `~/.config/gtk-4.0/gtk.css` |
@@ -445,6 +463,7 @@ oneqode-kde-themes/
 │   ├── install-cursors.sh
 │   ├── install-konsole.sh
 │   ├── install-ghostty.sh
+│   ├── install-herdr.sh
 │   ├── install-firefox.sh
 │   ├── install-gtk.sh
 │   ├── install-zed.sh
@@ -457,6 +476,7 @@ oneqode-kde-themes/
 │   ├── color-schemes/   # KDE color schemes
 │   ├── firefox/         # userChrome/userContent CSS + XPI extensions
 │   ├── ghostty/         # Terminal themes
+│   ├── herdr/           # Agent-workspace TUI palettes
 │   ├── gtk/             # GTK3/4 CSS overrides
 │   ├── klassy/          # Window decoration presets
 │   ├── konsole/         # Terminal color schemes

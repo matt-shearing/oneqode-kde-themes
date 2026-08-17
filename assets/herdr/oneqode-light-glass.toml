@@ -1,0 +1,25 @@
+# OneQode Light Glass — Herdr UI palette
+# Herdr has no user-named themes; this is a [theme] + [theme.custom]
+# override applied by the OneQode switcher.
+
+[theme]
+name = "catppuccin-latte"
+auto_switch = false
+
+[theme.custom]
+panel_bg = "#f0f4f8"
+surface0 = "#e8eef4"
+surface1 = "#dce4ec"
+surface_dim = "#e4ebf2"
+overlay0 = "#c8d4e0"
+overlay1 = "#a0b0c0"
+text = "#232d37"
+subtext0 = "#4a5a6a"
+accent = "#00b4c8"
+mauve = "#d33682"
+green = "#2aa198"
+yellow = "#b58900"
+red = "#dc322f"
+blue = "#268bd2"
+teal = "#00b4c8"
+peach = "#cb912f"

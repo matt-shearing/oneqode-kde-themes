@@ -33,6 +33,17 @@ debug() { [[ "${ONEQODE_DEBUG:-}" == "1" ]] && printf "${CYAN}[DEBUG]${NC} %s\n"
 # Check if a command exists
 has_cmd() { command -v "$1" &>/dev/null; }
 
+# Reload a running Ghostty via its GTK action. SIGUSR1 used to crash it, and
+# gtk-single-instance windows inherit the already-loaded config otherwise.
+reload_ghostty() {
+    busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty \
+        org.gtk.Actions Activate sava{sv} reload-config 0 0 >/dev/null 2>&1 \
+        || gdbus call --session --dest com.mitchellh.ghostty \
+            --object-path /com/mitchellh/ghostty \
+            --method org.gtk.Actions.Activate reload-config [] {} >/dev/null 2>&1 \
+        || true
+}
+
 # Ensure not running as root
 check_not_root() {
     if [[ $EUID -eq 0 ]]; then
@@ -86,6 +97,10 @@ is_installed() {
             ;;
         ghostty)
             [[ -f "$CONFIG_DIR/ghostty/themes/oneqode-night-ride" ]]
+            ;;
+        herdr)
+            [[ -f "$CONFIG_DIR/herdr/themes/oneqode-night-ride.toml" ]] || \
+            [[ -f "$LOCAL_SHARE/oneqode/herdr/oneqode-night-ride.toml" ]]
             ;;
         fastfetch)
             [[ -f "$CONFIG_DIR/fastfetch/config-night-ride.jsonc" ]]
