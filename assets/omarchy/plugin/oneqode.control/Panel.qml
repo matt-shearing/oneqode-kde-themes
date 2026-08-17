@@ -66,13 +66,11 @@ Panel {
 
   Component {
     id: logoIcon
-    Image {
+    Logo {
       anchors.fill: parent
       source: root.logo
-      sourceSize.width: width * 2
-      sourceSize.height: height * 2
-      fillMode: Image.PreserveAspectFit
-      smooth: true
+      color: root.fg
+      tint: true
     }
   }
 
@@ -105,14 +103,12 @@ Panel {
           foreground: root.fg
           fontFamily: root.fontFamily
           iconComponent: Component {
-            Image {
+            Logo {
               width: Style.font.display
               height: Style.font.display
               source: root.logo
-              sourceSize.width: width * 2
-              sourceSize.height: height * 2
-              fillMode: Image.PreserveAspectFit
-              smooth: true
+              color: root.fg
+              tint: true
             }
           }
         }
