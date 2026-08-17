@@ -77,7 +77,11 @@ def compute(lat, lng, base_ms):
     return jd_to_ms(j_transit - omega / 360.0), jd_to_ms(j_transit + omega / 360.0), None
 
 now = datetime.now(TZ)
-sunrise_ms, sunset_ms, polar = compute(LAT, LON, now.timestamp() * 1000)
+# Local noon, not `now`. Before ~10:00 AEST the UTC date is still yesterday,
+# so computing from `now` returns yesterday's sunset and we stay on night
+# all morning.
+local_noon = now.replace(hour=12, minute=0, second=0, microsecond=0)
+sunrise_ms, sunset_ms, polar = compute(LAT, LON, local_noon.timestamp() * 1000)
 if polar == "polar-day":
     print("day polar polar")
 elif polar == "polar-night":

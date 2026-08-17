@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Omarchy morning switch stayed on Night Ride.** The NOAA sunrise
+  equation was keyed off the current UTC instant, so before ~10:00 AEST
+  it still used yesterday's sunset and thought it was night. It now
+  computes today's local-noon solar events.
+
 ### Added
 
 - **Docs rebranded to OneQode Linux Theme** — README, landing page
