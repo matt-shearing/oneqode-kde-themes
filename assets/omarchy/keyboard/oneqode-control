@@ -1,0 +1,272 @@
+#!/usr/bin/env bash
+# OneQode control CLI for Omarchy: theme, auto day/night, Framework keyboard.
+set -euo pipefail
+
+CONF_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/oneqode
+CONF=$CONF_DIR/keyboard.conf
+STATE_THEME=${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme.name
+AUTO_THEME=${AUTO_THEME:-$HOME/.local/bin/omarchy-oq-auto-theme}
+[[ -x $AUTO_THEME ]] || AUTO_THEME=$HOME/bin/omarchy-oq-auto-theme
+
+LIGHT_THEME=omarchy-oq-light-glass
+NIGHT_THEME=omarchy-oq-night-ride
+
+usage() {
+  cat <<'EOF'
+Usage:
+  oneqode-control status [--json]
+  oneqode-control theme night|day|light|dark|toggle
+  oneqode-control auto on|off|toggle
+  oneqode-control keyboard effect heatmap|solid|off
+  oneqode-control keyboard brightness <1-100>
+  oneqode-control apply
+EOF
+}
+
+ensure_conf() {
+  mkdir -p "$CONF_DIR"
+  if [[ ! -f $CONF ]]; then
+    printf 'effect=heatmap\nbrightness=100\n' >"$CONF"
+  fi
+}
+
+read_conf() {
+  ensure_conf
+  EFFECT=heatmap
+  BRIGHTNESS=100
+  # shellcheck disable=SC1090
+  source "$CONF" 2>/dev/null || true
+  EFFECT=${effect:-heatmap}
+  BRIGHTNESS=${brightness:-100}
+  case "$EFFECT" in
+  heatmap | solid | off) ;;
+  *) EFFECT=heatmap ;;
+  esac
+  if ! [[ $BRIGHTNESS =~ ^[0-9]+$ ]] || ((BRIGHTNESS < 1 || BRIGHTNESS > 100)); then
+    BRIGHTNESS=100
+  fi
+}
+
+write_conf() {
+  ensure_conf
+  printf 'effect=%s\nbrightness=%s\n' "$EFFECT" "$BRIGHTNESS" >"$CONF"
+}
+
+current_theme() {
+  tr -d '[:space:]' <"$STATE_THEME" 2>/dev/null || true
+}
+
+theme_label() {
+  case "$1" in
+  "$NIGHT_THEME") echo "Night Ride" ;;
+  "$LIGHT_THEME") echo "Light Glass" ;;
+  "") echo "Unknown" ;;
+  *) echo "$1" ;;
+  esac
+}
+
+auto_enabled() {
+  systemctl --user is-enabled --quiet omarchy-oq-auto-theme.timer 2>/dev/null
+}
+
+keyboard_present() {
+  command -v qmk_hid >/dev/null 2>&1 && qmk_hid -l 2>/dev/null | grep -q 'Laptop 16 Keyboard'
+}
+
+effect_id() {
+  case "$1" in
+  heatmap) echo 45 ;;
+  solid) echo 1 ;;
+  off) echo 0 ;;
+  *) echo 45 ;;
+  esac
+}
+
+apply_keyboard() {
+  read_conf
+  local theme hex h s effect
+  theme=$(current_theme)
+  s=255
+  case "$theme" in
+  "$NIGHT_THEME")
+    hex=ff0080
+    ;;
+  "$LIGHT_THEME")
+    hex=00b4c8
+    ;;
+  *)
+    return 0
+    ;;
+  esac
+
+  command -v qmk_hid >/dev/null 2>&1 || return 0
+  command -v omarchy-hw-framework16 >/dev/null 2>&1 || return 0
+  omarchy-hw-framework16 || return 0
+
+  h=$(python3 -c "
+import colorsys, sys
+hex = sys.argv[1]
+r, g, b = int(hex[:2],16)/255, int(hex[2:4],16)/255, int(hex[4:6],16)/255
+hh, _s, _v = colorsys.rgb_to_hsv(r, g, b)
+print(int(hh * 255))
+" "$hex") || return 0
+
+  effect=$(effect_id "$EFFECT")
+  if [[ $EFFECT == heatmap ]]; then
+    qmk_hid via --rgb-effect 45 >/dev/null 2>&1 || true
+    local got
+    got=$(qmk_hid via --rgb-effect 2>/dev/null || true)
+    if [[ $got != *'Effect: 45'* ]]; then
+      effect=1
+    fi
+  fi
+
+  qmk_hid via --rgb-effect "$effect" >/dev/null 2>&1 || return 0
+  if [[ $EFFECT != off ]]; then
+    qmk_hid via --rgb-hue "$h" >/dev/null 2>&1 || true
+    qmk_hid via --rgb-saturation "$s" >/dev/null 2>&1 || true
+    qmk_hid via --rgb-brightness "$BRIGHTNESS" >/dev/null 2>&1 || true
+  fi
+  qmk_hid via --save >/dev/null 2>&1 || true
+}
+
+status_json() {
+  read_conf
+  local theme period sunrise sunset auto kb
+  theme=$(current_theme)
+  period=unknown
+  sunrise=""
+  sunset=""
+  if [[ -x $AUTO_THEME ]]; then
+    local raw
+    raw=$("$AUTO_THEME" --status 2>/dev/null || true)
+    period=$(awk '/^Period:/{print $2}' <<<"$raw")
+    sunrise=$(awk '/^Sunrise:/{print $2}' <<<"$raw")
+    sunset=$(awk '/^Sunset:/{print $2}' <<<"$raw")
+  fi
+  auto=false
+  auto_enabled && auto=true
+  kb=false
+  keyboard_present && kb=true
+  python3 - "$theme" "$(theme_label "$theme")" "$auto" "${period:-unknown}" "${sunrise:-}" "${sunset:-}" "$EFFECT" "$(effect_id "$EFFECT")" "$BRIGHTNESS" "$kb" <<'PY'
+import json, sys
+theme, label, auto, period, sunrise, sunset, effect, effect_id, brightness, kb = sys.argv[1:]
+print(json.dumps({
+    "ok": True,
+    "theme": theme,
+    "themeLabel": label,
+    "isOqTheme": theme in ("omarchy-oq-night-ride", "omarchy-oq-light-glass"),
+    "autoEnabled": auto == "true",
+    "period": period or "unknown",
+    "sunrise": sunrise,
+    "sunset": sunset,
+    "effect": effect,
+    "effectId": int(effect_id),
+    "brightness": int(brightness),
+    "keyboardPresent": kb == "true",
+}))
+PY
+}
+
+status_text() {
+  read_conf
+  local theme
+  theme=$(current_theme)
+  echo "Theme:      $(theme_label "$theme") ($theme)"
+  echo "Auto:       $(auto_enabled && echo on || echo off)"
+  if [[ -x $AUTO_THEME ]]; then
+    "$AUTO_THEME" --status 2>/dev/null | sed 's/^/            /' | sed '1s/            //'
+  fi
+  echo "Keyboard:   $EFFECT @ ${BRIGHTNESS}%"
+  echo "Present:    $(keyboard_present && echo yes || echo no)"
+}
+
+set_theme() {
+  local want=$1
+  case "$want" in
+  night | dark) omarchy theme set "$NIGHT_THEME" ;;
+  day | light) omarchy theme set "$LIGHT_THEME" ;;
+  toggle)
+    case "$(current_theme)" in
+    "$NIGHT_THEME") omarchy theme set "$LIGHT_THEME" ;;
+    *) omarchy theme set "$NIGHT_THEME" ;;
+    esac
+    ;;
+  *)
+    echo "Unknown theme: $want" >&2
+    return 1
+    ;;
+  esac
+}
+
+set_auto() {
+  case "$1" in
+  on)
+    systemctl --user enable --now omarchy-oq-auto-theme.timer
+    ;;
+  off)
+    systemctl --user disable --now omarchy-oq-auto-theme.timer
+    ;;
+  toggle)
+    if auto_enabled; then set_auto off; else set_auto on; fi
+    ;;
+  *)
+    echo "Unknown auto mode: $1" >&2
+    return 1
+    ;;
+  esac
+}
+
+cmd=${1:-}
+shift || true
+case "$cmd" in
+status)
+  if [[ ${1:-} == --json ]]; then
+    status_json
+  else
+    status_text
+  fi
+  ;;
+theme)
+  set_theme "${1:-}"
+  ;;
+auto)
+  set_auto "${1:-}"
+  ;;
+keyboard)
+  read_conf
+  case "${1:-}" in
+  effect)
+    case "${2:-}" in
+    heatmap | solid | off) EFFECT=$2 ;;
+    *) echo "effect must be heatmap, solid, or off" >&2; exit 1 ;;
+    esac
+    write_conf
+    apply_keyboard
+    ;;
+  brightness)
+    if ! [[ ${2:-} =~ ^[0-9]+$ ]] || ((${2} < 1 || ${2} > 100)); then
+      echo "brightness must be 1-100" >&2
+      exit 1
+    fi
+    BRIGHTNESS=$2
+    write_conf
+    apply_keyboard
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
+  ;;
+apply)
+  apply_keyboard
+  ;;
+-h | --help | help | "")
+  usage
+  ;;
+*)
+  usage
+  exit 1
+  ;;
+esac

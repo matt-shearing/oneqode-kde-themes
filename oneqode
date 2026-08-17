@@ -70,6 +70,7 @@ show_status() {
     echo -e "  $(status_icon mattermost) Mattermost Themes"
     echo -e "  $(status_icon gtk) GTK Overrides"
     echo -e "  $(status_icon switcher) Theme Switcher"
+    echo -e "  $(status_icon omarchy) Omarchy (themes + bar + keyboard)"
     echo -e "  $(status_icon sddm) SDDM Login Screen"
     echo ""
 }
@@ -225,6 +226,11 @@ do_install_all() {
         enable_switcher
     fi
 
+    if command -v omarchy >/dev/null 2>&1; then
+        source "$SCRIPT_DIR/lib/install-omarchy.sh"
+        install_omarchy
+    fi
+
     echo ""
     success "All components installed!"
     echo ""
@@ -286,6 +292,7 @@ do_install_selective() {
         "Mattermost Themes" \
         "GTK Overrides" \
         "Theme Switcher" \
+        "Omarchy (themes + bar + keyboard)" \
         "SDDM Login Screen")
 
     # Trim whitespace
@@ -377,6 +384,10 @@ do_install_selective() {
                 install_switcher
                 enable_switcher
                 ;;
+            "Omarchy (themes + bar + keyboard)")
+                source "$SCRIPT_DIR/lib/install-omarchy.sh"
+                install_omarchy
+                ;;
             "SDDM Login Screen")
                 source "$SCRIPT_DIR/lib/install-sddm.sh"
                 install_sddm
@@ -403,6 +414,9 @@ do_uninstall() {
 
     source "$SCRIPT_DIR/lib/install-switcher.sh"
     uninstall_switcher
+
+    source "$SCRIPT_DIR/lib/install-omarchy.sh"
+    uninstall_omarchy
 
     source "$SCRIPT_DIR/lib/install-ghostty.sh"
     uninstall_ghostty

@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# Pick OneQode Light Glass or Night Ride from Brisbane sunrise/sunset,
+# then apply it with `omarchy theme set`. Only touches the OQ pair (and
+# leftover Tokyo Night from a first-boot default). A manually chosen
+# stock theme is left alone.
+
+set -euo pipefail
+
+LIGHT_THEME=omarchy-oq-light-glass
+NIGHT_THEME=omarchy-oq-night-ride
+# Omarchy's install default if no theme has been chosen yet.
+STOCK_DEFAULT=tokyo-night
+
+# Brisbane civil-twilight fallback if the solar math fails.
+# Same numbers as the old KDE switcher.
+FALLBACK_TZ=Australia/Brisbane
+FALLBACK_DAY_START=0730
+FALLBACK_NIGHT_START=1830
+
+current=$(tr -d '[:space:]' <"${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme.name" 2>/dev/null || true)
+
+# Prints: PERIOD SUNRISE SUNSET   (HH:MM in Australia/Brisbane)
+# PERIOD is day or night. Times are -- if the calculator failed.
+solar_status() {
+  python3 - <<'PY' || true
+import math
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+LAT = -27.4698
+LON = 153.0251
+TZ = ZoneInfo("Australia/Brisbane")
+RAD = math.pi / 180.0
+DAY_MS = 86_400_000
+UNIX_EPOCH_JD = 2440587.5
+
+def mod360(x):
+    x %= 360.0
+    return x + 360.0 if x < 0 else x
+
+def compute(lat, lng, base_ms):
+    jdate = base_ms / DAY_MS + UNIX_EPOCH_JD
+    lw = -lng
+    n = round(jdate - 2451545.0 + 0.0008)
+    j_star = n + lw / 360.0
+    m = mod360(357.5291 + 0.98560028 * j_star)
+    c = (1.9148 * math.sin(m * RAD)
+         + 0.0200 * math.sin(2 * m * RAD)
+         + 0.0003 * math.sin(3 * m * RAD))
+    lam = mod360(m + c + 180 + 102.9372)
+    j_transit = (2451545.0 + j_star
+                 + 0.0053 * math.sin(m * RAD)
+                 - 0.0069 * math.sin(2 * lam * RAD))
+    delta = math.asin(math.sin(lam * RAD) * math.sin(23.4397 * RAD))
+    cos_omega = ((math.sin(-0.833 * RAD) - math.sin(lat * RAD) * math.sin(delta))
+                 / (math.cos(lat * RAD) * math.cos(delta)))
+    if abs(cos_omega) > 1.0:
+        return None, None, "polar-day" if cos_omega < -1.0 else "polar-night"
+    omega = math.acos(cos_omega) / RAD
+    def jd_to_ms(jd):
+        return (jd - UNIX_EPOCH_JD) * DAY_MS
+    return jd_to_ms(j_transit - omega / 360.0), jd_to_ms(j_transit + omega / 360.0), None
+
+now = datetime.now(TZ)
+sunrise_ms, sunset_ms, polar = compute(LAT, LON, now.timestamp() * 1000)
+if polar == "polar-day":
+    print("day polar polar")
+elif polar == "polar-night":
+    print("night polar polar")
+elif sunrise_ms is None:
+    raise SystemExit(1)
+else:
+    now_ms = now.timestamp() * 1000
+    period = "day" if sunrise_ms <= now_ms < sunset_ms else "night"
+    rise = datetime.fromtimestamp(sunrise_ms / 1000, TZ).strftime("%H:%M")
+    sett = datetime.fromtimestamp(sunset_ms / 1000, TZ).strftime("%H:%M")
+    print(f"{period} {rise} {sett}")
+PY
+}
+
+fallback_status() {
+  local now
+  now=$(TZ=$FALLBACK_TZ date +%H%M)
+  if ((10#$now >= 10#$FALLBACK_DAY_START && 10#$now < 10#$FALLBACK_NIGHT_START)); then
+    echo "day 07:30 18:30"
+  else
+    echo "night 07:30 18:30"
+  fi
+}
+
+status=$(solar_status)
+case "$status" in
+"day "*|"night "*) ;;
+*) status=$(fallback_status) ;;
+esac
+
+period=${status%% *}
+if [[ $period == day ]]; then
+  desired=$LIGHT_THEME
+else
+  desired=$NIGHT_THEME
+fi
+
+if [[ ${1:-} == --status ]]; then
+  read -r _ sunrise sunset <<<"$status"
+  echo "Location: Brisbane (${FALLBACK_TZ})"
+  echo "Period:   $period"
+  echo "Sunrise:  $sunrise"
+  echo "Sunset:   $sunset"
+  echo "Current:  ${current:-none}"
+  echo "Desired:  $desired"
+  exit 0
+fi
+
+case "$current" in
+"$LIGHT_THEME" | "$NIGHT_THEME" | "$STOCK_DEFAULT" | "")
+  ;;
+*)
+  exit 0
+  ;;
+esac
+
+[[ $current == "$desired" ]] && exit 0
+
+exec omarchy theme set "$desired"

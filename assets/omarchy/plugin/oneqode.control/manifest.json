@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "oneqode.control",
+  "name": "OneQode",
+  "version": "1.0.0",
+  "author": "OneQode",
+  "license": "MIT",
+  "description": "OneQode theme and Framework keyboard controls for the Omarchy bar.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "OneQode",
+    "description": "Switch Light Glass / Night Ride, auto day-night, and the Framework heatmap.",
+    "category": "Appearance",
+    "aliases": [
+      "oneqode",
+      "oq",
+      "oq-tray"
+    ],
+    "allowMultiple": false,
+    "defaults": {
+      "showLabel": false
+    },
+    "schema": [
+      {
+        "key": "showLabel",
+        "type": "boolean",
+        "label": "Show OQ label on the bar",
+        "defaultValue": false
+      }
+    ]
+  }
+}

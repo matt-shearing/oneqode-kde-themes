@@ -159,6 +159,10 @@ is_installed() {
         switcher)
             [[ -x "$LOCAL_BIN/oneqode-theme-switch" ]]
             ;;
+        omarchy)
+            [[ -x "$LOCAL_BIN/oneqode-control" ]] && \
+            [[ -d "$CONFIG_DIR/omarchy/plugins/oneqode.control" ]]
+            ;;
         sddm)
             [[ -f "/etc/sddm.conf.d/10-oneqode.conf" ]]
             ;;

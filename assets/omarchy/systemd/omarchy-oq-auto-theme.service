@@ -1,0 +1,6 @@
+[Unit]
+Description=Apply OneQode Light Glass or Night Ride from local time
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/omarchy-oq-auto-theme
