@@ -1,0 +1,339 @@
+#!/usr/bin/env python3
+"""Set Keychron RGB from OneQode Light Glass / Night Ride.
+
+Talks the Keychron Launcher / ZMK VIA-style protocol used by Ultra 8K
+boards (V10 Alice, etc.). Same idea as Omarchy's omarchy-theme-set-keyboard
+(qmk_hid via --rgb-hue), but we speak the Launcher packet format and
+try the 2.4 GHz dongle wrappers Keychron uses instead of wired FF60.
+
+Effects (rgb_matrix_conf.h):
+  16  typing heatmap   — neighbours heat up, colour shifts with WPM
+  19  reactive wide    — lights fan out from the key you hit (theme hue)
+  20  reactive nexus
+  22  solid splash
+
+Default is 19 so the fan-out/hot-zone behaviour stays, recoloured to
+ice cyan (day) or magenta (night).
+"""
+
+from __future__ import annotations
+
+import argparse
+import colorsys
+import os
+import sys
+import time
+
+VID = 0x3434
+
+# Launcher custom channel
+CMD_GET_PROTO = 0x01
+CMD_SET = 0x07
+CMD_GET = 0x08
+CH_RGB_MATRIX = 0x03
+VAL_BRIGHTNESS = 0x01
+VAL_EFFECT = 0x02
+VAL_SPEED = 0x03
+VAL_COLOR = 0x04
+
+EFFECTS = {
+    "solid": 1,
+    "breathing": 2,
+    "heatmap": 16,
+    "reactive": 18,
+    "reactive-wide": 19,
+    "nexus": 20,
+    "splash": 21,
+    "solid-splash": 22,
+}
+
+THEMES = {
+    "day": {
+        # Light Glass ice cyan #00b4c8
+        "hex": "#00b4c8",
+        "effect": "reactive-wide",
+        "brightness": 200,
+        "speed": 180,
+    },
+    "night": {
+        # Night Ride magenta #ff0080
+        "hex": "#ff0080",
+        "effect": "reactive-wide",
+        "brightness": 230,
+        "speed": 180,
+    },
+}
+
+
+def hex_to_hs(hex_color: str) -> tuple[int, int]:
+    hex_color = hex_color.lstrip("#")
+    r, g, b = (int(hex_color[i : i + 2], 16) / 255.0 for i in (0, 2, 4))
+    h, s, _v = colorsys.rgb_to_hsv(r, g, b)
+    return int(h * 255), int(s * 255)
+
+
+def pkt(*values: int) -> bytes:
+    buf = bytearray(32)
+    for i, value in enumerate(values):
+        buf[i] = value & 0xFF
+    return bytes(buf)
+
+
+def try_import_hid():
+    try:
+        import hid
+
+        return hid
+    except ImportError:
+        print("python-hid is required (pacman -S python-hidapi)", file=sys.stderr)
+        sys.exit(2)
+
+
+def list_devices(hid) -> list[dict]:
+    seen = []
+    for dev in hid.enumerate(VID, 0):
+        path = dev.get("path") or b""
+        if isinstance(path, bytes):
+            path = path.decode("utf-8", "replace")
+        seen.append(
+            {
+                "path": path,
+                "product": dev.get("product_string") or "",
+                "pid": dev.get("product_id") or 0,
+                "interface": dev.get("interface_number"),
+                "usage_page": dev.get("usage_page") or 0,
+                "usage": dev.get("usage") or 0,
+            }
+        )
+    return seen
+
+
+class Transport:
+    """One hidraw node + one framing style."""
+
+    def __init__(self, hid, path: str, kind: str):
+        self.hid = hid
+        self.path = path
+        self.kind = kind
+        self.dev = None
+
+    def open(self) -> None:
+        path = self.path.encode() if isinstance(self.path, str) else self.path
+        # python-hidapi exposes hid.Device(path=...); older hid.device() is gone.
+        self.dev = self.hid.Device(path=path)
+        try:
+            self.dev.nonblocking = True
+        except Exception:
+            pass
+
+    def close(self) -> None:
+        if self.dev is not None:
+            try:
+                self.dev.close()
+            except Exception:
+                pass
+            self.dev = None
+
+    def _frame(self, payload: bytes) -> bytes:
+        if self.kind == "raw32":
+            return payload
+        if self.kind == "b2":
+            return bytes([0xB2]) + payload
+        if self.kind == "2a":
+            return bytes([0x2A]) + payload + bytes(28)
+        if self.kind == "b3":
+            return bytes([0xB3]) + payload + bytes(31)
+        raise ValueError(self.kind)
+
+    def send(self, payload: bytes) -> bytes | None:
+        framed = self._frame(payload)
+        self.dev.write(framed)
+        deadline = time.time() + 0.35
+        while time.time() < deadline:
+            data = self.dev.read(128, timeout=50)
+            if data:
+                return bytes(data)
+            time.sleep(0.02)
+        return None
+
+
+def _looks_like_via(resp: bytes) -> bool:
+    """Classic wired Launcher/VIA: 32-byte reply starting with the command id."""
+    return bool(resp) and resp[0] == CMD_GET_PROTO and any(resp[1:4])
+
+
+def _looks_like_ultralink(resp: bytes, sent: bytes) -> bool:
+    """Ultra-Link 8K dongle ACKs on report 0x2C, echoing value_id + first data byte."""
+    if not resp or resp[0] != 0x2C or len(resp) < 4:
+        return False
+    # SET/GET rgb_matrix: sent is 07/08, 03, value_id, data...
+    if len(sent) >= 4 and sent[0] in (CMD_SET, CMD_GET) and sent[1] == CH_RGB_MATRIX:
+        return resp[1] == sent[2]
+    return True
+
+
+def open_working_transport(hid, prefer_path: str | None = None) -> Transport:
+    devices = list_devices(hid)
+    if not devices:
+        raise RuntimeError("No Keychron USB device (vid 3434) found")
+
+    # Never poke boot keyboard/mouse interfaces — they accept writes and look
+    # like success while doing nothing to the LEDs.
+    candidates: list[tuple[str, str, int]] = []
+    if prefer_path:
+        candidates.append((prefer_path, "2a", 0xFF0B))
+        candidates.append((prefer_path, "raw32", 0xFF60))
+
+    for d in devices:
+        page = d["usage_page"]
+        if page in (0x0001, 0x000C):
+            continue
+        if page == 0xFF60:
+            candidates.append((d["path"], "raw32", page))
+        elif page == 0xFF0B:
+            candidates.append((d["path"], "2a", page))
+        elif page == 0x008C:
+            candidates.append((d["path"], "b2", page))
+        elif page == 0xFFC1:
+            candidates.append((d["path"], "b3", page))
+
+    seen = set()
+    last_err = None
+    ping = pkt(CMD_GET_PROTO)
+    probe = pkt(CMD_SET, CH_RGB_MATRIX, VAL_EFFECT, EFFECTS["reactive-wide"])
+    for path, kind, page in candidates:
+        key = (path, kind)
+        if key in seen:
+            continue
+        seen.add(key)
+        t = Transport(hid, path, kind)
+        try:
+            t.open()
+        except Exception as exc:
+            last_err = exc
+            continue
+        try:
+            resp = t.send(ping)
+            if _looks_like_via(resp or b""):
+                return t
+            # Ultra-Link: protocol ping is silent/zero; a SET effect ACKs on 0x2C.
+            if kind == "2a":
+                ack = t.send(probe)
+                if _looks_like_ultralink(ack or b"", probe):
+                    return t
+            t.close()
+        except Exception as exc:
+            last_err = exc
+            t.close()
+    hint = (
+        "Could not speak Keychron Launcher HID on a vendor interface.\n"
+        "If hidraw is still root-only:\n"
+        "  sudo cp ~/.local/share/oneqode/keychron/99-keychron.rules /etc/udev/rules.d/\n"
+        "  sudo udevadm control --reload-rules && sudo udevadm trigger\n"
+        "If udev is already in place, plug the board over USB-C — some Ultra "
+        "firmwares only expose full Launcher/VIA on the cable, not the 2.4 GHz dongle."
+    )
+    if last_err:
+        raise RuntimeError(f"{hint}\nLast error: {last_err}") from last_err
+    raise RuntimeError(hint)
+
+
+def apply(transport: Transport, theme: str, effect_name: str | None, brightness: int | None) -> None:
+    spec = THEMES[theme]
+    effect_name = effect_name or spec["effect"]
+    brightness = spec["brightness"] if brightness is None else brightness
+    if effect_name not in EFFECTS:
+        raise SystemExit(f"unknown effect {effect_name!r}; choose from {', '.join(EFFECTS)}")
+    hue, sat = hex_to_hs(spec["hex"])
+    effect = EFFECTS[effect_name]
+
+    # Non-persistent setters — do not send 0x09 (save-to-flash).
+    transport.send(pkt(CMD_SET, CH_RGB_MATRIX, VAL_EFFECT, effect))
+    time.sleep(0.03)
+    transport.send(pkt(CMD_SET, CH_RGB_MATRIX, VAL_COLOR, hue, sat))
+    time.sleep(0.03)
+    transport.send(pkt(CMD_SET, CH_RGB_MATRIX, VAL_BRIGHTNESS, brightness))
+    time.sleep(0.03)
+    transport.send(pkt(CMD_SET, CH_RGB_MATRIX, VAL_SPEED, spec["speed"]))
+
+    print(
+        f"Keychron {theme}: effect={effect_name} ({effect}) "
+        f"color={spec['hex']} hsv=({hue},{sat}) brightness={brightness} "
+        f"via {transport.kind} {transport.path}"
+    )
+
+
+def cmd_status(hid) -> int:
+    devices = list_devices(hid)
+    if not devices:
+        print("No Keychron USB device found (vid 3434)")
+        return 1
+    print("Keychron HID interfaces:")
+    for d in devices:
+        print(
+            f"  pid=0x{d['pid']:04x} if={d['interface']} "
+            f"page=0x{d['usage_page']:04x} usage=0x{d['usage']:x} "
+            f"{d['product']!r} {d['path']}"
+        )
+    try:
+        t = open_working_transport(hid)
+    except RuntimeError as exc:
+        print(exc)
+        return 2
+    print(f"Launcher transport: {t.kind} {t.path}")
+    for label, payload in (
+        ("protocol", pkt(CMD_GET_PROTO)),
+        ("effect", pkt(CMD_GET, CH_RGB_MATRIX, VAL_EFFECT)),
+        ("color", pkt(CMD_GET, CH_RGB_MATRIX, VAL_COLOR)),
+        ("brightness", pkt(CMD_GET, CH_RGB_MATRIX, VAL_BRIGHTNESS)),
+    ):
+        resp = t.send(payload)
+        print(f"  {label}: {resp.hex() if resp else 'no reply'}")
+    t.close()
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "command",
+        nargs="?",
+        default="status",
+        choices=["status", "day", "night", "apply"],
+        help="status, or apply a theme (day/night/apply)",
+    )
+    parser.add_argument("--theme", choices=("day", "night"), help="with apply")
+    parser.add_argument(
+        "--effect",
+        choices=sorted(EFFECTS),
+        help="override effect (default: reactive-wide)",
+    )
+    parser.add_argument("--brightness", type=int)
+    parser.add_argument("--path", help="force a hidraw path")
+    args = parser.parse_args()
+
+    hid = try_import_hid()
+
+    if args.command == "status":
+        return cmd_status(hid)
+
+    theme = args.theme or ("day" if args.command == "day" else "night" if args.command == "night" else None)
+    if args.command == "apply" and not theme:
+        parser.error("apply needs --theme day|night")
+    if not theme:
+        theme = args.command
+
+    t = open_working_transport(hid, prefer_path=args.path)
+    try:
+        apply(t, theme, args.effect, args.brightness)
+    finally:
+        t.close()
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except Exception as exc:
+        print(exc, file=sys.stderr)
+        sys.exit(2)

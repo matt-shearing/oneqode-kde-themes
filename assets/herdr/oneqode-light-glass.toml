@@ -8,6 +8,7 @@ auto_switch = false
 
 [theme.custom]
 panel_bg = "#f0f4f8"
+sidebar_bg = "#f0f4f8"
 surface0 = "#e8eef4"
 surface1 = "#dce4ec"
 surface_dim = "#e4ebf2"
@@ -23,3 +24,8 @@ red = "#dc322f"
 blue = "#268bd2"
 teal = "#00b4c8"
 peach = "#cb912f"
+
+[sidebar]
+# apply-theme.py copies these onto [ui.sidebar.*] tokens; Herdr never sees this table.
+title = "#232d37"
+subtitle = "#4a5a6a"

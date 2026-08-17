@@ -1,0 +1,8 @@
+# OneQode — Keychron hidraw access for Launcher (WebHID) and oneqode-keychron.
+# Vendor 3434 covers Q/V/K, Ultra-Link 8K (d028), Keychron Link (d030), Q14 (08e0).
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="3434", \
+  MODE="0660", GROUP="input", TAG+="uaccess", TAG+="udev-acl"
+
+# STM32 DFU (hold Esc while plugging in to flash)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", \
+  MODE="0660", GROUP="input", TAG+="uaccess", TAG+="udev-acl"

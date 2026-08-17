@@ -1,0 +1,33 @@
+# OneQode Night Ride — mapped from the KDE / Graphene palette
+# Accent pink #ff0080, secondary cyan #00c8ff, green #50ffb4
+mode = "dark"
+
+accent = "#ff0080"
+selection = "#282d3c"
+muted = "#6a7080"
+
+background = "#191c2a"
+dark_background = "#12141f"
+darker_background = "#0c0e16"
+lighter_background = "#282d3c"
+
+foreground = "#e6ebf5"
+dark_foreground = "#6a7080"
+light_foreground = "#a0a8b8"
+bright_foreground = "#f4f6fb"
+
+red = "#ff5555"
+yellow = "#ffbe50"
+orange = "#ff5080"
+green = "#50ffb4"
+cyan = "#00c8ff"
+blue = "#1774e0"
+magenta = "#ff0080"
+brown = "#b478ff"
+
+bright_red = "#ff9696"
+bright_yellow = "#ffdc82"
+bright_green = "#96ffd2"
+bright_cyan = "#6edfff"
+bright_blue = "#5a9eef"
+bright_magenta = "#ff50a0"

@@ -1,10 +1,10 @@
-# OneQode KDE Theme Suite
+# OneQode Linux Theme
 
-A polished KDE Plasma 6 theme suite for EndeavourOS/Arch Linux on Wayland, featuring:
+Light Glass and Night Ride for Linux — the same day/night pair on **KDE Plasma 6** and **Omarchy** (Hyprland). The installer looks at the running desktop and applies the matching pieces. Shared app themes (Herdr, Ghostty, Grok Build, Firefox, Zed, Typora, Obsidian, Mattermost, GTK, Keychron) are the same on both.
 
-- **OneQode Light Glass** - A light, glass-inspired theme with ice cyan accents for comfortable daytime work
-- **OneQode Night Ride** - A dark, synthwave-inspired theme with neon accents for nighttime coding
-- **Automatic day/night switching** - Solar-based or fixed-time scheduling via systemd timer
+- **OneQode Light Glass** — ice cyan on near-white glass, for daytime
+- **OneQode Night Ride** — neon pink/cyan on midnight navy, for night
+- **Automatic sunrise/sunset switching** — solar time (Brisbane by default; same config file on both desktops)
 
 ## Quick Install
 
@@ -13,6 +13,8 @@ git clone https://github.com/matt-shearing/oneqode-kde-themes.git
 cd oneqode-kde-themes
 ./oneqode
 ```
+
+On Omarchy this installs the desktop themes plus the solar timer. On KDE it installs the Plasma look-and-feel plus the classic switcher. Either way, Herdr / Grok / terminals follow the same palette.
 
 This launches an interactive TUI where you can:
 - Install all components or select specific ones
@@ -65,6 +67,8 @@ Each theme sets:
 | Mattermost | Custom sidebar/UI color schemes (manual import) |
 | Opera | Follows system theme; color reference provided for Stylus CSS |
 
+On **Omarchy**, the same palettes land as `omarchy-oq-light-glass` / `omarchy-oq-night-ride`. A user systemd timer (`omarchy-oq-auto-theme.timer`) rechecks every five minutes and calls `omarchy theme set` at sunrise and sunset. Location is read from `~/.config/oneqode/oneqode-theme-switcher.conf` — the same file the KDE switcher uses.
+
 The themes provide a cohesive experience from login to desktop, including terminals, browsers, and editors.
 
 ### Experimental: office suites
@@ -99,6 +103,10 @@ This checks:
 ## Configuration
 
 ### Theme Switcher
+
+On Omarchy, check the solar clock with `omarchy-oq-auto-theme --status` (or `oneqode switch` / `oneqode status`). Force a side with `oneqode switch day` or `oneqode switch night`.
+
+On KDE:
 
 > **Important:** Disable KDE's built-in "Switch to Dark Mode at Night" toggle in System Settings → Colors & Themes → Global Theme. The OneQode switcher handles day/night transitions itself — including color scheme, wallpaper, Klassy presets, terminal themes, and SDDM background. Running both will cause conflicts where each system fights to apply different settings.
 
@@ -169,6 +177,25 @@ When KDE switches between light/dark modes, Zed will follow automatically. You c
 Herdr has no user-named theme files — only built-in names plus a `[theme.custom]` override table. OneQode ships two palettes (`assets/herdr/oneqode-light-glass.toml` and `oneqode-night-ride.toml`) and writes the active one into `~/.config/herdr/config.toml`. The day/night switcher swaps the block and runs `herdr server reload-config`.
 
 Don't set `theme.name = "terminal"` if you want the OneQode chrome. That mode maps the host terminal ANSI palette onto Herdr's UI and looks wrong once Ghostty goes Light Glass.
+
+### Keychron RGB
+
+Ultra-series boards (Alice V10 / Ultra-Link 8K) speak the Keychron Launcher HID protocol. OneQode sets **Reactive Multi-Wide** (lights fan out from the key you hit) in ice cyan by day and magenta by night — same pattern Omarchy uses for Framework/ASUS keyboards (`qmk_hid via`).
+
+```bash
+# one-time hidraw access (also unblocks launcher.keychron.com in Opera)
+sudo cp ~/.local/share/oneqode/keychron/99-keychron.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=hidraw
+# unplug/replug the 8K dongle
+
+oneqode-keychron status
+oneqode-keychron day          # ice cyan fan-out
+oneqode-keychron night        # magenta fan-out
+oneqode-keychron day --effect heatmap
+```
+
+Official Launcher often fails over 2.4 GHz until that udev rule exists; some SKUs still only expose the configurator over a USB-C cable. The helper talks to the dongle directly so day/night still works wirelessly.
 
 ### Obsidian
 

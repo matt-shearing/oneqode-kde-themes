@@ -1,0 +1,33 @@
+# OneQode Light Glass — mapped from the KDE / Graphene palette
+# Ice cyan #00b4c8 on near-white glass
+mode = "light"
+
+accent = "#00b4c8"
+selection = "#d8e0e8"
+muted = "#8090a0"
+
+background = "#fafcff"
+dark_background = "#f0f4f8"
+darker_background = "#e8f0f5"
+lighter_background = "#ffffff"
+
+foreground = "#232d37"
+dark_foreground = "#8090a0"
+light_foreground = "#5a6570"
+bright_foreground = "#14181c"
+
+red = "#dc322f"
+yellow = "#cb912f"
+orange = "#c45a2a"
+green = "#2aa198"
+cyan = "#00b4c8"
+blue = "#1774e0"
+magenta = "#6c71c4"
+brown = "#9a6b3f"
+
+bright_red = "#f05a56"
+bright_yellow = "#e0b04a"
+bright_green = "#3ec4b8"
+bright_cyan = "#3cc8d8"
+bright_blue = "#3d8eec"
+bright_magenta = "#8b90d4"

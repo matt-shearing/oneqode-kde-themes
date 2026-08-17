@@ -64,6 +64,8 @@ install_ghostty() {
     mkdir -p "$ghostty_themes"
 
     cp "$ASSETS_DIR/ghostty/"* "$ghostty_themes/"
+    mkdir -p "$LOCAL_SHARE/oneqode/ghostty"
+    cp "$ASSETS_DIR/ghostty/"* "$LOCAL_SHARE/oneqode/ghostty/"
 
     # Keep the current-theme symlink for anyone still listing oneqode-current.
     ln -sf "oneqode-night-ride" "$ghostty_themes/oneqode-current"

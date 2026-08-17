@@ -41,9 +41,10 @@ find_herdr_fragment() {
 
 apply_herdr_theme_file() {
     local fragment="$1"
-    local apply
+    local apply grok_theme=groknight
     apply=$(find_herdr_apply) || return 1
-    python3 "$apply" --config "$CONFIG_DIR/herdr/config.toml" "$fragment"
+    [[ $fragment == *light-glass* ]] && grok_theme=grokday
+    python3 "$apply" --config "$CONFIG_DIR/herdr/config.toml" --grok-theme "$grok_theme" "$fragment"
 }
 
 reload_herdr() {
@@ -83,9 +84,10 @@ install_herdr() {
     done
 
     local is_light="true"
-    local lnf
+    local lnf current
     lnf=$(kreadconfig6 --file kdeglobals --group KDE --key LookAndFeelPackage 2>/dev/null || true)
-    if [[ "$lnf" == *"nightride"* ]]; then
+    current=$(tr -d '[:space:]' <"${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme.name" 2>/dev/null || true)
+    if [[ "$lnf" == *"nightride"* || "$current" == *"night-ride"* ]]; then
         is_light="false"
     fi
 

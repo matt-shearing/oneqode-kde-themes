@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OneQode KDE Theme Suite - Installer (Legacy Shim)
+# OneQode Linux Theme - Installer (Legacy Shim)
 # =================================================
 # This script now calls the new TUI-based installer.
 # For the full experience, run: ./oneqode

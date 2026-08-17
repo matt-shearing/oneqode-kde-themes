@@ -52,6 +52,22 @@ check_not_root() {
     fi
 }
 
+# Which desktop this machine is running. "omarchy" wins over leftover
+# Plasma tools so a migrated box does not get the KDE switcher.
+detect_desktop() {
+    local desktop
+    desktop=$(printf '%s:%s' "${XDG_CURRENT_DESKTOP:-}" "${XDG_SESSION_DESKTOP:-}" | tr '[:upper:]' '[:lower:]')
+    if [[ $desktop == *hyprland* || $desktop == *omarchy* ]] || { has_cmd omarchy && [[ -d $CONFIG_DIR/omarchy ]]; }; then
+        echo omarchy
+        return
+    fi
+    if [[ $desktop == *kde* || $desktop == *plasma* ]] || has_cmd plasma-apply-lookandfeel; then
+        echo kde
+        return
+    fi
+    echo unknown
+}
+
 # Detect theme apply command
 detect_apply_tool() {
     if command -v plasma-apply-lookandfeel &>/dev/null; then
@@ -101,6 +117,13 @@ is_installed() {
         herdr)
             [[ -f "$CONFIG_DIR/herdr/themes/oneqode-night-ride.toml" ]] || \
             [[ -f "$LOCAL_SHARE/oneqode/herdr/oneqode-night-ride.toml" ]]
+            ;;
+        omarchy)
+            [[ -d "$CONFIG_DIR/omarchy/themes/omarchy-oq-night-ride" ]] && \
+            [[ -x "$LOCAL_BIN/omarchy-oq-auto-theme" ]]
+            ;;
+        keychron)
+            [[ -x "$LOCAL_BIN/oneqode-keychron" ]]
             ;;
         fastfetch)
             [[ -f "$CONFIG_DIR/fastfetch/config-night-ride.jsonc" ]]

@@ -4,6 +4,28 @@
 
 ### Added
 
+- **Omarchy desktop themes** — Light Glass / Night Ride as
+  `omarchy-oq-light-glass` and `omarchy-oq-night-ride`, with a solar
+  systemd timer (`omarchy-oq-auto-theme`) that shares
+  `~/.config/oneqode/oneqode-theme-switcher.conf` with the KDE switcher.
+  `./oneqode install` detects KDE vs Omarchy and installs the matching
+  desktop half; Herdr, Grok Build, Ghostty, and the other app themes
+  stay shared.
+
+- **Herdr sidebar contrast + Grok Build auto-theme.** Night Ride sidebar
+  titles/subtitles are explicit Light Glass / Night Ride inks (no more
+  Tokyo Night muted grey on `#191c2a`). `apply-theme.py` also writes
+  `[ui].theme` in `~/.grok/config.toml` (`grokday` / `groknight`).
+
+- **Keychron RGB day/night hook** (`assets/keychron/`, `oneqode-keychron`).
+  Same idea as Omarchy's `omarchy-theme-set-keyboard` (`qmk_hid via`):
+  set RGB matrix effect + HSV over the Keychron Launcher HID protocol.
+  Default effect is Reactive Multi-Wide (fan-out / hot zones from the
+  key you hit) in Light Glass ice cyan or Night Ride magenta. Covers
+  the Ultra-Link 8K 2.4 GHz dongle wrappers as well as wired FF60.
+  Needs a one-time udev rule so hidraw is not root-only — that is also
+  why Keychron Launcher in Opera cannot see the keyboard today.
+
 - **Herdr Light Glass / Night Ride themes** with day/night auto-switch.
   Herdr has no user-named theme files, so the palettes live as
   `[theme]` + `[theme.custom]` fragments (`assets/herdr/`). The installer
@@ -20,6 +42,26 @@
   still need a re-run of `./install.sh`.
 
 ### Fixed
+
+- **Light Glass: white/grey (and ice-cyan) text vanished in Herdr and
+  Claude Code.** The light Ghostty palette used `#eee8d5` / `#ffffff` as
+  ANSI white — TUIs treat those as *foreground*, so they disappeared on
+  `#fafcff`. Ice cyan `#00b4c8` is only ~2.3:1 on the panel. Darkened
+  palette 7/15 and the bright/accent colours, set `minimum-contrast = 4.5`
+  so leftover truecolor greys get lifted, export `COLORFGBG` so
+  `theme=auto` apps classify the terminal correctly, and have the
+  switcher pin Claude Code to `light`/`dark` (auto-detect fails inside
+  Herdr). Herdr Light Glass overlays/accent were the same washed-out
+  greys and are now WCAG-AA.
+
+- **Light Glass TUI colours rebalanced after over-darkening.** The
+  contrast fix above pushed Ghostty ANSI 6/9–14 and Herdr
+  accent/mauve/green/blue to near-ink, so Herdr chrome and Claude Code
+  looked monochrome. Brand hues (ice cyan `#00b4c8`, teal `#2aa198`,
+  solarized yellow/blue/magenta) are restored; palette 7/15 stay
+  readable mid/dark ink. `minimum-contrast` is 1.5 so Herdr status
+  dots (idle green / working gold / blocked coral / done blue) stay
+  coloured instead of being lifted to black.
 
 - **Ghostty stayed on Night Ride after the daytime switch.** The switcher only
   retargeted the `themes/oneqode-current` symlink, and Ghostty's

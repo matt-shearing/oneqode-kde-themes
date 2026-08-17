@@ -71,13 +71,13 @@ Color=40,150,170
 Color=60,210,230
 
 [Color7]
-Color=238,232,213
+Color=74,90,106
 
 [Color7Faint]
-Color=200,195,180
+Color=90,106,122
 
 [Color7Intense]
-Color=255,255,255
+Color=35,45,55
 
 [Foreground]
 Color=35,45,55

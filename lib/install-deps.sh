@@ -38,6 +38,11 @@ check_deps() {
 }
 
 install_deps() {
+    if [[ $(detect_desktop) == omarchy ]]; then
+        info "Omarchy host — skipping Plasma package set"
+        return 0
+    fi
+
     info "Checking system dependencies..."
 
     local missing

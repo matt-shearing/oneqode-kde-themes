@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# OneQode KDE Theme Suite - TUI Manager
+# OneQode Linux Theme - TUI Manager
 #
-# A cohesive day/night theme experience for KDE Plasma 6
+# Light Glass / Night Ride for KDE Plasma 6 and Omarchy (Hyprland)
 #
 
 set -euo pipefail
@@ -37,12 +37,12 @@ show_header() {
         gum style \
             --foreground 212 --border-foreground 212 --border double \
             --align center --width 50 --margin "1 2" --padding "1 2" \
-            "OneQode KDE Theme Suite" "Day/Night Theming for Plasma 6"
+            "OneQode Linux Theme" "Light Glass / Night Ride · KDE + Omarchy"
     else
         echo ""
         echo -e "${MAGENTA}╔══════════════════════════════════════════════════╗${NC}"
-        echo -e "${MAGENTA}║${NC}        ${CYAN}OneQode KDE Theme Suite${NC}               ${MAGENTA}║${NC}"
-        echo -e "${MAGENTA}║${NC}        Day/Night Theming for Plasma 6        ${MAGENTA}║${NC}"
+        echo -e "${MAGENTA}║${NC}          ${CYAN}OneQode Linux Theme${NC}                 ${MAGENTA}║${NC}"
+        echo -e "${MAGENTA}║${NC}   Light Glass / Night Ride · KDE + Omarchy   ${MAGENTA}║${NC}"
         echo -e "${MAGENTA}╚══════════════════════════════════════════════════╝${NC}"
         echo ""
     fi
@@ -51,15 +51,17 @@ show_header() {
 # Show installation status
 show_status() {
     echo ""
-    echo -e "${CYAN}Installation Status:${NC}"
+    echo -e "${CYAN}Installation Status:${NC}  desktop=$(detect_desktop)"
     echo ""
     echo -e "  $(status_icon colors) Color Schemes"
     echo -e "  $(status_icon lookandfeel) Look-and-Feel"
+    echo -e "  $(status_icon omarchy) Omarchy Desktop Themes"
     echo -e "  $(status_icon wallpapers) Wallpapers"
     echo -e "  $(status_icon cursors) Cursors (Bibata)"
     echo -e "  $(status_icon konsole) Konsole Themes"
     echo -e "  $(status_icon ghostty) Ghostty Themes"
     echo -e "  $(status_icon herdr) Herdr Themes"
+    echo -e "  $(status_icon keychron) Keychron RGB"
     echo -e "  $(status_icon fastfetch) Fastfetch Config"
     echo -e "  $(status_icon zed) Zed Themes"
     echo -e "  $(status_icon typora) Typora Themes"
@@ -149,35 +151,15 @@ pause() {
 # Actions
 #
 
-do_install_all() {
-    show_header
-    info "Installing all components..."
-    echo ""
-
-    source "$SCRIPT_DIR/lib/install-deps.sh"
-    install_deps
-    install_klassy
-
-    source "$SCRIPT_DIR/lib/install-colors.sh"
-    install_colors
-
-    source "$SCRIPT_DIR/lib/install-lookandfeel.sh"
-    install_lookandfeel
-
-    source "$SCRIPT_DIR/lib/install-wallpapers.sh"
-    install_wallpapers
-
-    source "$SCRIPT_DIR/lib/install-cursors.sh"
-    install_cursors
-
-    source "$SCRIPT_DIR/lib/install-konsole.sh"
-    install_konsole
-
+install_shared_apps() {
     source "$SCRIPT_DIR/lib/install-ghostty.sh"
     install_ghostty
 
     source "$SCRIPT_DIR/lib/install-herdr.sh"
     install_herdr
+
+    source "$SCRIPT_DIR/lib/install-keychron.sh"
+    install_keychron
 
     source "$SCRIPT_DIR/lib/install-fastfetch.sh"
     install_fastfetch
@@ -199,10 +181,49 @@ do_install_all() {
 
     source "$SCRIPT_DIR/lib/install-gtk.sh"
     install_gtk
+}
 
-    source "$SCRIPT_DIR/lib/install-switcher.sh"
-    install_switcher
-    enable_switcher
+do_install_all() {
+    local desktop
+    desktop=$(detect_desktop)
+
+    show_header
+    info "Installing OneQode Linux Theme (detected: $desktop)..."
+    echo ""
+
+    if [[ $desktop == kde || $desktop == unknown ]]; then
+        source "$SCRIPT_DIR/lib/install-deps.sh"
+        install_deps
+        install_klassy
+
+        source "$SCRIPT_DIR/lib/install-colors.sh"
+        install_colors
+
+        source "$SCRIPT_DIR/lib/install-lookandfeel.sh"
+        install_lookandfeel
+
+        source "$SCRIPT_DIR/lib/install-wallpapers.sh"
+        install_wallpapers
+
+        source "$SCRIPT_DIR/lib/install-cursors.sh"
+        install_cursors
+
+        source "$SCRIPT_DIR/lib/install-konsole.sh"
+        install_konsole
+    fi
+
+    if [[ $desktop == omarchy ]]; then
+        source "$SCRIPT_DIR/lib/install-omarchy.sh"
+        install_omarchy
+    fi
+
+    install_shared_apps
+
+    if [[ $desktop == kde || $desktop == unknown ]]; then
+        source "$SCRIPT_DIR/lib/install-switcher.sh"
+        install_switcher
+        enable_switcher
+    fi
 
     echo ""
     success "All components installed!"
@@ -211,23 +232,24 @@ do_install_all() {
     info "Set your location for solar-based switching"
     echo ""
 
-    if confirm "Configure SDDM login screen? (requires sudo)"; then
-        source "$SCRIPT_DIR/lib/install-sddm.sh"
-        install_sddm
+    if [[ $desktop == kde || $desktop == unknown ]]; then
+        if confirm "Configure SDDM login screen? (requires sudo)"; then
+            source "$SCRIPT_DIR/lib/install-sddm.sh"
+            install_sddm
+        fi
     fi
 
-    # Apply the current theme so accent colors, Klassy presets, and terminal
-    # themes are all active immediately — not just files on disk.
-    # Clear any saved state so the switcher applies even if it thinks the
-    # theme is already set (files were just reinstalled).
     echo ""
     info "Applying theme..."
-    if [[ -x "$LOCAL_BIN/oneqode-theme-switch" ]]; then
+    if [[ $desktop == omarchy && -x $LOCAL_BIN/omarchy-oq-auto-theme ]]; then
+        "$LOCAL_BIN/omarchy-oq-auto-theme" 2>&1 | grep -v "^$" || true
+        success "Omarchy theme applied for current sunrise/sunset"
+    elif [[ -x $LOCAL_BIN/oneqode-theme-switch ]]; then
         rm -f "$LOCAL_STATE/oneqode/theme-state" 2>/dev/null || true
         "$LOCAL_BIN/oneqode-theme-switch" 2>&1 | grep -v "^$" || true
         success "Theme applied for current time of day"
     else
-        warn "Theme switcher not found — run 'oneqode-theme-switch --force-day' manually"
+        warn "Theme switcher not found"
     fi
 
     echo ""
@@ -249,11 +271,13 @@ do_install_selective() {
     components=$(menu_multiselect "Select components to install:" \
         "Color Schemes" \
         "Look-and-Feel" \
+        "Omarchy Desktop Themes" \
         "Wallpapers" \
         "Cursors (Bibata)" \
         "Konsole Themes" \
         "Ghostty Themes" \
         "Herdr Themes" \
+        "Keychron RGB" \
         "Fastfetch Config" \
         "Zed Themes" \
         "Typora Themes" \
@@ -292,6 +316,10 @@ do_install_selective() {
                 source "$SCRIPT_DIR/lib/install-lookandfeel.sh"
                 install_lookandfeel
                 ;;
+            "Omarchy Desktop Themes")
+                source "$SCRIPT_DIR/lib/install-omarchy.sh"
+                install_omarchy
+                ;;
             "Wallpapers")
                 source "$SCRIPT_DIR/lib/install-wallpapers.sh"
                 install_wallpapers
@@ -311,6 +339,10 @@ do_install_selective() {
             "Herdr Themes")
                 source "$SCRIPT_DIR/lib/install-herdr.sh"
                 install_herdr
+                ;;
+            "Keychron RGB")
+                source "$SCRIPT_DIR/lib/install-keychron.sh"
+                install_keychron
                 ;;
             "Fastfetch Config")
                 source "$SCRIPT_DIR/lib/install-fastfetch.sh"
@@ -377,6 +409,12 @@ do_uninstall() {
 
     source "$SCRIPT_DIR/lib/install-herdr.sh"
     uninstall_herdr
+
+    source "$SCRIPT_DIR/lib/install-omarchy.sh"
+    uninstall_omarchy
+
+    source "$SCRIPT_DIR/lib/install-keychron.sh"
+    uninstall_keychron
 
     source "$SCRIPT_DIR/lib/install-fastfetch.sh"
     uninstall_fastfetch
@@ -837,7 +875,7 @@ main_menu() {
 
 show_help() {
     cat << EOF
-OneQode KDE Theme Suite
+OneQode Linux Theme — Light Glass / Night Ride for KDE and Omarchy
 
 Usage: oneqode [command]
 
@@ -939,21 +977,25 @@ case "${1:-}" in
         ;;
     switch)
         check_not_root
-        case "${2:-}" in
-            day|light)
-                "$LOCAL_BIN/oneqode-theme-switch" --force-day
-                ;;
-            night|dark)
-                "$LOCAL_BIN/oneqode-theme-switch" --force-night
-                ;;
-            *)
-                "$LOCAL_BIN/oneqode-theme-switch"
-                ;;
-        esac
+        if [[ $(detect_desktop) == omarchy ]]; then
+            case "${2:-}" in
+                day|light)  "$LOCAL_BIN/omarchy-oq-auto-theme" --force-day ;;
+                night|dark) "$LOCAL_BIN/omarchy-oq-auto-theme" --force-night ;;
+                *)          "$LOCAL_BIN/omarchy-oq-auto-theme" ;;
+            esac
+        else
+            case "${2:-}" in
+                day|light)  "$LOCAL_BIN/oneqode-theme-switch" --force-day ;;
+                night|dark) "$LOCAL_BIN/oneqode-theme-switch" --force-night ;;
+                *)          "$LOCAL_BIN/oneqode-theme-switch" ;;
+            esac
+        fi
         ;;
     status)
         show_status
-        if is_installed switcher; then
+        if [[ $(detect_desktop) == omarchy && -x $LOCAL_BIN/omarchy-oq-auto-theme ]]; then
+            "$LOCAL_BIN/omarchy-oq-auto-theme" --status
+        elif is_installed switcher; then
             "$LOCAL_BIN/oneqode-theme-switch" --status
         fi
         ;;

@@ -379,6 +379,12 @@ update_terminal_themes() {
     # Update Herdr (agent workspace TUI)
     update_herdr_theme "$is_light"
 
+    # Point Claude Code at the matching TUI theme (auto-detect fails in Herdr)
+    update_claude_theme "$is_light"
+
+    # Keychron RGB (Ultra-Link / Launcher HID) — fan-out in theme accent
+    update_keychron_theme "$is_light"
+
     # Update fastfetch
     update_fastfetch_theme "$is_light"
 
@@ -549,6 +555,25 @@ update_ghostty_theme() {
         theme_name="oneqode-night-ride"
     fi
 
+    # Refresh installed theme files from the repo/share copy when present,
+    # so palette contrast fixes land without a full reinstall.
+    local src=""
+    local dir
+    for dir in \
+        "$HOME/dev/oneqode-kde-themes/assets/ghostty" \
+        "$HOME/.local/share/oneqode/ghostty" \
+        "/usr/share/oneqode-kde-themes/ghostty"
+    do
+        if [[ -f "$dir/$theme_name" ]]; then
+            src="$dir"
+            break
+        fi
+    done
+    if [[ -n "$src" ]]; then
+        mkdir -p "$ghostty_themes"
+        cp "$src/oneqode-light-glass" "$src/oneqode-night-ride" "$ghostty_themes/" 2>/dev/null || true
+    fi
+
     # Check if our themes are installed
     if [[ ! -f "$ghostty_themes/$theme_name" ]]; then
         debug "Ghostty theme not found: $theme_name"
@@ -595,7 +620,9 @@ update_herdr_theme() {
         return 0
     fi
 
-    python3 "$apply" --config "$HOME/.config/herdr/config.toml" "$fragment" 2>/dev/null || {
+    local grok_theme=groknight
+    [[ $is_light == true ]] && grok_theme=grokday
+    python3 "$apply" --config "$HOME/.config/herdr/config.toml" --grok-theme "$grok_theme" "$fragment" 2>/dev/null || {
         debug "Herdr theme apply failed"
         return 0
     }
@@ -604,6 +631,71 @@ update_herdr_theme() {
         herdr server reload-config >/dev/null 2>&1 || true
     fi
     debug "Herdr theme updated to: $fragment_name"
+}
+
+# Claude Code's theme=auto often misses the light background inside a Herdr
+# pane (OSC 11 / COLORFGBG don't make it through the multiplexer), so it
+# stays on the dark palette — light-grey/white text on Light Glass.
+update_claude_theme() {
+    local is_light="$1"
+    local cc_theme="dark"
+    [[ "$is_light" == "true" ]] && cc_theme="light"
+
+    python3 - "$cc_theme" <<'PY' || { debug "Claude Code theme update skipped"; return 0; }
+import json, os, sys
+theme = sys.argv[1]
+paths = [
+    os.path.expanduser("~/.claude/settings.json"),
+    os.path.expanduser("~/.claude.json"),
+]
+updated = False
+for path in paths:
+    if not os.path.isfile(path):
+        continue
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        continue
+    if not isinstance(data, dict):
+        continue
+    if data.get("theme") == theme:
+        continue
+    data["theme"] = theme
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")
+    os.replace(tmp, path)
+    updated = True
+sys.exit(0 if updated or True else 1)
+PY
+    debug "Claude Code theme set to: $cc_theme"
+}
+
+# Keychron Ultra / Launcher RGB — same pattern as Omarchy's qmk_hid via hook.
+update_keychron_theme() {
+    local is_light="$1"
+    local period="night"
+    [[ "$is_light" == "true" ]] && period="day"
+
+    local cmd=""
+    local dir
+    for dir in \
+        "$HOME/.local/bin" \
+        "$HOME/.local/share/oneqode/keychron" \
+        "$HOME/dev/oneqode-kde-themes/assets/keychron"
+    do
+        if [[ -x "$dir/oneqode-keychron" ]]; then
+            cmd="$dir/oneqode-keychron"
+            break
+        fi
+    done
+    if [[ -z "$cmd" ]]; then
+        debug "Keychron helper not installed, skipping"
+        return 0
+    fi
+    "$cmd" "$period" >/dev/null 2>&1 || debug "Keychron RGB update skipped (dongle hidraw still root-only?)"
 }
 
 # Update Firefox userChrome.css + userContent.css to the auto-switching versions
