@@ -17,6 +17,7 @@ Panel {
   readonly property bool night: Model.isNight(status.theme)
   readonly property bool showLabel: setting("showLabel", false) === true
   readonly property string themeValue: night ? "night" : (status.isOqTheme ? "day" : "")
+  readonly property url logo: Qt.resolvedUrl(night ? "assets/oneqode-dark.svg" : "assets/oneqode-light.svg")
 
   function refresh() {
     if (!statusProc.running) statusProc.running = true
@@ -61,12 +62,30 @@ Panel {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: root.showLabel ? "OQ" : "◈"
+    text: root.showLabel ? "OQ" : ""
+    iconComponent: root.showLabel ? null : logoIcon
     slotSize: Style.bar.iconSlot * (root.showLabel ? 1.6 : 1)
     tooltipText: "OneQode · " + root.status.themeLabel
     onPressed: function(b) {
       if (b === Qt.RightButton) root.runControl(["theme", "toggle"])
       else root.toggle()
+    }
+  }
+
+  Component {
+    id: logoIcon
+    Item {
+      Image {
+        anchors.centerIn: parent
+        width: Style.bar.iconCanvas
+        height: Style.bar.iconCanvas
+        source: root.logo
+        sourceSize.width: width * 2
+        sourceSize.height: height * 2
+        fillMode: Image.PreserveAspectFit
+        smooth: true
+        asynchronous: true
+      }
     }
   }
 
@@ -99,11 +118,14 @@ Panel {
           foreground: root.fg
           fontFamily: root.fontFamily
           iconComponent: Component {
-            Text {
-              text: "◈"
-              color: root.fg
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.display
+            Image {
+              width: Style.font.display
+              height: Style.font.display
+              source: root.logo
+              sourceSize.width: width * 2
+              sourceSize.height: height * 2
+              fillMode: Image.PreserveAspectFit
+              smooth: true
             }
           }
         }
