@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Added
+
+- **Nautilus / GTK day and night palettes.** The previous GTK CSS imported
+  KDE Breeze variables from `colors.css`, which Omarchy never writes, so
+  Files stayed stock Adwaita by day (Night Ride looked close only because
+  `Adwaita-dark` is already dark). Light Glass and Night Ride now ship as
+  four hardcoded GTK3/GTK4 files, swapped by the KDE switcher and an
+  Omarchy `theme-set` hook. Libadwaita named colors, Nautilus grid/list
+  selection, the portal file chooser, and Qt via `gtk3` all follow. GNOME
+  `accent-color` is set to teal / pink as a fallback. Light Glass folder
+  icons move from Yaru-blue to Yaru-prussiangreen so they read as ice
+  teal rather than GNOME blue.
+
 ### Fixed
 
 - **Grok Build panes that were mid-turn stayed on the old palette.**

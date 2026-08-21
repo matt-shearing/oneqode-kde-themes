@@ -1,0 +1,213 @@
+/* OneQode GTK4 — Night Ride
+ * libadwaita named colors + Nautilus / Files chrome.
+ * Installed to ~/.config/gtk-4.0/gtk.css
+ */
+
+/* ==================== Palette ==================== */
+
+@define-color accent_bg_color #ff0080;
+@define-color accent_fg_color #ffffff;
+@define-color accent_color #ff50a0;
+
+@define-color window_bg_color #191c2a;
+@define-color window_fg_color #e6ebf5;
+@define-color view_bg_color #12141f;
+@define-color view_fg_color #e6ebf5;
+
+@define-color headerbar_bg_color #232837;
+@define-color headerbar_fg_color #e6ebf5;
+@define-color headerbar_backdrop_color #191c2a;
+@define-color headerbar_border_color #6a7080;
+@define-color headerbar_shade_color alpha(#000000, 0.36);
+@define-color headerbar_darker_shade_color alpha(#000000, 0.6);
+
+@define-color sidebar_bg_color #12141f;
+@define-color sidebar_fg_color #e6ebf5;
+@define-color sidebar_backdrop_color #0c0e16;
+@define-color sidebar_shade_color alpha(#000000, 0.25);
+@define-color sidebar_border_color alpha(#000000, 0.36);
+
+@define-color secondary_sidebar_bg_color #0c0e16;
+@define-color secondary_sidebar_fg_color #e6ebf5;
+@define-color secondary_sidebar_backdrop_color #12141f;
+@define-color secondary_sidebar_shade_color alpha(#000000, 0.25);
+@define-color secondary_sidebar_border_color alpha(#000000, 0.36);
+
+@define-color card_bg_color #282d3c;
+@define-color card_fg_color #e6ebf5;
+@define-color card_shade_color alpha(#000000, 0.36);
+
+@define-color dialog_bg_color #191c2a;
+@define-color dialog_fg_color #e6ebf5;
+@define-color popover_bg_color #232837;
+@define-color popover_fg_color #e6ebf5;
+@define-color popover_shade_color alpha(#000000, 0.25);
+
+@define-color thumbnail_bg_color #282d3c;
+@define-color thumbnail_fg_color #e6ebf5;
+
+@define-color destructive_bg_color #ff5555;
+@define-color destructive_fg_color #ffffff;
+@define-color destructive_color #ff9696;
+@define-color success_bg_color #50ffb4;
+@define-color success_fg_color #12141f;
+@define-color success_color #96ffd2;
+@define-color warning_bg_color #ffbe50;
+@define-color warning_fg_color #12141f;
+@define-color warning_color #ffdc82;
+@define-color error_bg_color #ff5555;
+@define-color error_fg_color #ffffff;
+@define-color error_color #ff9696;
+
+@define-color shade_color alpha(#000000, 0.25);
+@define-color scrollbar_outline_color alpha(#ff0080, 0.5);
+
+@define-color theme_bg_color @window_bg_color;
+@define-color theme_fg_color @window_fg_color;
+@define-color theme_base_color @view_bg_color;
+@define-color theme_text_color @view_fg_color;
+@define-color theme_selected_bg_color @accent_bg_color;
+@define-color theme_selected_fg_color @accent_fg_color;
+
+:root {
+  --accent-bg-color: #ff0080;
+  --accent-fg-color: #ffffff;
+  --accent-color: #ff50a0;
+  --window-bg-color: #191c2a;
+  --window-fg-color: #e6ebf5;
+  --view-bg-color: #12141f;
+  --view-fg-color: #e6ebf5;
+  --headerbar-bg-color: #232837;
+  --headerbar-fg-color: #e6ebf5;
+  --headerbar-backdrop-color: #191c2a;
+  --sidebar-bg-color: #12141f;
+  --sidebar-fg-color: #e6ebf5;
+  --sidebar-backdrop-color: #0c0e16;
+  --card-bg-color: #282d3c;
+  --card-fg-color: #e6ebf5;
+  --dialog-bg-color: #191c2a;
+  --dialog-fg-color: #e6ebf5;
+  --popover-bg-color: #232837;
+  --popover-fg-color: #e6ebf5;
+  --destructive-bg-color: #ff5555;
+  --success-bg-color: #50ffb4;
+  --warning-bg-color: #ffbe50;
+  --error-bg-color: #ff5555;
+}
+
+/* ==================== Selection / focus ==================== */
+
+entry > text selection,
+textview text selection,
+label selection {
+  background-color: alpha(@accent_bg_color, 0.35);
+  color: @window_fg_color;
+}
+
+row:selected,
+.view:selected,
+.sidebar row:selected,
+.navigation-sidebar row:selected {
+  background-color: alpha(@accent_bg_color, 0.22);
+  color: @window_fg_color;
+}
+
+entry:focus-within {
+  border-color: @accent_bg_color;
+  box-shadow: 0 0 0 1px alpha(@accent_bg_color, 0.35);
+}
+
+check:checked,
+check:indeterminate,
+radio:checked,
+radio:indeterminate {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+  border-color: @accent_bg_color;
+}
+
+switch:checked {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+  border-color: @accent_bg_color;
+}
+
+scale > range > trough > highlight,
+progressbar > trough > progress {
+  background-color: @accent_bg_color;
+}
+
+button.suggested-action {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+}
+
+/* ==================== Scrollbar ==================== */
+
+scrollbar > range > trough > slider {
+  background-color: alpha(@accent_bg_color, 0.28);
+  border-radius: 100px;
+  min-width: 6px;
+  min-height: 30px;
+}
+
+scrollbar > range > trough > slider:hover {
+  background-color: alpha(@accent_bg_color, 0.5);
+}
+
+scrollbar > range > trough > slider:active {
+  background-color: alpha(@accent_bg_color, 0.7);
+}
+
+scrollbar > range > trough {
+  background-color: transparent;
+}
+
+/* ==================== Sidebar / menus ==================== */
+
+.sidebar row:hover:not(:selected),
+.navigation-sidebar row:hover:not(:selected) {
+  background-color: alpha(@accent_bg_color, 0.1);
+}
+
+popover.menu contents modelbutton:hover,
+popover.background contents modelbutton:hover {
+  background-color: alpha(@accent_bg_color, 0.14);
+}
+
+tooltip.background {
+  background-color: #282d3c;
+  color: @window_fg_color;
+  border-radius: 6px;
+}
+
+*:link {
+  color: #00c8ff;
+}
+
+*:visited {
+  color: #b478ff;
+}
+
+/* ==================== Nautilus (Files) ==================== */
+
+.nautilus-window {
+  background-color: @window_bg_color;
+  color: @window_fg_color;
+}
+
+.nautilus-grid-view gridview > child:selected,
+.nautilus-grid-view gridview > child:selected:hover {
+  background-color: alpha(@accent_bg_color, 0.24);
+  outline-color: alpha(@accent_bg_color, 0.6);
+}
+
+.nautilus-list-view columnview > listview > row:selected,
+.nautilus-list-view columnview > listview > row:selected:hover {
+  background-color: alpha(@accent_bg_color, 0.22);
+}
+
+.nautilus-grid-view:drop(active),
+.nautilus-list-view:drop(active) {
+  box-shadow: inset 0 0 0 2px @accent_bg_color;
+}

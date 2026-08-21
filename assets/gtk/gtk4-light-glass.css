@@ -1,0 +1,209 @@
+/* OneQode GTK4 — Light Glass
+ * libadwaita named colors + Nautilus / Files chrome.
+ * Installed to ~/.config/gtk-4.0/gtk.css
+ */
+
+/* ==================== Palette ==================== */
+
+@define-color accent_bg_color #00b4c8;
+@define-color accent_fg_color #14181c;
+@define-color accent_color #007a8a;
+
+@define-color window_bg_color #fafcff;
+@define-color window_fg_color #232d37;
+@define-color view_bg_color #ffffff;
+@define-color view_fg_color #232d37;
+
+@define-color headerbar_bg_color #f0f4f8;
+@define-color headerbar_fg_color #232d37;
+@define-color headerbar_backdrop_color #fafcff;
+@define-color headerbar_border_color #8090a0;
+@define-color headerbar_shade_color alpha(#14181c, 0.07);
+@define-color headerbar_darker_shade_color alpha(#14181c, 0.12);
+
+@define-color sidebar_bg_color #f0f4f8;
+@define-color sidebar_fg_color #232d37;
+@define-color sidebar_backdrop_color #e8f0f5;
+@define-color sidebar_shade_color alpha(#14181c, 0.06);
+@define-color sidebar_border_color #d8e0e8;
+
+@define-color secondary_sidebar_bg_color #e8f0f5;
+@define-color secondary_sidebar_fg_color #232d37;
+@define-color secondary_sidebar_backdrop_color #f0f4f8;
+@define-color secondary_sidebar_shade_color alpha(#14181c, 0.06);
+@define-color secondary_sidebar_border_color #d8e0e8;
+
+@define-color card_bg_color #ffffff;
+@define-color card_fg_color #232d37;
+@define-color card_shade_color alpha(#14181c, 0.07);
+
+@define-color dialog_bg_color #fafcff;
+@define-color dialog_fg_color #232d37;
+@define-color popover_bg_color #ffffff;
+@define-color popover_fg_color #232d37;
+@define-color popover_shade_color alpha(#14181c, 0.07);
+
+@define-color thumbnail_bg_color #e8f0f5;
+@define-color thumbnail_fg_color #232d37;
+
+@define-color destructive_bg_color #dc322f;
+@define-color destructive_fg_color #ffffff;
+@define-color destructive_color #dc322f;
+@define-color success_bg_color #2aa198;
+@define-color success_fg_color #ffffff;
+@define-color success_color #2aa198;
+@define-color warning_bg_color #cb912f;
+@define-color warning_fg_color #14181c;
+@define-color warning_color #cb912f;
+@define-color error_bg_color #dc322f;
+@define-color error_fg_color #ffffff;
+@define-color error_color #dc322f;
+
+@define-color shade_color alpha(#14181c, 0.07);
+@define-color scrollbar_outline_color alpha(#00b4c8, 0.45);
+
+@define-color theme_bg_color @window_bg_color;
+@define-color theme_fg_color @window_fg_color;
+@define-color theme_base_color @view_bg_color;
+@define-color theme_text_color @view_fg_color;
+@define-color theme_selected_bg_color @accent_bg_color;
+@define-color theme_selected_fg_color @accent_fg_color;
+
+:root {
+  --accent-bg-color: #00b4c8;
+  --accent-fg-color: #14181c;
+  --accent-color: #007a8a;
+  --window-bg-color: #fafcff;
+  --window-fg-color: #232d37;
+  --view-bg-color: #ffffff;
+  --view-fg-color: #232d37;
+  --headerbar-bg-color: #f0f4f8;
+  --headerbar-fg-color: #232d37;
+  --headerbar-backdrop-color: #fafcff;
+  --sidebar-bg-color: #f0f4f8;
+  --sidebar-fg-color: #232d37;
+  --sidebar-backdrop-color: #e8f0f5;
+  --card-bg-color: #ffffff;
+  --card-fg-color: #232d37;
+  --dialog-bg-color: #fafcff;
+  --dialog-fg-color: #232d37;
+  --popover-bg-color: #ffffff;
+  --popover-fg-color: #232d37;
+  --destructive-bg-color: #dc322f;
+  --success-bg-color: #2aa198;
+  --warning-bg-color: #cb912f;
+  --error-bg-color: #dc322f;
+}
+
+/* ==================== Selection / focus ==================== */
+
+entry > text selection,
+textview text selection,
+label selection {
+  background-color: alpha(@accent_bg_color, 0.28);
+  color: @window_fg_color;
+}
+
+row:selected,
+.view:selected,
+.sidebar row:selected,
+.navigation-sidebar row:selected {
+  background-color: alpha(@accent_bg_color, 0.18);
+  color: @window_fg_color;
+}
+
+entry:focus-within {
+  border-color: @accent_bg_color;
+  box-shadow: 0 0 0 1px alpha(@accent_bg_color, 0.28);
+}
+
+check:checked,
+check:indeterminate,
+radio:checked,
+radio:indeterminate {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+  border-color: @accent_bg_color;
+}
+
+switch:checked {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+  border-color: @accent_bg_color;
+}
+
+scale > range > trough > highlight,
+progressbar > trough > progress {
+  background-color: @accent_bg_color;
+}
+
+button.suggested-action {
+  background-color: @accent_bg_color;
+  color: @accent_fg_color;
+}
+
+/* ==================== Scrollbar ==================== */
+
+scrollbar > range > trough > slider {
+  background-color: alpha(@accent_bg_color, 0.28);
+  border-radius: 100px;
+  min-width: 6px;
+  min-height: 30px;
+}
+
+scrollbar > range > trough > slider:hover {
+  background-color: alpha(@accent_bg_color, 0.5);
+}
+
+scrollbar > range > trough > slider:active {
+  background-color: alpha(@accent_bg_color, 0.7);
+}
+
+scrollbar > range > trough {
+  background-color: transparent;
+}
+
+/* ==================== Sidebar / menus ==================== */
+
+.sidebar row:hover:not(:selected),
+.navigation-sidebar row:hover:not(:selected) {
+  background-color: alpha(@accent_bg_color, 0.08);
+}
+
+popover.menu contents modelbutton:hover,
+popover.background contents modelbutton:hover {
+  background-color: alpha(@accent_bg_color, 0.12);
+}
+
+tooltip.background {
+  background-color: #fafcfe;
+  color: @window_fg_color;
+  border-radius: 6px;
+}
+
+*:link {
+  color: @accent_color;
+}
+
+/* ==================== Nautilus (Files) ==================== */
+
+.nautilus-window {
+  background-color: @window_bg_color;
+  color: @window_fg_color;
+}
+
+.nautilus-grid-view gridview > child:selected,
+.nautilus-grid-view gridview > child:selected:hover {
+  background-color: alpha(@accent_bg_color, 0.2);
+  outline-color: alpha(@accent_bg_color, 0.55);
+}
+
+.nautilus-list-view columnview > listview > row:selected,
+.nautilus-list-view columnview > listview > row:selected:hover {
+  background-color: alpha(@accent_bg_color, 0.18);
+}
+
+.nautilus-grid-view:drop(active),
+.nautilus-list-view:drop(active) {
+  box-shadow: inset 0 0 0 2px @accent_bg_color;
+}

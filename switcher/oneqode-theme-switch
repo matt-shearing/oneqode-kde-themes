@@ -390,6 +390,44 @@ update_terminal_themes() {
 
     # Ensure Firefox has auto-switching CSS
     update_firefox_theme
+
+    # Nautilus / GTK file chooser / Qt-via-gtk3
+    update_gtk_theme "$is_light"
+}
+
+# Swap GTK3/4 CSS to the matching OneQode palette. Files live in
+# ~/.local/share/oneqode/gtk after install_gtk; libadwaita apps need a
+# restart (the installer/hook quit Nautilus).
+update_gtk_theme() {
+    local is_light="$1"
+    local share="${XDG_DATA_HOME:-$HOME/.local/share}/oneqode/gtk"
+    local gtk3_dir="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0"
+    local gtk4_dir="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0"
+    local gtk3_src gtk4_src accent_name
+
+    if [[ "$is_light" == "true" ]]; then
+        gtk3_src=gtk3-light-glass.css
+        gtk4_src=gtk4-light-glass.css
+        accent_name=teal
+    else
+        gtk3_src=gtk3-night-ride.css
+        gtk4_src=gtk4-night-ride.css
+        accent_name=pink
+    fi
+
+    if [[ ! -f $share/$gtk4_src || ! -f $share/$gtk3_src ]]; then
+        debug "GTK CSS not installed, skipping"
+        return 0
+    fi
+
+    mkdir -p "$gtk3_dir" "$gtk4_dir"
+    cp "$share/$gtk3_src" "$gtk3_dir/gtk.css"
+    cp "$share/$gtk4_src" "$gtk4_dir/gtk.css"
+    gsettings set org.gnome.desktop.interface accent-color "$accent_name" >/dev/null 2>&1 || true
+    if pgrep -u "$UID" -x nautilus >/dev/null 2>&1; then
+        nautilus -q >/dev/null 2>&1 || true
+    fi
+    debug "GTK CSS swapped to $gtk4_src"
 }
 
 # Update fastfetch config (OQ logo + accent colors) for the active theme

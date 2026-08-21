@@ -54,7 +54,7 @@ Shared on both desktops:
 | Obsidian | Vault themes for both variants |
 | Typora | Matching markdown editor themes |
 | Mattermost | Custom sidebar/UI color schemes |
-| GTK3/4 | Accent colors, scrollbars, libadwaita |
+| GTK3/4 | Nautilus, file chooser, libadwaita, Qt-via-gtk3 |
 | Keychron RGB | Ice cyan by day, magenta by night |
 | Fastfetch | Logo + accent colors |
 
@@ -158,9 +158,11 @@ After installing, you must enable custom stylesheets in Firefox:
 
 Static variants (force light or dark) are also available in `~/.mozilla/firefox/<profile>/chrome/`.
 
-### GTK3/4
+### GTK3/4 (Nautilus / Files)
 
-GTK overrides set accent colors, selection highlights, scrollbar styling, and libadwaita integration for GTK apps running under KDE. Colors are referenced from KDE's color sync (`colors.css`), so they **auto-update when you switch themes** — no restart needed for GTK3 apps. GTK4/libadwaita apps may need a restart.
+GTK overrides set the Light Glass / Night Ride palettes on GTK apps: Nautilus, the portal file chooser, Evince, GNOME Disks, and Qt apps that use `QT_QPA_PLATFORMTHEME=gtk3`. Each variant is a hardcoded CSS file (no KDE Breeze variables), so the same files work on Plasma and Omarchy.
+
+The KDE switcher and the Omarchy `theme-set` hook swap `~/.config/gtk-3.0/gtk.css` and `~/.config/gtk-4.0/gtk.css` on day/night. Libadwaita apps (Nautilus) read the CSS once at launch — open a new Files window after a theme change.
 
 Chromium-based browsers in "Use GTK+" appearance mode also pick up the accent colors.
 

@@ -18,7 +18,7 @@
 | Herdr | `assets/herdr/` (2 TOML palettes) | `install-herdr.sh` | `update_herdr_theme()` + `herdr server reload-config` | `[theme.custom]` override; Herdr has no user-named themes |
 | Firefox (chrome) | `assets/firefox/` (3 CSS + XPIs) | `install-firefox.sh` | `update_firefox_theme()` | Auto-switching via `prefers-color-scheme` |
 | Firefox (content) | `assets/firefox/` (3 userContent CSS) | `install-firefox.sh` | `update_firefox_theme()` | about:newtab, preferences, addons, error pages |
-| GTK3/4 Overrides | `assets/gtk/` (gtk3.css + gtk4.css) | `install-gtk.sh` | Auto (KDE color sync) | Accent, scrollbar, libadwaita, Chromium .chromium class |
+| GTK3/4 Overrides | `assets/gtk/` (gtk3/gtk4 × light-glass/night-ride) | `install-gtk.sh` | `update_gtk_theme()` + Omarchy `theme-set.d/gtk-theme.sh` | Hardcoded palettes (no Breeze vars). Nautilus, file chooser, Qt-via-gtk3. |
 | SDDM | `sddm/10-oneqode.conf` | `install-sddm.sh` (sudo) | `update_sddm_background()` | Breeze theme + OneQode wallpaper |
 | Cursors | Downloaded at install | `install-cursors.sh` | via look-and-feel defaults | Bibata-Modern-Ice v2.0.6 |
 | Zed Editor | `assets/zed/oneqode.json` | `install-zed.sh` | System mode (auto) | — |
@@ -65,40 +65,27 @@
 
 ---
 
-## Phase 2 — GTK3/4 CSS Overrides
+## Phase 2 — GTK3/4 CSS Overrides ✅ Done
 
-**Goal**: Make GTK apps running under KDE visually consistent with the active OneQode theme.
+**Goal**: Make GTK apps (Nautilus/Files, the portal file chooser, Evince, Qt via `gtk3`) match Light Glass / Night Ride on both KDE and Omarchy.
 
-**Approach**: Ship targeted `gtk.css` overrides that set accent colors, selection colors, and scrollbar styling. The switcher swaps the active override on theme change.
+**Approach**: Ship four hardcoded palettes. The old Breeze-variable `gtk.css` only worked under KDE's `kde-gtk-config`; Omarchy has no `colors.css`, so Nautilus stayed stock Adwaita by day.
 
-**Key targets**:
-- Accent/highlight color (selection, focused inputs, toggles, sliders)
-- Scrollbar thumb/track colors
-- Headerbar background (GTK CSD apps)
-- Sidebar backgrounds
-- Link colors
-
-**Files to create**:
-- `assets/gtk/gtk3-light-glass.css` — GTK3 overrides for light theme
-- `assets/gtk/gtk3-night-ride.css` — GTK3 overrides for dark theme
-- `assets/gtk/gtk4-light-glass.css` — GTK4 overrides for light theme
-- `assets/gtk/gtk4-night-ride.css` — GTK4 overrides for dark theme
+**Files**:
+- `assets/gtk/gtk3-light-glass.css` / `gtk3-night-ride.css`
+- `assets/gtk/gtk4-light-glass.css` / `gtk4-night-ride.css`
 
 **Install path**:
 - GTK3: `~/.config/gtk-3.0/gtk.css`
 - GTK4: `~/.config/gtk-4.0/gtk.css`
+- Published copies: `~/.local/share/oneqode/gtk/`
 
-**Switcher changes**:
-- Add `update_gtk_theme()` function that copies the correct variant
-- KDE already sets the base GTK theme via `kde-gtk-config` / `xdg-desktop-portal-kde` — our overrides layer on top
+**Switcher / hook**:
+- KDE: `update_gtk_theme()` copies the matching variant
+- Omarchy: `theme-set.d/gtk-theme.sh` does the same, and clears the CSS when the desktop is not an OQ theme
+- `org.gnome.desktop.interface accent-color` is set to `teal` / `pink` as a fallback for apps that ignore `gtk.css`
 
-**Chromium bonus**: Chromium reads GTK3 colors when set to "Use GTK+" appearance mode. Shipping a `.chromium` style class in the GTK3 CSS gives us partial Chromium theming for free:
-```css
-.entry.chromium {
-  background-color: #191c2a;
-  color: #e6ebf5;
-}
-```
+**Chromium bonus**: Chromium reads GTK3 colors when set to "Use GTK+" appearance mode. The GTK3 CSS includes a `.chromium` class.
 
 ---
 

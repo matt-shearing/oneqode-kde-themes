@@ -29,8 +29,12 @@ install_omarchy() {
         fi
         if [[ $variant == *light-glass* ]]; then
             cp "$ASSETS_DIR/wallpapers/OneQode-Light-Glass.jpg" "$dest/backgrounds/"
+            cp "$ASSETS_DIR/gtk/gtk3-light-glass.css" "$dest/gtk-3.css"
+            cp "$ASSETS_DIR/gtk/gtk4-light-glass.css" "$dest/gtk-4.css"
         else
             cp "$ASSETS_DIR/wallpapers/OneQode-Night-Ride.jpg" "$dest/backgrounds/"
+            cp "$ASSETS_DIR/gtk/gtk3-night-ride.css" "$dest/gtk-3.css"
+            cp "$ASSETS_DIR/gtk/gtk4-night-ride.css" "$dest/gtk-4.css"
         fi
     done
 
@@ -54,6 +58,8 @@ install_omarchy() {
         "$OMARCHY_HOOKS/post-boot.d/oq-auto-theme.sh"
     install -Dm755 "$ASSETS_DIR/omarchy/hooks/framework-keyboard-heat.sh" \
         "$OMARCHY_HOOKS/theme-set.d/framework-keyboard-heat.sh"
+    install -Dm755 "$ASSETS_DIR/omarchy/hooks/theme-set-gtk.sh" \
+        "$OMARCHY_HOOKS/theme-set.d/gtk-theme.sh"
 
     mkdir -p "$CONFIG_DIR/oneqode"
     if [[ ! -f $CONFIG_DIR/oneqode/oneqode-theme-switcher.conf ]]; then
@@ -91,6 +97,7 @@ uninstall_omarchy() {
           "$LOCAL_BIN/oneqode-control"
     rm -f "$OMARCHY_HOOKS/theme-set.d/herdr-theme.sh" \
           "$OMARCHY_HOOKS/theme-set.d/framework-keyboard-heat.sh" \
+          "$OMARCHY_HOOKS/theme-set.d/gtk-theme.sh" \
           "$OMARCHY_HOOKS/post-boot.d/oq-auto-theme.sh"
     rm -rf "$OMARCHY_THEMES/omarchy-oq-light-glass" \
            "$OMARCHY_THEMES/omarchy-oq-night-ride" \

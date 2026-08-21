@@ -142,6 +142,28 @@ verify_repo_structure() {
     check_file "$SCRIPT_DIR/assets/herdr/apply-theme.py" "Herdr apply-theme.py"
     check_file "$SCRIPT_DIR/lib/install-herdr.sh" "Herdr installer"
 
+    check_file "$SCRIPT_DIR/assets/gtk/gtk3-light-glass.css" "GTK3 Light Glass"
+    check_file "$SCRIPT_DIR/assets/gtk/gtk3-night-ride.css" "GTK3 Night Ride"
+    check_file "$SCRIPT_DIR/assets/gtk/gtk4-light-glass.css" "GTK4 Light Glass"
+    check_file "$SCRIPT_DIR/assets/gtk/gtk4-night-ride.css" "GTK4 Night Ride"
+    check_file "$SCRIPT_DIR/assets/omarchy/hooks/theme-set-gtk.sh" "Omarchy GTK theme-set hook"
+    check_file "$SCRIPT_DIR/lib/install-gtk.sh" "GTK installer"
+    if grep -q 'update_gtk_theme' "$SCRIPT_DIR/switcher/oneqode-theme-switch"; then
+        pass "KDE switcher swaps GTK CSS on theme change"
+    else
+        fail "KDE switcher missing update_gtk_theme"
+    fi
+    if grep -q 'gtk-theme.sh' "$SCRIPT_DIR/lib/install-omarchy.sh"; then
+        pass "Omarchy installer installs the GTK theme-set hook"
+    else
+        fail "Omarchy installer missing GTK theme-set hook"
+    fi
+    if grep -q 'colors.css' "$SCRIPT_DIR/assets/gtk/"*.css 2>/dev/null; then
+        fail "GTK CSS still imports KDE colors.css (broken on Omarchy)"
+    else
+        pass "GTK CSS does not depend on KDE colors.css"
+    fi
+
     # Ghostty must use native light/dark pairing + D-Bus reload, not a
     # flipping config-file include. The gtk-single-instance daemon never
     # picks up a symlink retarget on its own.
@@ -297,6 +319,17 @@ verify_installation() {
         else
             fail "Herdr config has the OneQode marker but no OQ accent"
         fi
+    fi
+
+    local gtk4_css="$CONFIG_DIR/gtk-4.0/gtk.css"
+    if [[ -f $gtk4_css ]] && grep -q 'OneQode GTK' "$gtk4_css"; then
+        if grep -qE 'accent_bg_color #(00b4c8|ff0080)' "$gtk4_css"; then
+            pass "GTK4 CSS has a OneQode palette"
+        else
+            fail "GTK4 CSS has the OneQode marker but no OQ accent"
+        fi
+    else
+        info "GTK4 overrides not installed"
     fi
 
     if [[ -d "$LOCAL_SHARE/plasma/look-and-feel/org.oneqode.lightglass" ]]; then
