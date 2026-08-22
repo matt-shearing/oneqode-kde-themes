@@ -1,6 +1,11 @@
 [Unit]
-Description=Apply OneQode Light Glass or Night Ride from local time
+Description=Apply OneQode Light Glass or Night Ride from local sunrise/sunset
+Documentation=file://%h/.local/bin/omarchy-oq-auto-theme
+# Persistent=true on the timer can start this at user-manager start, before
+# UWSM imports OMARCHY_PATH. The script also defaults it; set it here too.
+After=graphical-session.target
 
 [Service]
 Type=oneshot
+Environment=OMARCHY_PATH=/usr/share/omarchy
 ExecStart=%h/.local/bin/omarchy-oq-auto-theme

@@ -9,6 +9,15 @@
 
 set -euo pipefail
 
+# omarchy-theme-set-templates reads $OMARCHY_PATH for the .tpl files that
+# become foot.ini, kitty.conf, alacritty.toml, etc. This script is started
+# by a user timer with Persistent=true, so it can fire at user-manager
+# start — before UWSM has imported the graphical session environment.
+# Without OMARCHY_PATH the templates dir is empty, the theme still "applies",
+# and every new foot/kitty/alacritty window errors on a missing include.
+export OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+export PATH="$OMARCHY_PATH/bin:${PATH}"
+
 LIGHT_THEME=omarchy-oq-light-glass
 NIGHT_THEME=omarchy-oq-night-ride
 STOCK_DEFAULT=tokyo-night
@@ -147,6 +156,9 @@ case "$current" in
   ;;
 esac
 
-[[ $current == "$desired" ]] && exit 0
+theme_dir="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme"
+if [[ $current == "$desired" && -f $theme_dir/foot.ini ]]; then
+  exit 0
+fi
 
 exec omarchy theme set "$desired"
