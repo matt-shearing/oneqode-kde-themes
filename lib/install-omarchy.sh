@@ -60,6 +60,14 @@ install_omarchy() {
         "$OMARCHY_HOOKS/theme-set.d/framework-keyboard-heat.sh"
     install -Dm755 "$ASSETS_DIR/omarchy/hooks/theme-set-gtk.sh" \
         "$OMARCHY_HOOKS/theme-set.d/gtk-theme.sh"
+    install -Dm755 "$ASSETS_DIR/omarchy/hooks/theme-set-mattermost.sh" \
+        "$OMARCHY_HOOKS/theme-set.d/mattermost-theme.sh"
+    install -Dm755 "$ASSETS_DIR/mattermost/apply-theme.py" \
+        "$OMARCHY_HOOKS/lib/apply-mattermost-theme.py"
+    mkdir -p "$LOCAL_SHARE/oneqode/mattermost"
+    cp "$ASSETS_DIR/mattermost/"*.json "$ASSETS_DIR/mattermost/apply-theme.py" \
+        "$LOCAL_SHARE/oneqode/mattermost/"
+    chmod +x "$LOCAL_SHARE/oneqode/mattermost/apply-theme.py"
 
     mkdir -p "$CONFIG_DIR/oneqode"
     if [[ ! -f $CONFIG_DIR/oneqode/oneqode-theme-switcher.conf ]]; then
@@ -98,6 +106,8 @@ uninstall_omarchy() {
     rm -f "$OMARCHY_HOOKS/theme-set.d/herdr-theme.sh" \
           "$OMARCHY_HOOKS/theme-set.d/framework-keyboard-heat.sh" \
           "$OMARCHY_HOOKS/theme-set.d/gtk-theme.sh" \
+          "$OMARCHY_HOOKS/theme-set.d/mattermost-theme.sh" \
+          "$OMARCHY_HOOKS/lib/apply-mattermost-theme.py" \
           "$OMARCHY_HOOKS/post-boot.d/oq-auto-theme.sh"
     rm -rf "$OMARCHY_THEMES/omarchy-oq-light-glass" \
            "$OMARCHY_THEMES/omarchy-oq-night-ride" \

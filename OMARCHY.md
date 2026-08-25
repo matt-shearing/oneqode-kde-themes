@@ -9,7 +9,7 @@ Omarchy (Hyprland + Quickshell) counterpart to the KDE tray and theme switcher.
 | Themes | `~/.config/omarchy/themes/omarchy-oq-{night-ride,light-glass}/` |
 | Control CLI | `~/.local/bin/oneqode-control` |
 | Auto day/night | `~/.local/bin/omarchy-oq-auto-theme` + user systemd timer |
-| Theme-set hook | `~/.config/omarchy/hooks/theme-set.d/{framework-keyboard-heat,gtk-theme,herdr-theme}.sh` |
+| Theme-set hook | `~/.config/omarchy/hooks/theme-set.d/{framework-keyboard-heat,gtk-theme,herdr-theme,mattermost-theme}.sh` |
 | Bar applet | `~/.config/omarchy/plugins/oneqode.control/` |
 | Keyboard config | `~/.config/oneqode/keyboard.conf` |
 

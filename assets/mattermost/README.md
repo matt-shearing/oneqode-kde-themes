@@ -5,15 +5,18 @@ Custom themes for Mattermost desktop and web client.
 ## Automatic switching (recommended)
 
 When installed via `oneqode` (or `lib/install-mattermost.sh`), the theme switches
-automatically with the desktop day/night theme. The switcher pushes the active
-variant to the Mattermost server via its API on every switch, so all your clients
-(and all teams) update live — no manual paste needed.
+automatically with the desktop day/night theme. On KDE that is the look-and-feel
+switcher; on Omarchy it is the `theme-set` hook. Both push the active variant to
+the Mattermost server via its API, so all your clients (and all teams) update
+live — no manual paste needed.
 
-How it works: the switcher reads the desktop app's session token (`MMAUTHTOKEN`)
+How it works: `apply-theme.py` reads the desktop app's session token (`MMAUTHTOKEN`)
 from `~/.config/Mattermost/Cookies` at runtime and `PUT`s the theme to
 `/api/v4/users/me/preferences` for every team plus the all-teams default. The token
 is read fresh each time, so rotation is handled automatically; if you're logged out
-the update is skipped silently.
+the update is skipped silently. On Omarchy the solar timer retries that push if
+the desktop theme is already correct, so a sunrise switch that raced wifi still
+catches up.
 
 Requires the Mattermost desktop app to be set up (logged in) before installing.
 

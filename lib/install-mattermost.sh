@@ -11,7 +11,8 @@ install_mattermost() {
 
     local mm_share="$LOCAL_SHARE/oneqode/mattermost"
     mkdir -p "$mm_share"
-    cp "$ASSETS_DIR/mattermost/"*.json "$mm_share/"
+    cp "$ASSETS_DIR/mattermost/"*.json "$ASSETS_DIR/mattermost/apply-theme.py" "$mm_share/"
+    chmod +x "$mm_share/apply-theme.py"
 
     success "Mattermost themes installed"
     info "Theme switches automatically with the desktop theme (via Mattermost API)"

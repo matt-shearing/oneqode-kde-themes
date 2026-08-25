@@ -158,6 +158,13 @@ esac
 
 theme_dir="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme"
 if [[ $current == "$desired" && -f $theme_dir/foot.ini ]]; then
+  # theme-set is skipped, so a Mattermost API call that lost the race with
+  # wifi at sunrise would otherwise stick until the next period. The hook
+  # is a no-op when the server already matches.
+  mm_hook="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/hooks/theme-set.d/mattermost-theme.sh"
+  if [[ -f $mm_hook ]]; then
+    bash "$mm_hook" "$desired" >/dev/null || true
+  fi
   exit 0
 fi
 

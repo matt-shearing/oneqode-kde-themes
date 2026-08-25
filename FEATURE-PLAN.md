@@ -24,7 +24,7 @@
 | Zed Editor | `assets/zed/oneqode.json` | `install-zed.sh` | System mode (auto) | — |
 | Typora | `assets/typora/` (2 CSS) | `install-typora.sh` | No switcher (manual) | — |
 | Obsidian | `assets/obsidian/` (2 themes) | `install-obsidian.sh` | No switcher integration | — |
-| Mattermost | `assets/mattermost/` (2 JSON) | `install-mattermost.sh` | `update_mattermost_theme()` | Pushed to server via API (token from app cookie); switches all teams live |
+| Mattermost | `assets/mattermost/` (2 JSON + apply script) | `install-mattermost.sh` | `update_mattermost_theme()` / Omarchy `theme-set.d/mattermost-theme.sh` | Pushed to server via API (token from app cookie); switches all teams live |
 | Fastfetch | `assets/fastfetch/` (2 jsonc + logo) | `install-fastfetch.sh` | `update_fastfetch_theme()` | OQ ASCII logo, theme-accent colors; symlink to active variant |
 | Theme Switcher | `switcher/` (script + tray + systemd) | `install-switcher.sh` | — | Solar or fixed-time auto-switch (KDE) |
 | Omarchy desktop | `assets/omarchy/` (2 themes + timer) | `install-omarchy.sh` | `omarchy-oq-auto-theme` | Solar timer; skipped on KDE |
@@ -200,10 +200,15 @@ session token (`MMAUTHTOKEN`) is read from `~/.config/Mattermost/Cookies` at run
 team plus the all-teams default, so all clients update live.
 
 **Files created**:
-- `lib/install-mattermost.sh` (deploys theme JSONs to `~/.local/share/oneqode/mattermost/`)
+- `lib/install-mattermost.sh` (deploys theme JSONs + `apply-theme.py` to `~/.local/share/oneqode/mattermost/`)
+- `assets/mattermost/apply-theme.py` (shared by the KDE switcher and the Omarchy hook)
+- `assets/omarchy/hooks/theme-set-mattermost.sh`
 
-**Switcher changes**: `update_mattermost_theme()` — called from `apply_theme`; non-fatal on
-any failure (logged out, app not installed, cookie format change).
+**Switcher changes**: `update_mattermost_theme()` — called from `apply_theme` on KDE.
+Omarchy has no look-and-feel switcher, so the same Python runs from
+`theme-set.d/mattermost-theme.sh` after `omarchy theme set`, and the solar
+timer retries it on later ticks when the desktop theme is already correct.
+Non-fatal on any failure (logged out, app not installed, cookie format change).
 
 ---
 

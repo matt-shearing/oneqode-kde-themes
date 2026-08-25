@@ -215,7 +215,9 @@ Themes are installed to `~/.config/Typora/themes/`. Select them via Typora → T
 
 ### Mattermost
 
-Mattermost themes require manual import: Settings → Display → Theme → Custom Theme, then paste the contents of the JSON files from `assets/mattermost/`.
+The desktop day/night switcher pushes Light Glass or Night Ride to the Mattermost server, so every client and team updates live. On Omarchy that is a `theme-set` hook; on KDE it is the look-and-feel switcher. Both read the desktop app's session cookie and call the preferences API.
+
+If you are logged out, or want to import by hand: Settings → Display → Theme → Custom Theme, then paste `assets/mattermost/oneqode-light-glass.json` or `oneqode-night-ride.json`.
 
 ### Terminal Transparency
 
@@ -523,7 +525,7 @@ oneqode-kde-themes/
 │   ├── klassy/          # Window decoration presets
 │   ├── konsole/         # Terminal color schemes
 │   ├── look-and-feel/   # KDE look-and-feel packages
-│   ├── mattermost/      # Chat client themes (manual import)
+│   ├── mattermost/      # Chat client themes (API auto-switch)
 │   ├── obsidian/        # Vault themes
 │   ├── opera/           # Theming guide + color reference
 │   ├── typora/          # Markdown editor themes

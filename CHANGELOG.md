@@ -17,6 +17,13 @@
 
 ### Fixed
 
+- **Mattermost stayed on Night Ride on Omarchy.** The API push lived only
+  in the KDE look-and-feel switcher. Omarchy applies Light Glass and Night
+  Ride with `omarchy theme set`, which never called it, so the chat theme
+  ignored sunrise. A `theme-set` hook now pushes the matching JSON through
+  the same API, and the solar timer retries that push on later ticks so a
+  morning switch that happened before wifi associated still catches up.
+
 - **Grok Build panes that were mid-turn stayed on the old palette.**
   Config was updated, but live TUIs only honor `/theme`. The hook now
   flips idle panes immediately and retries working ones once they
