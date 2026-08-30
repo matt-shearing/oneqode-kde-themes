@@ -19,6 +19,10 @@ Omarchy (Hyprland + Quickshell) counterpart to the KDE tray and theme switcher.
 oneqode-control status [--json]
 oneqode-control theme night|day|toggle
 oneqode-control auto on|off|toggle
+oneqode-control location
+oneqode-control location search QUERY
+oneqode-control location set NAME LAT LON TIMEZONE
+oneqode-control location preset brisbane|hong-kong|sydney
 oneqode-control keyboard effect heatmap|solid|off
 oneqode-control keyboard brightness 40|70|100
 oneqode-control apply
@@ -40,5 +44,10 @@ Or run `oq-keyboard-flash` if that helper is on the machine.
 ## Bar applet
 
 `oneqode.control` is the Omarchy-native tray. Click the bar mark for theme
-buttons, auto day/night, heatmap/solid/off, and brightness. Right-click
+buttons, auto day/night, solar city, heatmap/solid/off, and brightness. Right-click
 toggles Light Glass and Night Ride.
+
+Auto day/night uses latitude, longitude, and an IANA timezone from
+`~/.config/oneqode/oneqode-theme-switcher.conf`. It does not follow the OS
+timezone. Set the city from the panel (search or a Brisbane / Hong Kong / Sydney
+preset) or with `oneqode-control location`.

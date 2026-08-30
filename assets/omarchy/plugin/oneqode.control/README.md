@@ -7,6 +7,7 @@ Click the bar mark to:
 
 - switch **Light Glass** / **Night Ride**
 - toggle solar auto-switching
+- set the city that drives sunrise / sunset (search or Brisbane / Hong Kong / Sydney)
 - set Framework 16 lighting to **Heatmap**, **Solid**, or **Off**
 - pick keyboard brightness
 

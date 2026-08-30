@@ -27,7 +27,7 @@
 | Mattermost | `assets/mattermost/` (2 JSON + apply script) | `install-mattermost.sh` | `update_mattermost_theme()` / Omarchy `theme-set.d/mattermost-theme.sh` | Pushed to server via API (token from app cookie); switches all teams live |
 | Fastfetch | `assets/fastfetch/` (2 jsonc + logo) | `install-fastfetch.sh` | `update_fastfetch_theme()` | OQ ASCII logo, theme-accent colors; symlink to active variant |
 | Theme Switcher | `switcher/` (script + tray + systemd) | `install-switcher.sh` | — | Solar or fixed-time auto-switch (KDE) |
-| Omarchy desktop | `assets/omarchy/` (2 themes + timer) | `install-omarchy.sh` | `omarchy-oq-auto-theme` | Solar timer; skipped on KDE |
+| Omarchy desktop | `assets/omarchy/` (2 themes + timer + plugin) | `install-omarchy.sh` | `omarchy-oq-auto-theme` | Solar timer; city/preset location picker in `oneqode.control`; skipped on KDE |
 | Grok Build | via `assets/herdr/apply-theme.py` | `install-herdr.sh` | `--grok-theme grokday/groknight` | Shared with Herdr apply |
 | Keychron RGB | `assets/keychron/` | `install-keychron.sh` | `update_keychron_theme()` | Ice cyan / magenta |
 
@@ -212,14 +212,33 @@ Non-fatal on any failure (logged out, app not installed, cookie format change).
 
 ---
 
+## Phase 8 — Omarchy plugin: solar location
+
+**Goal:** Pick the city that drives auto day/night from the OneQode bar applet, instead of hand-editing `~/.config/oneqode/oneqode-theme-switcher.conf`.
+
+**Why:** The switcher never reads the OS timezone. Missing conf defaults to Brisbane. Setting `timedatectl` to Hong Kong still switched to Night Ride at Brisbane sunset.
+
+**Plan:** [`docs/plans/plugin-solar-location.md`](docs/plans/plugin-solar-location.md) — implemented 2026-08-30.
+
+**Approach (if approved as written):**
+
+- `oneqode-control location` get / set / search / preset
+- Panel row under Auto day / night: city search (Open-Meteo, same as weather) plus Brisbane / Hong Kong / Sydney chips
+- Write `LATITUDE`, `LONGITUDE`, `TIMEZONE`, `LOCATION_NAME` only. Never KDE `LIGHT_THEME` / `DARK_THEME` keys
+- Re-assert Omarchy theme slugs after sourcing the conf
+- Do not follow `timedatectl`
+
+---
+
 ## Implementation Order
 
-1. **Firefox userContent.css** — direct extension of current work, high visibility
-2. **GTK3/4 overrides** — fixes visible inconsistency in daily use
-3. **Kvantum theme** — deeper polish, builds on GTK work
-4. **Vivaldi CSS** — for users on Vivaldi, reuses Firefox CSS patterns
-5. **Chromium extensions** — low effort, wide compatibility
-6. **Fastfetch** — cosmetic finishing touch
+1. **Omarchy plugin: solar location** — waiting on plan approval; unblocks travel
+2. **Firefox userContent.css** — direct extension of current work, high visibility
+3. **GTK3/4 overrides** — fixes visible inconsistency in daily use
+4. **Kvantum theme** — deeper polish, builds on GTK work
+5. **Vivaldi CSS** — for users on Vivaldi, reuses Firefox CSS patterns
+6. **Chromium extensions** — low effort, wide compatibility
+7. **Fastfetch** — cosmetic finishing touch
 
 ---
 

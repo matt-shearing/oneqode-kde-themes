@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
-# OneQode control CLI for Omarchy: theme, auto day/night, Framework keyboard.
+# OneQode control CLI for Omarchy: theme, auto day/night, solar location,
+# Framework keyboard.
 set -euo pipefail
 
 CONF_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/oneqode
 CONF=$CONF_DIR/keyboard.conf
+SWITCHER_CONF=$CONF_DIR/oneqode-theme-switcher.conf
 STATE_THEME=${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme.name
 AUTO_THEME=${AUTO_THEME:-$HOME/.local/bin/omarchy-oq-auto-theme}
 [[ -x $AUTO_THEME ]] || AUTO_THEME=$HOME/bin/omarchy-oq-auto-theme
+NIGHTLIGHT=${NIGHTLIGHT:-$HOME/.local/bin/omarchy-oq-auto-nightlight}
+[[ -x $NIGHTLIGHT ]] || NIGHTLIGHT=$HOME/bin/omarchy-oq-auto-nightlight
 
 LIGHT_THEME=omarchy-oq-light-glass
 NIGHT_THEME=omarchy-oq-night-ride
+
+DEFAULT_LAT=-27.4698
+DEFAULT_LON=153.0251
+DEFAULT_TZ=Australia/Brisbane
+DEFAULT_NAME=Brisbane
 
 usage() {
   cat <<'EOF'
@@ -17,6 +26,11 @@ Usage:
   oneqode-control status [--json]
   oneqode-control theme night|day|light|dark|toggle
   oneqode-control auto on|off|toggle
+  oneqode-control location
+  oneqode-control location --json
+  oneqode-control location search QUERY
+  oneqode-control location set NAME LAT LON TIMEZONE
+  oneqode-control location preset brisbane|hong-kong|sydney
   oneqode-control keyboard effect heatmap|solid|off
   oneqode-control keyboard brightness <1-100>
   oneqode-control apply
@@ -130,27 +144,251 @@ print(int(hh * 255))
   qmk_hid via --save >/dev/null 2>&1 || true
 }
 
-status_json() {
-  read_conf
-  local theme period sunrise sunset auto kb
-  theme=$(current_theme)
-  period=unknown
-  sunrise=""
-  sunset=""
+read_location() {
+  LOC_NAME=
+  LOC_LAT=
+  LOC_LON=
+  LOC_TZ=
+  eval "$(python3 - "$SWITCHER_CONF" "$DEFAULT_NAME" "$DEFAULT_LAT" "$DEFAULT_LON" "$DEFAULT_TZ" <<'PY'
+import shlex, sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+name, lat, lon, tz = sys.argv[2:]
+presets = {
+    "Australia/Brisbane": "Brisbane",
+    "Asia/Hong_Kong": "Hong Kong",
+    "Australia/Sydney": "Sydney",
+}
+data = {}
+if path.is_file():
+    for line in path.read_text().splitlines():
+        s = line.strip()
+        if not s or s.startswith("#") or "=" not in s:
+            continue
+        key, value = s.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+            value = value[1:-1]
+        data[key] = value
+lat = data.get("LATITUDE") or lat
+lon = data.get("LONGITUDE") or lon
+tz = data.get("TIMEZONE") or tz
+name = data.get("LOCATION_NAME") or presets.get(tz) or tz.replace("_", " ").rsplit("/", 1)[-1]
+print(f"LOC_NAME={shlex.quote(name)}")
+print(f"LOC_LAT={shlex.quote(lat)}")
+print(f"LOC_LON={shlex.quote(lon)}")
+print(f"LOC_TZ={shlex.quote(tz)}")
+PY
+)"
+}
+
+write_location() {
+  local name=$1 lat=$2 lon=$3 tz=$4
+  python3 - "$SWITCHER_CONF" "$name" "$lat" "$lon" "$tz" <<'PY'
+import re, shlex, sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+name, lat, lon, tz = sys.argv[2:]
+keys = {
+    "LATITUDE": lat,
+    "LONGITUDE": lon,
+    "TIMEZONE": tz,
+    "LOCATION_NAME": name,
+}
+drop = {"LIGHT_THEME", "DARK_THEME"}
+lines = []
+seen = set()
+if path.is_file():
+    for line in path.read_text().splitlines(True):
+        raw = line.splitlines()[0] if line else ""
+        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)=", raw)
+        if not m:
+            lines.append(line)
+            continue
+        key = m.group(1)
+        if key in drop:
+            continue
+        if key in keys:
+            lines.append(f"{key}={shlex.quote(keys[key])}\n")
+            seen.add(key)
+            continue
+        lines.append(line)
+else:
+    lines = [
+        "# OneQode Theme Switcher Configuration\n",
+        "MODE=solar\n",
+    ]
+for key, value in keys.items():
+    if key not in seen:
+        lines.append(f"{key}={shlex.quote(value)}\n")
+path.parent.mkdir(parents=True, exist_ok=True)
+path.write_text("".join(lines))
+PY
+}
+
+validate_location() {
+  local name=$1 lat=$2 lon=$3 tz=$4
+  python3 - "$name" "$lat" "$lon" "$tz" <<'PY'
+import sys
+from zoneinfo import ZoneInfo
+
+name, lat_s, lon_s, tz = sys.argv[1:]
+if not name.strip():
+    sys.exit("location name is empty")
+try:
+    lat = float(lat_s)
+    lon = float(lon_s)
+except ValueError:
+    sys.exit("latitude and longitude must be numbers")
+if not -90.0 <= lat <= 90.0:
+    sys.exit("latitude must be between -90 and 90")
+if not -180.0 <= lon <= 180.0:
+    sys.exit("longitude must be between -180 and 180")
+try:
+    ZoneInfo(tz)
+except Exception:
+    sys.exit(f"unknown timezone: {tz}")
+PY
+}
+
+solar_fields() {
+  PERIOD=unknown
+  SUNRISE=
+  SUNSET=
   if [[ -x $AUTO_THEME ]]; then
     local raw
     raw=$("$AUTO_THEME" --status 2>/dev/null || true)
-    period=$(awk '/^Period:/{print $2}' <<<"$raw")
-    sunrise=$(awk '/^Sunrise:/{print $2}' <<<"$raw")
-    sunset=$(awk '/^Sunset:/{print $2}' <<<"$raw")
+    PERIOD=$(awk '/^Period:/{print $2}' <<<"$raw")
+    SUNRISE=$(awk '/^Sunrise:/{print $2}' <<<"$raw")
+    SUNSET=$(awk '/^Sunset:/{print $2}' <<<"$raw")
   fi
+  PERIOD=${PERIOD:-unknown}
+}
+
+apply_location_schedule() {
+  if [[ -x $NIGHTLIGHT ]]; then
+    "$NIGHTLIGHT" >/dev/null 2>&1 || true
+  fi
+  if auto_enabled && [[ -x $AUTO_THEME ]]; then
+    "$AUTO_THEME" >/dev/null 2>&1 || true
+  fi
+}
+
+location_json() {
+  read_location
+  solar_fields
+  python3 - "$LOC_NAME" "$LOC_TZ" "$LOC_LAT" "$LOC_LON" "$PERIOD" "$SUNRISE" "$SUNSET" <<'PY'
+import json, sys
+name, tz, lat, lon, period, sunrise, sunset = sys.argv[1:]
+print(json.dumps({
+    "ok": True,
+    "name": name,
+    "timezone": tz,
+    "latitude": float(lat),
+    "longitude": float(lon),
+    "period": period or "unknown",
+    "sunrise": sunrise,
+    "sunset": sunset,
+}))
+PY
+}
+
+location_text() {
+  read_location
+  solar_fields
+  echo "Location:  $LOC_NAME ($LOC_TZ)"
+  echo "Coords:    $LOC_LAT, $LOC_LON"
+  echo "Period:    $PERIOD"
+  echo "Sunrise:   ${SUNRISE:-unknown}"
+  echo "Sunset:    ${SUNSET:-unknown}"
+}
+
+location_set() {
+  local name=$1 lat=$2 lon=$3 tz=$4
+  if [[ -z $name || -z $lat || -z $lon || -z $tz ]]; then
+    echo "usage: oneqode-control location set NAME LAT LON TIMEZONE" >&2
+    return 1
+  fi
+  validate_location "$name" "$lat" "$lon" "$tz"
+  write_location "$name" "$lat" "$lon" "$tz"
+  apply_location_schedule
+}
+
+location_preset() {
+  case "$1" in
+  brisbane)
+    location_set Brisbane -27.4698 153.0251 Australia/Brisbane
+    ;;
+  hong-kong | hongkong | hk)
+    location_set "Hong Kong" 22.3193 114.1694 Asia/Hong_Kong
+    ;;
+  sydney)
+    location_set Sydney -33.8688 151.2093 Australia/Sydney
+    ;;
+  *)
+    echo "preset must be brisbane, hong-kong, or sydney" >&2
+    return 1
+    ;;
+  esac
+}
+
+location_search() {
+  local query=${1:-}
+  if [[ ${#query} -lt 2 ]]; then
+    echo '{"ok":true,"results":[]}'
+    return 0
+  fi
+  python3 - "$query" <<'PY'
+import json, sys, urllib.error, urllib.parse, urllib.request
+
+query = sys.argv[1]
+url = "https://geocoding-api.open-meteo.com/v1/search?" + urllib.parse.urlencode(
+    {"name": query, "count": 5, "language": "en", "format": "json"}
+)
+try:
+    with urllib.request.urlopen(url, timeout=5) as resp:
+        data = json.loads(resp.read().decode())
+except Exception as exc:
+    print(json.dumps({"ok": False, "results": [], "error": str(exc)}))
+    raise SystemExit(0)
+
+out = []
+for row in data.get("results") or []:
+    name = row.get("name")
+    timezone = row.get("timezone")
+    lat = row.get("latitude")
+    lon = row.get("longitude")
+    if not name or not timezone or lat is None or lon is None:
+        continue
+    region = ", ".join(part for part in (row.get("admin1"), row.get("country")) if part)
+    out.append({
+        "name": str(name),
+        "description": region,
+        "latitude": lat,
+        "longitude": lon,
+        "timezone": str(timezone),
+    })
+print(json.dumps({"ok": True, "results": out}))
+PY
+}
+
+status_json() {
+  read_conf
+  read_location
+  solar_fields
+  local theme auto kb
+  theme=$(current_theme)
   auto=false
   auto_enabled && auto=true
   kb=false
   keyboard_present && kb=true
-  python3 - "$theme" "$(theme_label "$theme")" "$auto" "${period:-unknown}" "${sunrise:-}" "${sunset:-}" "$EFFECT" "$(effect_id "$EFFECT")" "$BRIGHTNESS" "$kb" <<'PY'
+  python3 - "$theme" "$(theme_label "$theme")" "$auto" "${PERIOD:-unknown}" "${SUNRISE:-}" "${SUNSET:-}" "$EFFECT" "$(effect_id "$EFFECT")" "$BRIGHTNESS" "$kb" "$LOC_NAME" "$LOC_TZ" "$LOC_LAT" "$LOC_LON" <<'PY'
 import json, sys
-theme, label, auto, period, sunrise, sunset, effect, effect_id, brightness, kb = sys.argv[1:]
+(theme, label, auto, period, sunrise, sunset, effect, effect_id,
+ brightness, kb, loc_name, loc_tz, loc_lat, loc_lon) = sys.argv[1:]
 print(json.dumps({
     "ok": True,
     "theme": theme,
@@ -164,6 +402,12 @@ print(json.dumps({
     "effectId": int(effect_id),
     "brightness": int(brightness),
     "keyboardPresent": kb == "true",
+    "location": {
+        "name": loc_name,
+        "timezone": loc_tz,
+        "latitude": float(loc_lat),
+        "longitude": float(loc_lon),
+    },
 }))
 PY
 }
@@ -174,9 +418,7 @@ status_text() {
   theme=$(current_theme)
   echo "Theme:      $(theme_label "$theme") ($theme)"
   echo "Auto:       $(auto_enabled && echo on || echo off)"
-  if [[ -x $AUTO_THEME ]]; then
-    "$AUTO_THEME" --status 2>/dev/null | sed 's/^/            /' | sed '1s/            //'
-  fi
+  location_text | sed 's/^/            /' | sed '1s/            //'
   echo "Keyboard:   $EFFECT @ ${BRIGHTNESS}%"
   echo "Present:    $(keyboard_present && echo yes || echo no)"
 }
@@ -232,6 +474,29 @@ theme)
   ;;
 auto)
   set_auto "${1:-}"
+  ;;
+location)
+  case "${1:-}" in
+  "" )
+    location_text
+    ;;
+  --json)
+    location_json
+    ;;
+  search)
+    location_search "${2:-}"
+    ;;
+  set)
+    location_set "${2:-}" "${3:-}" "${4:-}" "${5:-}"
+    ;;
+  preset)
+    location_preset "${2:-}"
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
   ;;
 keyboard)
   read_conf

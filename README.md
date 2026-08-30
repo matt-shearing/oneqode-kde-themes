@@ -110,7 +110,7 @@ This checks:
 
 ### Theme Switcher
 
-On Omarchy, check the solar clock with `omarchy-oq-auto-theme --status` (or `oneqode switch` / `oneqode status`). Force a side with `oneqode switch day` or `oneqode switch night`.
+On Omarchy, set the city from the OneQode bar applet (search, or Brisbane / Hong Kong / Sydney) or with `oneqode-control location`. Check the solar clock with `omarchy-oq-auto-theme --status`. Auto switching uses that conf, not the OS timezone. Force a side with `oneqode switch day` or `oneqode switch night`.
 
 On KDE:
 

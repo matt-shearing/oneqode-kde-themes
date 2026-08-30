@@ -198,6 +198,23 @@ verify_repo_structure() {
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-switcher.timer" "Systemd timer"
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-watcher.service" "Watcher service"
     check_file "$SCRIPT_DIR/switcher/oneqode-theme-switcher.conf" "Switcher config template"
+    check_file "$SCRIPT_DIR/assets/omarchy/keyboard/oneqode-control" "Omarchy control CLI"
+    check_file "$SCRIPT_DIR/switcher/omarchy-oq-auto-theme" "Omarchy solar timer script"
+    if grep -q 'location preset' "$SCRIPT_DIR/assets/omarchy/keyboard/oneqode-control" \
+            && grep -q 'geocoding-api.open-meteo.com' "$SCRIPT_DIR/assets/omarchy/keyboard/oneqode-control"; then
+        pass "Omarchy control CLI can search and set solar location"
+    else
+        fail "Omarchy control CLI missing location search/set"
+    fi
+    if awk '
+        /source "\$CONFIG_FILE"/ { sourced=1 }
+        sourced && /LIGHT_THEME=omarchy-oq-light-glass/ { reassert=1 }
+        END { exit reassert ? 0 : 1 }
+      ' "$SCRIPT_DIR/switcher/omarchy-oq-auto-theme"; then
+        pass "Omarchy solar timer re-asserts theme slugs after sourcing conf"
+    else
+        fail "Omarchy solar timer sources conf without re-asserting LIGHT_THEME"
+    fi
 }
 
 # Verify JSON syntax
@@ -267,6 +284,8 @@ verify_shellcheck() {
         "$SCRIPT_DIR/verify.sh"
         "$SCRIPT_DIR/switcher/oneqode-theme-switch"
         "$SCRIPT_DIR/switcher/oneqode-theme-watcher"
+        "$SCRIPT_DIR/switcher/omarchy-oq-auto-theme"
+        "$SCRIPT_DIR/assets/omarchy/keyboard/oneqode-control"
     )
 
     if ! command -v shellcheck &>/dev/null; then

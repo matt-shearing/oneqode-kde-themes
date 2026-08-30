@@ -42,6 +42,11 @@ if [[ -f $CONFIG_FILE ]]; then
     FALLBACK_NIGHT_START=${NIGHT_START/:/}
   fi
 fi
+# Conf may carry KDE look-and-feel IDs in LIGHT_THEME / DARK_THEME.
+# Re-assert Omarchy slugs after the source so those keys cannot win.
+LIGHT_THEME=omarchy-oq-light-glass
+NIGHT_THEME=omarchy-oq-night-ride
+STOCK_DEFAULT=tokyo-night
 
 current=$(tr -d '[:space:]' <"${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme.name" 2>/dev/null || true)
 
