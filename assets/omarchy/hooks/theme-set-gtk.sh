@@ -2,6 +2,11 @@
 # After `omarchy theme set`, retint GTK3/4 (Nautilus, file chooser, Evince)
 # to Light Glass or Night Ride. Other Omarchy themes drop the OQ gtk.css
 # so stock Adwaita shows through.
+#
+# Also writes gtk-application-prefer-dark-theme. Electron (Grok Bot,
+# Mattermost chrome) and some Chromium/Brave paths read that flag, not
+# gsettings color-scheme, and Omarchy has no xsettingsd to keep them in
+# sync the way KDE's gtkconfig did.
 
 set -euo pipefail
 
@@ -11,6 +16,7 @@ SHARE_DIR=${XDG_DATA_HOME:-$HOME/.local/share}/oneqode/gtk
 GTK3_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0
 GTK4_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0
 REPO_GTK=$HOME/dev/oneqode-kde-themes/assets/gtk
+LIGHT_MODE=$THEME_DIR/light.mode
 
 variant=""
 accent=blue
@@ -35,6 +41,13 @@ omarchy-oq-night-ride)
     ;;
 esac
 
+prefer_dark=true
+color_scheme=prefer-dark
+if [[ $variant == light || ( -z $variant && -f $LIGHT_MODE ) ]]; then
+    prefer_dark=false
+    color_scheme=prefer-light
+fi
+
 remove_ours() {
     local file=$1
     [[ -f $file ]] || return 0
@@ -53,12 +66,55 @@ backup_foreign() {
     cp "$file" "$file.bak"
 }
 
+# Upsert gtk-application-prefer-dark-theme without clobbering a foreign
+# settings.ini (KDE gtkconfig used to write a full one).
+upsert_prefer_dark() {
+    local file=$1
+    local value=$2
+    mkdir -p "$(dirname "$file")"
+    if [[ ! -f $file ]]; then
+        cat >"$file" <<EOF
+# OneQode GTK
+[Settings]
+gtk-application-prefer-dark-theme=$value
+EOF
+        return 0
+    fi
+    if grep -q '^gtk-application-prefer-dark-theme=' "$file"; then
+        sed -i "s/^gtk-application-prefer-dark-theme=.*/gtk-application-prefer-dark-theme=$value/" "$file"
+    elif grep -q '^\[Settings\]' "$file"; then
+        sed -i "/^\[Settings\]/a gtk-application-prefer-dark-theme=$value" "$file"
+    else
+        printf '\n[Settings]\ngtk-application-prefer-dark-theme=%s\n' "$value" >>"$file"
+    fi
+}
+
+# Portal SettingsChanged is how Chromium, Brave, and Electron re-read
+# prefers-color-scheme. Restarting portal-gtk (so the file chooser picks
+# up gtk.css) drops those subscriptions; bouncing color-scheme fires the
+# signal again once the portal is back.
+rebroadcast_color_scheme() {
+    [[ -n ${DBUS_SESSION_BUS_ADDRESS:-} ]] || return 0
+    local other=prefer-light
+    [[ $color_scheme == prefer-light ]] && other=prefer-dark
+    gsettings set org.gnome.desktop.interface color-scheme "$other" >/dev/null 2>&1 || true
+    sleep 0.15
+    gsettings set org.gnome.desktop.interface color-scheme "$color_scheme" >/dev/null 2>&1 || true
+}
+
+sync_gtk_prefer_dark() {
+    upsert_prefer_dark "$GTK3_DIR/settings.ini" "$prefer_dark"
+    upsert_prefer_dark "$GTK4_DIR/settings.ini" "$prefer_dark"
+}
+
 if [[ -z $variant ]]; then
     remove_ours "$GTK3_DIR/gtk.css"
     remove_ours "$GTK4_DIR/gtk.css"
+    sync_gtk_prefer_dark
     if [[ -n ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
         gsettings set org.gnome.desktop.interface accent-color blue >/dev/null 2>&1 || true
     fi
+    rebroadcast_color_scheme
     exit 0
 fi
 
@@ -78,6 +134,8 @@ fi
 
 if [[ -z $src_dir ]]; then
     echo "gtk-theme hook: CSS not found for $THEME" >&2
+    sync_gtk_prefer_dark
+    rebroadcast_color_scheme
     exit 0
 fi
 
@@ -86,6 +144,7 @@ backup_foreign "$GTK3_DIR/gtk.css"
 backup_foreign "$GTK4_DIR/gtk.css"
 cp "$src_dir/$gtk3_src" "$GTK3_DIR/gtk.css"
 cp "$src_dir/$gtk4_src" "$GTK4_DIR/gtk.css"
+sync_gtk_prefer_dark
 
 if [[ -n ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
     gsettings set org.gnome.desktop.interface accent-color "$accent" >/dev/null 2>&1 || true
@@ -95,3 +154,5 @@ if pgrep -u "$UID" -x nautilus >/dev/null 2>&1; then
     nautilus -q >/dev/null 2>&1 || true
 fi
 systemctl --user try-restart xdg-desktop-portal-gtk.service >/dev/null 2>&1 || true
+sleep 0.3
+rebroadcast_color_scheme

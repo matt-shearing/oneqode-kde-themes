@@ -53,5 +53,27 @@ fi
 
 python3 "$apply" "$variant" "$assets" || {
   echo "mattermost-theme hook: apply failed" >&2
-  exit 0
 }
+
+# Desktop chrome is a separate flag from the server-side chat theme.
+# themeSyncing usually flips it when the API push lands; write it anyway
+# so the next launch matches if the live sync misses.
+python3 - "$variant" <<'PY' || true
+import json, os, sys
+variant = sys.argv[1]
+path = os.path.expanduser("~/.config/Mattermost/config.json")
+try:
+    with open(path) as fh:
+        data = json.load(fh)
+except Exception:
+    raise SystemExit(0)
+want = variant != "light"
+if data.get("darkMode") == want:
+    raise SystemExit(0)
+data["darkMode"] = want
+tmp = path + ".tmp"
+with open(tmp, "w") as fh:
+    json.dump(data, fh, indent=2)
+    fh.write("\n")
+os.replace(tmp, path)
+PY
