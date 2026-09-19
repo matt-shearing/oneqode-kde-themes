@@ -158,6 +158,13 @@ verify_repo_structure() {
     else
         fail "Omarchy installer missing GTK theme-set hook"
     fi
+    check_file "$SCRIPT_DIR/assets/omarchy/hooks/theme-set-bar.sh" "Omarchy bar transparency theme-set hook"
+    if grep -q 'bar-transparency.sh' "$SCRIPT_DIR/lib/install-omarchy.sh" \
+            && grep -q 'omarchy-oq-night-ride' "$SCRIPT_DIR/assets/omarchy/hooks/theme-set-bar.sh"; then
+        pass "Omarchy installer turns the top bar see-through on Night Ride"
+    else
+        fail "Omarchy installer missing Night Ride bar transparency hook"
+    fi
     if grep -q 'colors.css' "$SCRIPT_DIR/assets/gtk/"*.css 2>/dev/null; then
         fail "GTK CSS still imports KDE colors.css (broken on Omarchy)"
     else

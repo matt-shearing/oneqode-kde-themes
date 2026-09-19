@@ -17,6 +17,12 @@
 
 ### Fixed
 
+- **Night Ride top bar stayed a solid slab.** White icons were already
+  right on the wallpaper, but Omarchy bar transparency is a shell setting,
+  not a theme colour, so the wallpaper never showed through. Applying
+  Night Ride or Light Glass now turns the bar see-through (`omarchy bar
+  transparent true`).
+
 - **Mattermost stayed on Night Ride on Omarchy.** The API push lived only
   in the KDE look-and-feel switcher. Omarchy applies Light Glass and Night
   Ride with `omarchy theme set`, which never called it, so the chat theme

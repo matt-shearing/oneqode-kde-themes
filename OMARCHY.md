@@ -9,7 +9,7 @@ Omarchy (Hyprland + Quickshell) counterpart to the KDE tray and theme switcher.
 | Themes | `~/.config/omarchy/themes/omarchy-oq-{night-ride,light-glass}/` |
 | Control CLI | `~/.local/bin/oneqode-control` |
 | Auto day/night | `~/.local/bin/omarchy-oq-auto-theme` + user systemd timer |
-| Theme-set hook | `~/.config/omarchy/hooks/theme-set.d/{framework-keyboard-heat,gtk-theme,herdr-theme,mattermost-theme}.sh` |
+| Theme-set hook | `~/.config/omarchy/hooks/theme-set.d/{framework-keyboard-heat,gtk-theme,herdr-theme,mattermost-theme,webapps-theme,bar-transparency}.sh` |
 | Bar applet | `~/.config/omarchy/plugins/oneqode.control/` |
 | Keyboard config | `~/.config/oneqode/keyboard.conf` |
 
@@ -45,7 +45,8 @@ Or run `oq-keyboard-flash` if that helper is on the machine.
 
 `oneqode.control` is the Omarchy-native tray. Click the bar mark for theme
 buttons, auto day/night, solar city, heatmap/solid/off, and brightness. Right-click
-toggles Light Glass and Night Ride.
+toggles Light Glass and Night Ride. Applying either theme turns the top bar
+see-through so the wallpaper shows through the icons (`omarchy bar transparent true`).
 
 Auto day/night uses latitude, longitude, and an IANA timezone from
 `~/.config/oneqode/oneqode-theme-switcher.conf`. It does not follow the OS
